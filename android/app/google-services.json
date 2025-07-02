@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "346732284577",
+    "project_id": "dvgsurveyor-e8b79",
+    "storage_bucket": "dvgsurveyor-e8b79.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346732284577:android:0a6eb32992e5bca641bee0",
+        "android_client_info": {
+          "package_name": "com.example.dvgsurveyor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeFj5EV8vg4L_IZ21CpdJ4nxPDytxD2fY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
