@@ -1,4 +1,5 @@
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
+import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -69,7 +70,12 @@ class SplashScreenController {
     await Future.delayed(const Duration(seconds: 1));
 
     if (context.mounted) {
-      Navigator.pushReplacementNamed(context, AppRoutes.welcomeScreen);
+      final isUserLoggedIn = await SessionManager.isLoggedIn();
+      if (isUserLoggedIn) {
+        Navigator.pushReplacementNamed(context, AppRoutes.homeScreen);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.welcomeScreen);
+      }
     }
   }
 
