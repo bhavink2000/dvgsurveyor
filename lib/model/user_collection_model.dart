@@ -1,0 +1,153 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class UserCollectionModel {
+  final String id;
+  final String username;
+  final String password;
+  final String firstName;
+  final String lastName;
+  final String? email;
+  final String mobileNumber;
+  final String? gender;
+  final String? role;
+  final bool? isActive;
+  final bool? isExcelDownload;
+  final bool? isApproved; // Default value, can be changed later
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  UserCollectionModel({
+    required this.id,
+    required this.username,
+    required this.password,
+    required this.firstName,
+    required this.lastName,
+    this.email,
+    required this.mobileNumber,
+    this.gender,
+    this.role,
+    this.isActive = true,
+    this.isExcelDownload = false,
+    this.isApproved = false, // Default value for isApproved
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  // Convert to Firestore document map
+  Map<String, dynamic> toFirestore() {
+    return {
+      'username': username,
+      'password': password,
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'mobileNumber': mobileNumber,
+      'gender': gender,
+      'role': role,
+      'isActive': isActive,
+      'isExcelDownload': isExcelDownload,
+      'isApproved': isApproved, // Include isApproved in Firestore document
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      // Note: 'id' is not included as it's the document ID in Firestore
+    };
+  }
+
+  // Create from Firestore document
+  factory UserCollectionModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data() as Map<String, dynamic>;
+    return UserCollectionModel(
+      id: doc.id, // Document ID from Firestore
+      username: data['username'] ?? '',
+      password: data['password'] ?? '',
+      firstName: data['firstName'] ?? '',
+      lastName: data['lastName'] ?? '',
+      email: data['email'] ?? '',
+      mobileNumber: data['mobileNumber'] ?? '',
+      gender: data['gender'] ?? '',
+      role: data['role'] ?? '',
+      isActive: data['isActive'] ?? true,
+      isExcelDownload: data['isExcelDownload'] ?? false,
+      isApproved: data['isApproved'] ?? false, // Default value for isApproved
+      createdAt: data['createdAt']?.toDate(),
+      updatedAt: data['updatedAt']?.toDate(),
+    );
+  }
+
+  // Create from JSON
+  factory UserCollectionModel.fromJson(Map<String, dynamic> json) {
+    return UserCollectionModel(
+      id: json['id'] ?? '',
+      username: json['username'] ?? '',
+      password: json['password'] ?? '',
+      firstName: json['firstName'] ?? '',
+      lastName: json['lastName'] ?? '',
+      email: json['email'] ?? '',
+      mobileNumber: json['mobileNumber'] ?? '',
+      gender: json['gender'] ?? '',
+      role: json['role'] ?? '',
+      isActive: json['isActive'] ?? true,
+      isExcelDownload: json['isExcelDownload'] ?? false,
+      isApproved: json['isApproved'] ?? false, // Default value for isApproved
+      createdAt: json['createdAt']?.toDate(),
+      updatedAt: json['updatedAt']?.toDate(),
+    );
+  }
+
+  // Convert to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'password': password,
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'mobileNumber': mobileNumber,
+      'gender': gender,
+      'role': role,
+      'isActive': isActive,
+      'isExcelDownload': isExcelDownload,
+      'isApproved': isApproved, // Include isApproved in JSON
+      'createdAt': createdAt?.millisecondsSinceEpoch,
+      'updatedAt': updatedAt?.millisecondsSinceEpoch,
+    };
+  }
+
+  // Copy with method for updates
+  UserCollectionModel copyWith({
+    String? id,
+    String? username,
+    String? password,
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? mobileNumber,
+    String? gender,
+    String? role,
+    bool? isActive,
+    bool? isExcelDownload,
+    bool? isApproved,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return UserCollectionModel(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      password: password ?? this.password,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
+      mobileNumber: mobileNumber ?? this.mobileNumber,
+      gender: gender ?? this.gender,
+      role: role ?? this.role,
+      isActive: isActive ?? this.isActive,
+      isExcelDownload: isExcelDownload ?? this.isExcelDownload,
+      isApproved: isApproved ?? this.isApproved, // Include isApproved in copy
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+}
