@@ -1,4 +1,5 @@
 import 'package:dvgsurveyor/src/login_screen/login_screen.dart';
+import 'package:dvgsurveyor/src/register_screen/register_screen.dart';
 import 'package:dvgsurveyor/src/splash_screen/splash_screen.dart';
 import 'package:dvgsurveyor/src/welcome_screen/welcome_screen.dart';
 import 'package:flutter/material.dart';
@@ -16,15 +17,13 @@ class AppRoutes {
       case splashScreen:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
       case welcomeScreen:
-        // Uncomment the following line when WelcomeScreen is implemented
        return MaterialPageRoute(builder: (_) => const WelcomeScreen());
-        
       // case homeScreen:
       //   return MaterialPageRoute(builder: (_) => const HomeScreen());
       case loginScreen:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
-      // case registerScreen:
-      //   return MaterialPageRoute(builder: (_) => const RegisterScreen());
+      case registerScreen:
+        return MaterialPageRoute(builder: (_) => const RegisterScreen());
       default:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
     }
