@@ -1,11 +1,17 @@
+import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-void main() async{
-
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(
+    ProviderScope(
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -14,21 +20,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ScreenUtilInit(
+      designSize: const Size(360, 690),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, _) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        onGenerateRoute: AppRoutes.generateRoute,
+        initialRoute: AppRoutes.splashScreen,
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Firebase Initialization Example'),
-        ),
-        body: const Center(
-          child: Text('Firebase is initialized!'),
-        ),
-      ),
-      debugShowCheckedModeBanner: false,  
     );
   }
 }
-

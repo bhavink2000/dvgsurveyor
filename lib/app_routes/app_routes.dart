@@ -1,0 +1,27 @@
+import 'package:dvgsurveyor/src/login_screen/login_screen.dart';
+import 'package:dvgsurveyor/src/splash_screen/splash_screen.dart';
+import 'package:flutter/material.dart';
+
+class AppRoutes {
+
+  static const String splashScreen = '/splash-screen';
+  static const String homeScreen = '/home-screen';
+  static const String loginScreen = '/login-screen';
+  static const String registerScreen = '/register-screen';
+
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case splashScreen:
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
+      // case homeScreen:
+      //   return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case loginScreen:
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
+      // case registerScreen:
+      //   return MaterialPageRoute(builder: (_) => const RegisterScreen());
+      default:
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
+    }
+  }
+ 
+}
