@@ -1,10 +1,12 @@
 import 'package:dvgsurveyor/src/login_screen/login_screen.dart';
 import 'package:dvgsurveyor/src/splash_screen/splash_screen.dart';
+import 'package:dvgsurveyor/src/welcome_screen/welcome_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
 
   static const String splashScreen = '/splash-screen';
+  static const String welcomeScreen = '/welcome-screen';
   static const String homeScreen = '/home-screen';
   static const String loginScreen = '/login-screen';
   static const String registerScreen = '/register-screen';
@@ -13,6 +15,10 @@ class AppRoutes {
     switch (settings.name) {
       case splashScreen:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
+      case welcomeScreen:
+        // Uncomment the following line when WelcomeScreen is implemented
+       return MaterialPageRoute(builder: (_) => const WelcomeScreen());
+        
       // case homeScreen:
       //   return MaterialPageRoute(builder: (_) => const HomeScreen());
       case loginScreen:
