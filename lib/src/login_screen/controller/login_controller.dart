@@ -43,7 +43,7 @@ class LoginController extends GetxController {
     isLoading.value = true;
 
     try {
-      final user = await authRepo.getUserByUsername(
+      final user = await authRepo.getUser(
         username: usernameController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -56,9 +56,8 @@ class LoginController extends GetxController {
           return;
         }
 
-        await SessionManager.saveUserSession(
-          userId: user.id,
-          username: user.username,
+        await SessionManager.saveUser(
+          user: user,
         );
 
         AppSnackbar.showSnackbar('Welcome ${user.username}');

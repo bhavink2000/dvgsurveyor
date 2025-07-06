@@ -73,8 +73,8 @@ class RegisterController extends GetxController {
         updatedAt: now,
       );
 
-      final existingUser = await authRepo.getUserByUsername(
-        mobileNUmber: phoneController.text.trim(),
+      final existingUser = await authRepo.getUser(
+        mobileNumber: phoneController.text.trim(),
       );
 
       if (existingUser != null) {
@@ -82,7 +82,7 @@ class RegisterController extends GetxController {
         return;
       }
 
-      final response = await authRepo.saveUser(userDetails: userDetails);
+      final response = await authRepo.saveUser(user: userDetails);
 
       if (response != null) {
         AppSnackbar.showSnackbar(

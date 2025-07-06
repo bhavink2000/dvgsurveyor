@@ -1,16 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/helper/firebase_const.dart';
 import 'package:dvgsurveyor/model/user_collection_model.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-final authRepoProvider = Provider<AuthRepo>((ref) {
-  return AuthRepo();
-});
 
 class AuthRepo {
-  AuthRepo();
+  AuthRepo._(); // Private constructor for singleton
+  static final AuthRepo instance = AuthRepo._(); // Singleton instance
 
-  CollectionReference<UserCollectionModel> get userCollection =>
+  CollectionReference<UserCollectionModel> get _userCollection =>
       FirebaseFirestore.instance
           .collection(FirebaseConst.userCollection)
           .withConverter<UserCollectionModel>(
@@ -19,54 +15,45 @@ class AuthRepo {
             toFirestore: (model, _) => model.toFirestore(),
           );
 
-  Future<UserCollectionModel?> getUserByUsername({
+  /// Get user by username+password OR mobile number
+  Future<UserCollectionModel?> getUser({
     String? username,
     String? password,
-    String? mobileNUmber,
+    String? mobileNumber,
   }) async {
     try {
-      final querySnapshot;
-      if (mobileNUmber != null) {
-        querySnapshot = await userCollection
-            .where('mobileNumber', isEqualTo: mobileNUmber)
+      QuerySnapshot<UserCollectionModel> querySnapshot;
+
+      if (mobileNumber != null) {
+        querySnapshot = await _userCollection
+            .where('mobileNumber', isEqualTo: mobileNumber)
             .limit(1)
             .get();
       } else {
-        querySnapshot = await userCollection
+        querySnapshot = await _userCollection
             .where('username', isEqualTo: username)
-            .where('password', isEqualTo: password) // fixed here
+            .where('password', isEqualTo: password)
             .limit(1)
             .get();
       }
 
       if (querySnapshot.docs.isNotEmpty) {
-        final data = querySnapshot.docs.first.data();
-        return data; // assuming your model
-      } else {
-        return null;
+        return querySnapshot.docs.first.data();
       }
     } catch (e) {
-      print('Error fetching user by username: $e');
-      return null;
+      print('Error fetching user: $e');
     }
+    return null;
   }
 
-  Future<UserCollectionModel?> saveUser({
-    required UserCollectionModel userDetails,
-  }) async {
+  /// Save new user
+  Future<UserCollectionModel?> saveUser({UserCollectionModel? user}) async {
     try {
-      // 1. Set user data to Firestore
-      final docRef = userCollection.doc(userDetails.id);
-      await docRef.set(userDetails);
-
-      // 2. Get user data back
+      final docRef = _userCollection.doc(user?.id);
+      await docRef.set(user!);
       final snapshot = await docRef.get();
-      if (snapshot.exists) {
-        return snapshot.data(); // returns UserCollectionModel
-      } else {
-        print('User not found');
-        return null;
-      }
+
+      return snapshot.data();
     } catch (e) {
       print('Error saving user: $e');
       return null;
