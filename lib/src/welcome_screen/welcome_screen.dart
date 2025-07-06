@@ -2,24 +2,17 @@ import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_images_helper.dart';
-import 'package:dvgsurveyor/helper/app_padding.dart';
 import 'package:dvgsurveyor/src/welcome_screen/controller/welcome_screen_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
-class WelcomeScreen extends ConsumerStatefulWidget {
+class WelcomeScreen extends GetWidget<WelcomeScreenController> {
   const WelcomeScreen({super.key});
 
   @override
-  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
-}
-
-class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
-  @override
   Widget build(BuildContext context) {
-    final welcomeCon = ref.watch(welcomeController);
     return Scaffold(
       backgroundColor: AppColors.tealPrimary,
       body: Column(
@@ -54,8 +47,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           SizedBox(
             height: 30,
           ),
-          //Our MaterialButton which when pressed will take us to a new screen named as
-          //LoginScreen
+
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.offWhite,
@@ -65,7 +57,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
             ),
             onPressed: () {
-              welcomeCon.onGetStarted(context);
+              controller.onGetStarted(context);
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
