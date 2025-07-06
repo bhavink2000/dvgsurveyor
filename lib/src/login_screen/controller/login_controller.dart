@@ -1,63 +1,25 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
-final loginController =
-    StateNotifierProvider<LoginController, LoginState>((ref) {
-  final authRepo = ref.read(authRepoProvider);
-  return LoginController(authRepo: authRepo);
-});
-
-final authRepo = Provider((ref) {
-  final authRepo = ref.read(authRepoProvider);
-  return LoginController(
-    authRepo: authRepo,
-  );
-});
-
-class LoginState {
-  final bool isLoading;
-  final bool isPasswordVisible;
-  final String? error;
-
-  LoginState({
-    this.isLoading = false,
-    this.isPasswordVisible = false,
-    this.error,
-  });
-
-  LoginState copyWith({
-    bool? isLoading,
-    bool? isPasswordVisible,
-    String? error,
-  }) {
-    return LoginState(
-      isLoading: isLoading ?? this.isLoading,
-      isPasswordVisible: isPasswordVisible ?? this.isPasswordVisible,
-      error: error ?? this.error,
-    );
-  }
-}
-
-class LoginController extends StateNotifier<LoginState> {
+class LoginController extends GetxController {
   final AuthRepo authRepo;
 
-  LoginController({required this.authRepo}) : super(LoginState());
+  LoginController({required this.authRepo});
 
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
+  // Reactive variables
+  var isLoading = false.obs;
+  var isPasswordVisible = false.obs;
+
   void togglePasswordVisibility() {
-    state = state.copyWith(
-      isPasswordVisible: !state.isPasswordVisible,
-    );
+    isPasswordVisible.value = !isPasswordVisible.value;
   }
 
   String? validateUsername(String? value) {
@@ -77,65 +39,52 @@ class LoginController extends StateNotifier<LoginState> {
     return null;
   }
 
-  Future<void> login(BuildContext context) async {
-    try {
-      state = state.copyWith(isLoading: true, error: null);
+  Future<void> login() async {
+    isLoading.value = true;
 
-      final exitUser = await authRepo.getUserByUsername(
+    try {
+      final user = await authRepo.getUserByUsername(
         username: usernameController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      if (exitUser != null) {
-        if (exitUser.isApproved == false) {
-          AppSnackbar.showSnackbar(context,
-              'Your account is not approved yet.\nPlease wait for admin approval.');
-          return;
-        } else {
-          // Store user in SharedPreferences
-          await SessionManager.saveUserSession(
-            userId: exitUser.id,
-            username: exitUser.username,
+      if (user != null) {
+        if (user.isApproved == false) {
+          AppSnackbar.showSnackbar(
+            'Your account is not approved yet.\nPlease wait for admin approval.',
           );
-
-          // Show success at TOP
-          AppSnackbar.showSnackbar(context, 'Welcome ${exitUser.username} ');
-
-          // Navigate (optional)
-          _clearControllers();
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            AppRoutes.dashScreen,
-            (Route<dynamic> route) => false,
-          );
-
           return;
         }
+
+        await SessionManager.saveUserSession(
+          userId: user.id,
+          username: user.username,
+        );
+
+        AppSnackbar.showSnackbar('Welcome ${user.username}');
+        _clearControllers();
+
+        Get.offAllNamed(AppRoutes.dashScreen);
       } else {
-        AppSnackbar.showSnackbar(context, 'User not exists');
-        return;
+        AppSnackbar.showSnackbar('User not exists');
       }
     } catch (e) {
       _clearControllers();
-      state = state.copyWith(
-        error: e.toString(),
-        isLoading: false,
-      );
-      AppSnackbar.showSnackbar(context, 'Login failed: ${e.toString()}');
+      AppSnackbar.showErrorSnackbar('Login failed: ${e.toString()}');
     } finally {
-      state = state.copyWith(isLoading: false);
+      isLoading.value = false;
     }
   }
 
-  @override
-  void dispose() {
-    usernameController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  _clearControllers() {
+  void _clearControllers() {
     usernameController.clear();
     passwordController.clear();
+  }
+
+  @override
+  void onClose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    super.onClose();
   }
 }

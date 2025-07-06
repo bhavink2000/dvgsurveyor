@@ -5,23 +5,15 @@ import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/src/login_screen/controller/login_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
+class LoginScreen extends GetWidget<LoginController> {
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends ConsumerState<LoginScreen> {
-  @override
   Widget build(BuildContext context) {
-    final state = ref.watch(loginController);
-    final controller = ref.read(loginController.notifier);
-
     return Scaffold(
       backgroundColor: AppColors.offWhite,
       resizeToAvoidBottomInset: false,
@@ -42,12 +34,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     '${AppConst.welcomeTo} \n${AppConst.appName}!',
                     textAlign: TextAlign.start,
                     style: AppFonts.text20(context).copyWith(
-                        color: AppColors.tealPrimary,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold),
+                      color: AppColors.tealPrimary,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                //SizedBox(height: 20),
                 Align(
                   alignment: Alignment.topLeft,
                   child: Text(
@@ -58,78 +50,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 50,
-                ),
+                SizedBox(height: 50),
                 CustomTextField(
                   controller: controller.usernameController,
                   keyboardType: TextInputType.name,
                   hintText: AppConst.username,
-                  prefixIcon: Icon(
-                    Icons.person,
-                    color: AppColors.tealDark,
-                  ),
+                  prefixIcon: Icon(Icons.person, color: AppColors.tealDark),
                   textCapitalization: TextCapitalization.none,
                   textAlign: TextAlign.start,
                   textInputAction: TextInputAction.next,
                   validator: controller.validateUsername,
                 ),
                 SizedBox(height: 20),
-                CustomTextField(
-                  controller: controller.passwordController,
-                  keyboardType: TextInputType.visiblePassword,
-                  hintText: AppConst.password,
-                  prefixIcon: Icon(
-                    Icons.lock,
-                    color: AppColors.tealDark,
-                  ),
-                  textCapitalization: TextCapitalization.none,
-                  textAlign: TextAlign.start,
-                  textInputAction: TextInputAction.next,
-                  obscureText: !state.isPasswordVisible,
-                  validator: controller.validatePassword,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      state.isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: AppColors.tealDark,
-                    ),
-                    onPressed: controller.togglePasswordVisibility,
-                  ),
-                ),
-
-                // Error Message
-                if (state.error != null) ...[
-                  SizedBox(height: 16.h),
-                  Text(
-                    state.error!,
-                    style: AppFonts.text14(context).copyWith(
-                      color: Colors.red,
-                    ),
-                  ),
-                ],
-
+                Obx(() => CustomTextField(
+                      controller: controller.passwordController,
+                      keyboardType: TextInputType.visiblePassword,
+                      hintText: AppConst.password,
+                      prefixIcon: Icon(Icons.lock, color: AppColors.tealDark),
+                      textCapitalization: TextCapitalization.none,
+                      textAlign: TextAlign.start,
+                      textInputAction: TextInputAction.done,
+                      obscureText: !controller.isPasswordVisible.value,
+                      validator: controller.validatePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.isPasswordVisible.value
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.tealDark,
+                        ),
+                        onPressed: controller.togglePasswordVisibility,
+                      ),
+                    )),
                 SizedBox(height: 20.h),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.tealPrimary,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 36.w, vertical: 12.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                  onPressed: () {
-                    if (!state.isLoading &&
-                        controller.formKey.currentState!.validate()) {
-                      controller.login(context);
-                    }
-                  },
-                  child: SizedBox(
-                    height: 20.h,
-                    child: Center(
-                      child: state.isLoading
+                Obx(() => ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.tealPrimary,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 36.w, vertical: 12.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : () {
+                              if (controller.formKey.currentState!.validate()) {
+                                controller.login();
+                              }
+                            },
+                      child: controller.isLoading.value
                           ? SizedBox(
                               width: 20.w,
                               height: 20.w,
@@ -140,13 +110,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             )
                           : Text(
                               AppConst.login,
-                              style: AppFonts.text14(context).copyWith(
-                                color: AppColors.offWhite,
-                              ),
+                              style: AppFonts.text14(context)
+                                  .copyWith(color: AppColors.offWhite),
                             ),
-                    ),
-                  ),
-                ),
+                    )),
                 SizedBox(height: 20.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -159,10 +126,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.of(context).pushNamed(
-                          AppRoutes.registerScreen,
-                        ); // Replace with your route name
-                        // Navigate to Sign Up Screen
+                        Get.toNamed(AppRoutes.registerScreen);
                       },
                       child: Text(
                         AppConst.signUp,
@@ -174,8 +138,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                 ),
-
-                Spacer(),
+                const Spacer(),
                 Text(
                   "Surveyor v1.0",
                   style: GoogleFonts.inter(
