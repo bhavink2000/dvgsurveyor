@@ -72,7 +72,7 @@ class SplashScreenController {
     if (context.mounted) {
       final isUserLoggedIn = await SessionManager.isLoggedIn();
       if (isUserLoggedIn) {
-        Navigator.pushReplacementNamed(context, AppRoutes.homeScreen);
+        Navigator.pushReplacementNamed(context, AppRoutes.dashScreen);
       } else {
         Navigator.pushReplacementNamed(context, AppRoutes.welcomeScreen);
       }

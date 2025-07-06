@@ -12,6 +12,8 @@ class UserCollectionModel {
   final String? role;
   final bool? isActive;
   final bool? isExcelDownload;
+  final bool? isEditable;
+  final bool? isDelete;
   final bool? isApproved; // Default value, can be changed later
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -28,6 +30,8 @@ class UserCollectionModel {
     this.role,
     this.isActive = true,
     this.isExcelDownload = false,
+    this.isEditable = false, // Default value for isEditable
+    this.isDelete = false, // Default value for isDelete
     this.isApproved = false, // Default value for isApproved
     this.createdAt,
     this.updatedAt,
@@ -46,6 +50,8 @@ class UserCollectionModel {
       'role': role,
       'isActive': isActive,
       'isExcelDownload': isExcelDownload,
+      'isEditable': isEditable, // Include isEditable in Firestore document
+      'isDelete': isDelete, // Include isDelete in Firestore document
       'isApproved': isApproved, // Include isApproved in Firestore document
       'createdAt': createdAt,
       'updatedAt': updatedAt,
@@ -70,6 +76,8 @@ class UserCollectionModel {
       role: data['role'] ?? '',
       isActive: data['isActive'] ?? true,
       isExcelDownload: data['isExcelDownload'] ?? false,
+      isEditable: data['isEditable'] ?? false, // Default value for isEditable
+      isDelete: data['isDelete'] ?? false, // Default value for isDelete
       isApproved: data['isApproved'] ?? false, // Default value for isApproved
       createdAt: data['createdAt']?.toDate(),
       updatedAt: data['updatedAt']?.toDate(),
@@ -90,6 +98,8 @@ class UserCollectionModel {
       role: json['role'] ?? '',
       isActive: json['isActive'] ?? true,
       isExcelDownload: json['isExcelDownload'] ?? false,
+      isEditable: json['isEditable'] ?? false, // Default value for isEditable
+      isDelete: json['isDelete'] ?? false, // Default value for isDelete
       isApproved: json['isApproved'] ?? false, // Default value for isApproved
       createdAt: json['createdAt']?.toDate(),
       updatedAt: json['updatedAt']?.toDate(),
@@ -110,6 +120,8 @@ class UserCollectionModel {
       'role': role,
       'isActive': isActive,
       'isExcelDownload': isExcelDownload,
+      'isEditable': isEditable, // Include isEditable in JSON
+      'isDelete': isDelete, // Include isDelete in JSON
       'isApproved': isApproved, // Include isApproved in JSON
       'createdAt': createdAt?.millisecondsSinceEpoch,
       'updatedAt': updatedAt?.millisecondsSinceEpoch,
@@ -129,6 +141,8 @@ class UserCollectionModel {
     String? role,
     bool? isActive,
     bool? isExcelDownload,
+    bool? isEditable,
+    bool? isDelete,
     bool? isApproved,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -145,6 +159,8 @@ class UserCollectionModel {
       role: role ?? this.role,
       isActive: isActive ?? this.isActive,
       isExcelDownload: isExcelDownload ?? this.isExcelDownload,
+      isEditable: isEditable ?? this.isEditable, // Include isEditable in copy
+      isDelete: isDelete ?? this.isDelete, // Include isDelete in copy
       isApproved: isApproved ?? this.isApproved, // Include isApproved in copy
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
