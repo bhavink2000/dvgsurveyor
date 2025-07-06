@@ -1,18 +1,18 @@
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
+import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(
-    ProviderScope(
-      child: const MyApp(),
-    ),
-  );
+  await GetStorage.init(); // Initialize GetStorage
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -21,11 +21,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return ScreenUtilInit(
       designSize: const Size(360, 690),
       minTextAdapt: true,
       splitScreenMode: true,
-      builder: (context, _) => MaterialApp(
+      builder: (context, _) => GetMaterialApp(
+        fallbackLocale: const Locale('en', 'US'),
+        title: AppConst.appName,
+      
         theme: ThemeData(
           colorScheme: ColorScheme.light(
             primary: AppColors.tealPrimary,
@@ -48,7 +55,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        onGenerateRoute: AppRoutes.generateRoute,
+        getPages: AppRoutes.pages,
         initialRoute: AppRoutes.splashScreen,
       ),
     );
