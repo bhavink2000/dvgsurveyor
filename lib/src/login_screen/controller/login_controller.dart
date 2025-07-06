@@ -87,25 +87,31 @@ class LoginController extends StateNotifier<LoginState> {
       );
 
       if (exitUser != null) {
-        // User already exists, show error
-        AppSnackbar.showSnackbar(context, 'User already exists');
+        if (exitUser.isApproved == false) {
+          AppSnackbar.showSnackbar(context,
+              'Your account is not approved yet.\nPlease wait for admin approval.');
+          return;
+        } else {
+          // Store user in SharedPreferences
+          await SessionManager.saveUserSession(
+            userId: exitUser.id,
+            username: exitUser.username,
+          );
 
-        // Store user in SharedPreferences
-        await SessionManager.saveUserSession(
-          userId: exitUser.id,
-          username: exitUser.username,
-        );
+          // Show success at TOP
+          AppSnackbar.showSnackbar(context, 'Welcome ${exitUser.username} ');
 
-        // Show success at TOP
-        AppSnackbar.showSnackbar(context, 'Welcome ${exitUser.username} ');
+          // Navigate (optional)
+          _clearControllers();
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.dashScreen,
+            (Route<dynamic> route) => false,
+          );
 
-        // Navigate (optional)
-        _clearControllers();
-        Navigator.pushReplacementNamed(context, AppRoutes.homeScreen);
-
-        return;
+          return;
+        }
       } else {
-        _clearControllers();
         AppSnackbar.showSnackbar(context, 'User not exists');
         return;
       }

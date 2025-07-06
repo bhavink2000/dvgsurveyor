@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
+import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/model/user_collection_model.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +58,8 @@ class RegisterScreenController extends StateNotifier<RegisterState> {
 
   final formKey = GlobalKey<FormState>();
 
+  
+
   void togglePasswordVisibility() {
     state = state.copyWith(
       isPasswordVisible: !state.isPasswordVisible,
@@ -108,7 +111,8 @@ class RegisterScreenController extends StateNotifier<RegisterState> {
     try {
       state = state.copyWith(isLoading: true, error: null);
       final now = DateTime.now();
-      final generatedId = 'DVG${now.millisecondsSinceEpoch}';
+      final generatedId =
+          '${AppConst.dvg}${now.day}${now.month}${now.year}${now.hour}${now.minute}${now.second}';
       final userDetails = UserCollectionModel(
         id: generatedId,
         username: usernameController.text.trim(),
@@ -120,24 +124,34 @@ class RegisterScreenController extends StateNotifier<RegisterState> {
         updatedAt: now,
       );
 
-      // Save to Firestore
-      final response = await authRepo.saveUser(userDetails: userDetails);
+      final exitUser = await authRepo.getUserByUsername(
+        mobileNUmber: phoneController.text.trim(),
+      );
 
-      if (response != null) {
-        // Show success at TOP
+      if (exitUser != null) {
         AppSnackbar.showSnackbar(
-            context, 'Your Account Register Succefully, wait for approval');
-
-        // Navigate (optional)
-        _clearControllers();
-        Future.delayed(Duration(seconds: 1), () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context); // Or pushReplacementNamed if needed
-          }
-        });
+            context, 'User already exists with this mobile number');
       } else {
-        _clearControllers();
-        AppSnackbar.showSnackbar(context, 'Register failed ');
+        // Save to Firestore
+        final response = await authRepo.saveUser(userDetails: userDetails);
+
+        if (response != null) {
+          // Show success at TOP
+          AppSnackbar.showSnackbar(
+              context, 'Your Account Register Succefully, wait for approval');
+
+          // Navigate (optional)
+
+          Future.delayed(Duration(seconds: 1), () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context); // Or pushReplacementNamed if needed
+            }
+            _clearControllers();
+          });
+        } else {
+          _clearControllers();
+          AppSnackbar.showSnackbar(context, 'Register failed ');
+        }
       }
     } catch (e) {
       _clearControllers();
@@ -169,4 +183,5 @@ class RegisterScreenController extends StateNotifier<RegisterState> {
     lastNameController.clear();
     phoneController.clear();
   }
+  
 }

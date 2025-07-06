@@ -25,7 +25,7 @@ class AuthRepo {
     String? mobileNUmber,
   }) async {
     try {
-      final QuerySnapshot<UserCollectionModel> querySnapshot;
+      final querySnapshot;
       if (mobileNUmber != null) {
         querySnapshot = await userCollection
             .where('mobileNumber', isEqualTo: mobileNUmber)
@@ -34,15 +34,16 @@ class AuthRepo {
       } else {
         querySnapshot = await userCollection
             .where('username', isEqualTo: username)
-            .where('password', isNotEqualTo: password)
+            .where('password', isEqualTo: password) // fixed here
             .limit(1)
             .get();
       }
 
       if (querySnapshot.docs.isNotEmpty) {
-        return querySnapshot.docs.first.data();
+        final data = querySnapshot.docs.first.data();
+        return data; // assuming your model
       } else {
-        return null; // No user found with the given username
+        return null;
       }
     } catch (e) {
       print('Error fetching user by username: $e');
