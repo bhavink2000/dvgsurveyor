@@ -3,6 +3,7 @@ import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_padding.dart';
 import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
+import 'package:dvgsurveyor/src/drawer_screen/drawer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -15,7 +16,6 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -27,51 +27,77 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     // final state = ref.watch(dashboardController);
-    final controller = ref.read(dashboardController);
+    final controller = ref.watch(dashboardController);
 
     return Scaffold(
       backgroundColor: AppColors.tealPrimary,
+      drawer: AppDrawer(),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.menu, color: AppColors.offWhite),
+                Builder(
+                  builder: (context) => IconButton(
+                    icon: Icon(Icons.menu, color: AppColors.offWhite),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
                 ),
                 Text(
                   AppConst.appName,
                   style: AppFonts.text20(context).copyWith(
                     color: AppColors.offWhite,
                     fontWeight: FontWeight.bold,
+                    fontSize: 18.sp,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ],
             ),
-            SizedBox(height: 4.h),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
               children: [
-                Text(
-                  'Welcome, ${controller.userName}',
-                  style: AppFonts.text20(context).copyWith(
-                    color: AppColors.offWhite,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome, ${controller.userName}',
+                        style: AppFonts.text20(context).copyWith(
+                          color: AppColors.offWhite,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24.sp,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Here is your dashboard',
+                        style: AppFonts.text14(context).copyWith(
+                          color: AppColors.offWhite,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ).paddingOnly(left: 16.w),
                 ),
-                SizedBox(height: 8.h),
-                Text(
-                  'Here is your dashboard',
-                  style: AppFonts.text16(context).copyWith(
+                Container(
+                  width: 50.w,
+                  height: 40.h,
+                  decoration: BoxDecoration(
                     color: AppColors.offWhite,
-                    fontWeight: FontWeight.w400,
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
-                ),
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.add,
+                      color: AppColors.tealPrimary,
+                      size: 20,
+                    ),
+                  ),
+                ).paddingOnly(right: 16.w),
               ],
-            ).paddingOnly(left: 16.w),
+            ),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(

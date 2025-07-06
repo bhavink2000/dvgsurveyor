@@ -72,4 +72,19 @@ class AuthRepo {
       return null;
     }
   }
+
+  Future<UserCollectionModel?> getUserId(String userId) async {
+    try {
+      final docSnapshot = await userCollection.doc(userId).get();
+      if (docSnapshot.exists) {
+        return docSnapshot.data();
+      } else {
+        print('User not found');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching user by ID: $e');
+      return null;
+    }
+  }
 }
