@@ -1,44 +1,32 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:dvgsurveyor/model/user_collection_model.dart';
 
 class SessionManager {
-  static const _keyIsLoggedIn = 'isLoggedIn';
-  static const _keyUserId = 'userId';
-  static const _keyUsername = 'username';
+  static final GetStorage _storage = GetStorage();
 
-  /// Save login session
-  static Future<void> saveUserSession({
-    required String userId,
-    required String username,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_keyIsLoggedIn, true);
-    await prefs.setString(_keyUserId, userId);
-    await prefs.setString(_keyUsername, username);
+  static const _userKey = 'user';
+
+  /// Save user session as whole object (JSON)
+  static Future<void> saveUser({UserCollectionModel? user}) async {
+    await _storage.write(_userKey, user?.toJson());
   }
 
-  /// Check if user is logged in
-  static Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyIsLoggedIn) ?? false;
+  /// Get user session
+  static UserCollectionModel? getUser() {
+    final userJson = _storage.read<Map<String, dynamic>>(_userKey);
+    if (userJson != null) {
+      return UserCollectionModel.fromJson(userJson);
+    }
+    return null;
   }
 
-  /// Get logged-in user ID
-  static Future<String?> getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyUserId);
+  /// Check login status
+  static bool isLoggedIn() {
+    return _storage.hasData(_userKey);
   }
 
-  /// Get username
-  static Future<String?> getUsername() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyUsername);
-  }
-
-  /// Clear session (logout)
+  /// Clear user session (logout)
   static Future<void> clearSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyIsLoggedIn);
-    await prefs.remove(_keyUserId);
-    await prefs.remove(_keyUsername);
+    await _storage.remove(_userKey);
   }
 }
