@@ -6,6 +6,8 @@ class AuthRepo {
   AuthRepo._(); // Private constructor for singleton
   static final AuthRepo instance = AuthRepo._(); // Singleton instance
 
+  factory AuthRepo() => instance;
+
   CollectionReference<UserCollectionModel> get _userCollection =>
       FirebaseFirestore.instance
           .collection(FirebaseConst.userCollection)
