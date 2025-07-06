@@ -3,30 +3,15 @@ import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_images_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'controller/splash_screen_controller.dart';
 
-class SplashScreen extends ConsumerStatefulWidget {
+class SplashScreen extends GetWidget<SplashScreenController> {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends ConsumerState<SplashScreen>
-    with TickerProviderStateMixin {
-  @override
-  void initState() {
-    super.initState();
-    final controller = ref.read(splashScreenController);
-    controller.initAnimation(this);
-    controller.initApp(context);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final controller = ref.read(splashScreenController);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -37,8 +22,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               position: controller.logoAnimation,
               child: Image.asset(
                 AppImages.dvgLogo,
-                width: 200,
-                height: 200,
+                width: 200.w,
+                height: 200.h,
               ),
             ),
             FadeTransition(
@@ -52,7 +37,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     child: Text(
                       AppConst.dvg,
                       style: AppFonts.text20(context).copyWith(
-                        fontSize: 24,
+                        fontSize: 24.sp,
                         color: AppColors.tealPrimary,
                       ),
                     ),
@@ -63,9 +48,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     child: Text(
                       AppConst.surveyor,
                       style: AppFonts.text20(context).copyWith(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.tealPrimary),
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.tealPrimary,
+                      ),
                     ),
                   ),
                 ],

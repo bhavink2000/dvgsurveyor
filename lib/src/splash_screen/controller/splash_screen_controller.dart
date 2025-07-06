@@ -1,24 +1,34 @@
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
-final splashScreenController = Provider((ref) => SplashScreenController());
-
-class SplashScreenController {
+class SplashScreenController extends GetxController
+    with GetSingleTickerProviderStateMixin {
   late AnimationController logoController;
   late Animation<Offset> logoAnimation;
   late Animation<Offset> textLeftAnimation;
   late Animation<Offset> textRightAnimation;
   late Animation<double> opacityAnimation;
 
-  void initAnimation(TickerProvider vsync) {
+  @override
+  void onInit() {
+    super.onInit();
+    initAnimation(); // initialize animations
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    initApp(); // only safe to call navigation after context is ready
+  }
+
+  void initAnimation() {
     logoController = AnimationController(
       duration: const Duration(milliseconds: 1500),
-      vsync: vsync,
+      vsync: this, // uses GetSingleTickerProviderStateMixin
     );
 
-    // Logo moves up
     logoAnimation = Tween<Offset>(
       begin: const Offset(0, 0),
       end: const Offset(0, 0.3),
@@ -29,7 +39,6 @@ class SplashScreenController {
       ),
     );
 
-    // "DVG" moves left
     textLeftAnimation = Tween<Offset>(
       begin: const Offset(0, 0),
       end: const Offset(-0.05, 0),
@@ -40,7 +49,6 @@ class SplashScreenController {
       ),
     );
 
-    // "Surveyor" moves right
     textRightAnimation = Tween<Offset>(
       begin: const Offset(0, 0),
       end: const Offset(0.05, 0),
@@ -51,7 +59,6 @@ class SplashScreenController {
       ),
     );
 
-    // Fade in animation
     opacityAnimation = Tween<double>(
       begin: 0,
       end: 1,
@@ -65,21 +72,21 @@ class SplashScreenController {
     logoController.forward();
   }
 
-  Future<void> initApp(BuildContext context) async {
+  Future<void> initApp() async {
     await logoController.forward();
     await Future.delayed(const Duration(seconds: 1));
 
-    if (context.mounted) {
-      final isUserLoggedIn = await SessionManager.isLoggedIn();
-      if (isUserLoggedIn) {
-        Navigator.pushReplacementNamed(context, AppRoutes.dashScreen);
-      } else {
-        Navigator.pushReplacementNamed(context, AppRoutes.welcomeScreen);
-      }
+    final isUserLoggedIn = await SessionManager.isLoggedIn();
+    if (isUserLoggedIn) {
+      Get.offNamed(AppRoutes.dashScreen);
+    } else {
+      Get.offNamed(AppRoutes.welcomeScreen);
     }
   }
 
-  void dispose() {
+  @override
+  void onClose() {
     logoController.dispose();
+    super.onClose();
   }
 }
