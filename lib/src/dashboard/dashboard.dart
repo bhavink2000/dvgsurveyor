@@ -1,24 +1,16 @@
+// dashboard_screen.dart
+import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
-class DashboardScreen extends ConsumerStatefulWidget{
+class DashboardScreen extends GetWidget<DashboardController> {
   const DashboardScreen({super.key});
 
   @override
-  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
-}
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  @override
   Widget build(BuildContext context) {
-    // final state = ref.watch(dashboardController);
-    // final controller = ref.read(dashboardController.notifier);
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-      ),
       body: Center(
-        child: Text('Welcome to the Dashboard!'),
+        child: Text('Dashboard Screen', style: TextStyle(fontSize: 24)),
       ),
     );
   }

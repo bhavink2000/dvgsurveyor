@@ -1,6 +1,5 @@
+import 'package:get/get.dart';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-final dashboardController = Provider((ref)=> DashboardController());
-
-class DashboardController {}
+class DashboardController extends GetxController{
+  
+}
