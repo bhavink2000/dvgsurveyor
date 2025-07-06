@@ -92,13 +92,13 @@ class LoginScreen extends GetWidget<LoginController> {
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : () {
-                              if (controller.formKey.currentState!.validate()) {
-                                controller.login();
-                              }
-                            },
+                      onPressed: () {
+                        if (controller.isLoading.value == false) {
+                          if (controller.formKey.currentState!.validate()) {
+                            controller.login();
+                          }
+                        }
+                      },
                       child: controller.isLoading.value
                           ? SizedBox(
                               width: 20.w,

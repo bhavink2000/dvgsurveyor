@@ -122,14 +122,13 @@ class RegisterScreen extends GetWidget<RegisterController> {
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                         ),
-                        onPressed: controller.isLoading.value
-                            ? null
-                            : () {
-                                if (controller.formKey.currentState!
-                                    .validate()) {
-                                  controller.registerUser();
-                                }
-                              },
+                        onPressed: () {
+                          if (controller.isLoading.value == false) {
+                            if (controller.formKey.currentState!.validate()) {
+                              controller.registerUser();
+                            }
+                          }
+                        },
                         child: SizedBox(
                           height: 20.h,
                           child: Center(
