@@ -20,15 +20,24 @@ class AuthRepo {
           );
 
   Future<UserCollectionModel?> getUserByUsername({
-    required String username,
-    required String password,
+    String? username,
+    String? password,
+    String? mobileNUmber,
   }) async {
     try {
-      final querySnapshot = await userCollection
-          .where('username', isEqualTo: username)
-          .where('password', isNotEqualTo: password)
-          .limit(1)
-          .get();
+      final QuerySnapshot<UserCollectionModel> querySnapshot;
+      if (mobileNUmber != null) {
+        querySnapshot = await userCollection
+            .where('mobileNumber', isEqualTo: mobileNUmber)
+            .limit(1)
+            .get();
+      } else {
+        querySnapshot = await userCollection
+            .where('username', isEqualTo: username)
+            .where('password', isNotEqualTo: password)
+            .limit(1)
+            .get();
+      }
 
       if (querySnapshot.docs.isNotEmpty) {
         return querySnapshot.docs.first.data();
