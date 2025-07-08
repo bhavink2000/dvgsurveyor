@@ -2,6 +2,7 @@ import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/init_binding/init_binding.dart';
+import 'package:dvgsurveyor/localization/gujarati_translations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,8 +33,13 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, _) => GetMaterialApp(
         fallbackLocale: const Locale('en', 'US'),
+        translations: GujaratiTranslations(),
+        locale: const Locale('gu', 'IN'), // Gujarati only
         title: AppConst.appName,
-      
+        debugShowCheckedModeBanner: false,
+        getPages: AppRoutes.pages,
+        initialRoute: AppRoutes.splashScreen,
+        initialBinding: InitBinding(),
         theme: ThemeData(
           colorScheme: ColorScheme.light(
             primary: AppColors.tealPrimary,
@@ -55,10 +61,6 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        debugShowCheckedModeBanner: false,
-        getPages: AppRoutes.pages,
-        initialRoute: AppRoutes.splashScreen,
-        initialBinding: InitBinding(),
       ),
     );
   }
