@@ -101,8 +101,12 @@ class UserCollectionModel {
       isEditable: json['isEditable'] ?? false, // Default value for isEditable
       isDelete: json['isDelete'] ?? false, // Default value for isDelete
       isApproved: json['isApproved'] ?? false, // Default value for isApproved
-      createdAt: json['createdAt']?.toDate(),
-      updatedAt: json['updatedAt']?.toDate(),
+      createdAt: json['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'])
+          : null,
     );
   }
 

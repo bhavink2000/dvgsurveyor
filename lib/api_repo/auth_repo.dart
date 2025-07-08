@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/helper/firebase_const.dart';
 import 'package:dvgsurveyor/model/user_collection_model.dart';
@@ -22,6 +24,7 @@ class AuthRepo {
     String? username,
     String? password,
     String? mobileNumber,
+    String? userId,
   }) async {
     try {
       QuerySnapshot<UserCollectionModel> querySnapshot;
@@ -31,12 +34,18 @@ class AuthRepo {
             .where('mobileNumber', isEqualTo: mobileNumber)
             .limit(1)
             .get();
-      } else {
+      } else if (username != null && password != null) {
         querySnapshot = await _userCollection
             .where('username', isEqualTo: username)
             .where('password', isEqualTo: password)
             .limit(1)
             .get();
+      } else {
+        final docRef = _userCollection.doc(userId);
+
+        final snapshot = await docRef.get();
+
+        return snapshot.data();
       }
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -58,6 +67,33 @@ class AuthRepo {
       return snapshot.data();
     } catch (e) {
       print('Error saving user: $e');
+      return null;
+    }
+  }
+
+  Future<List<UserCollectionModel>> getAllUser() async {
+    try {
+      final querySnapshot = await _userCollection.get();
+
+      return querySnapshot.docs
+          .map((doc) => doc.data()) // no need for fromFirestore
+          .whereType<UserCollectionModel>() // safety check
+          .toList();
+    } catch (e) {
+      log('Error fetching all users -> $e');
+      return []; // Return empty list on failure
+    }
+  }
+
+  Future<UserCollectionModel?> updateUser(
+      {UserCollectionModel? userData}) async {
+    try {
+      final docRef = _userCollection.doc(userData?.id);
+      await docRef.set(userData!);
+      final snapShot = await docRef.get();
+      return snapShot.data();
+    } catch (e) {
+      log('error update user $e');
       return null;
     }
   }
