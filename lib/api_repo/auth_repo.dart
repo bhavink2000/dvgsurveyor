@@ -2,6 +2,9 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/helper/firebase_const.dart';
+import 'package:dvgsurveyor/model/property_description_model.dart';
+import 'package:dvgsurveyor/model/property_type_model.dart';
+import 'package:dvgsurveyor/model/usage_model.dart';
 import 'package:dvgsurveyor/model/user_collection_model.dart';
 
 class AuthRepo {
@@ -16,6 +19,33 @@ class AuthRepo {
           .withConverter<UserCollectionModel>(
             fromFirestore: (snapshot, _) =>
                 UserCollectionModel.fromFirestore(snapshot),
+            toFirestore: (model, _) => model.toFirestore(),
+          );
+
+  CollectionReference<UsageTypeModel> get _usageTypeCollection =>
+      FirebaseFirestore.instance
+          .collection(FirebaseConst.usageCollection)
+          .withConverter<UsageTypeModel>(
+            fromFirestore: (snapshot, _) =>
+                UsageTypeModel.fromFirestore(snapshot),
+            toFirestore: (model, _) => model.toFirestore(),
+          );
+
+  CollectionReference<PropertyTypeModel> get _propertyTypeCollection =>
+      FirebaseFirestore.instance
+          .collection(FirebaseConst.propertyType)
+          .withConverter<PropertyTypeModel>(
+            fromFirestore: (snapshot, _) =>
+                PropertyTypeModel.fromFirestore(snapshot),
+            toFirestore: (model, _) => model.toFirestore(),
+          );
+
+  CollectionReference<PropertyDescriptionModel>
+      get _propertyDescriptionCollection => FirebaseFirestore.instance
+          .collection(FirebaseConst.propertyDescription)
+          .withConverter<PropertyDescriptionModel>(
+            fromFirestore: (snapshot, _) =>
+                PropertyDescriptionModel.fromFirestore(snapshot),
             toFirestore: (model, _) => model.toFirestore(),
           );
 
@@ -95,6 +125,52 @@ class AuthRepo {
     } catch (e) {
       log('error update user $e');
       return null;
+    }
+  }
+
+  Future<List<UsageTypeModel>> getUsageType() async {
+    try {
+      final querySnapshot = await _usageTypeCollection.get();
+      return querySnapshot.docs
+          .map((doc) => doc.data())
+          .whereType<UsageTypeModel>()
+          .toList();
+    } catch (e) {
+      log('error usage type $e');
+      return [];
+    }
+  }
+
+  Future<List<PropertyTypeModel>> getPropertyType() async {
+    try {
+      final querySnapshot = await _propertyTypeCollection.get();
+      return querySnapshot.docs
+          .map((doc) => doc.data())
+          .whereType<PropertyTypeModel>()
+          .toList();
+    } catch (e) {
+      log('error get property type data $e');
+      return [];
+    }
+  }
+
+  Future<List<PropertyDescriptionModel>> getPropertyDescription({
+    required String propertyId,
+  }) async {
+    try {
+      final querySnapshot = await _propertyDescriptionCollection
+          .where(
+            'propertyTypeId',
+            isEqualTo: propertyId,
+          )
+          .get();
+      return querySnapshot.docs
+          .map((doc) => doc.data())
+          .whereType<PropertyDescriptionModel>()
+          .toList();
+    } catch (e) {
+      log('error property description $e');
+      return [];
     }
   }
 }
