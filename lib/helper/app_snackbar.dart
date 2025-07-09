@@ -3,10 +3,12 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 class AppSnackbar {
-  static void showSnackbar(String message,
-      {Duration duration = const Duration(seconds: 2)}) {
+  static void showSnackbar(
+      {required String message,
+      String? title,
+      Duration duration = const Duration(seconds: 2)}) {
     Get.snackbar(
-      'Opps!', // Title (optional, leave empty)
+      title ?? 'Success', // Title (optional, leave empty)
       message,
       snackPosition: SnackPosition.TOP,
       backgroundColor: AppColors.tealDark,
@@ -18,14 +20,15 @@ class AppSnackbar {
     );
   }
 
-  static void showErrorSnackbar(String message,
-      {Duration duration = const Duration(seconds: 2)}) {
+  static void showErrorSnackbar(
+      {required String message,
+      Duration duration = const Duration(seconds: 2)}) {
     Get.snackbar(
       'Error!',
       message,
       snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
+      backgroundColor: AppColors.coralAccent,
+      colorText: AppColors.offWhite,
       borderRadius: 8,
       duration: duration,
       isDismissible: true,

@@ -78,7 +78,9 @@ class RegisterController extends GetxController {
       );
 
       if (existingUser != null) {
-        AppSnackbar.showSnackbar('User already exists with this mobile number');
+        AppSnackbar.showSnackbar(
+            title: 'Oops!',
+            message: 'User already exists with this mobile number');
         return;
       }
 
@@ -86,7 +88,8 @@ class RegisterController extends GetxController {
 
       if (response != null) {
         AppSnackbar.showSnackbar(
-            'Your account registered successfully, wait for approval');
+            title: 'Good',
+            message: 'Your account registered successfully, wait for approval');
 
         Future.delayed(const Duration(seconds: 1), () {
           Get.back(); // Go back to login screen
@@ -94,11 +97,11 @@ class RegisterController extends GetxController {
         });
       } else {
         _clearControllers();
-        AppSnackbar.showErrorSnackbar('Register failed');
+        AppSnackbar.showErrorSnackbar(message: 'Register failed');
       }
     } catch (e) {
       _clearControllers();
-      AppSnackbar.showErrorSnackbar('An error occurred: $e');
+      AppSnackbar.showErrorSnackbar(message: 'An error occurred: $e');
     } finally {
       isLoading.value = false;
     }
