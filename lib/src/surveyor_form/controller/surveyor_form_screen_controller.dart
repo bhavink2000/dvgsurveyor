@@ -1,8 +1,9 @@
 import 'dart:developer';
-
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
+import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/model/property_description_model.dart';
 import 'package:dvgsurveyor/model/property_type_model.dart';
+import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/usage_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,8 +11,8 @@ import 'package:get/get.dart';
 class SurveyorFormScreenController extends GetxController {
   final AuthRepo authRepo = AuthRepo();
 
+  // Form Controllers
   final formKey = GlobalKey<FormState>();
-
   final ownerName = TextEditingController();
   final junagharNumber = TextEditingController();
   final kabjedarName = TextEditingController();
@@ -24,62 +25,81 @@ class SurveyorFormScreenController extends GetxController {
   final constructionYear = TextEditingController();
   final totalFloors = TextEditingController();
 
+  // Dropdown selections
   String? selectedUsageId;
-  RxBool isUsageLoad = false.obs;
-  RxList<UsageTypeModel> usageData = <UsageTypeModel>[].obs;
-
   String? selectedPropertyType;
-  RxBool isPropertyTypeLoad = false.obs;
-  RxList<PropertyTypeModel> propertyData = <PropertyTypeModel>[].obs;
-
   String? selectedPropertyDescription;
+
+  // Loading indicators
+  RxBool isUsageLoad = false.obs;
+  RxBool isPropertyTypeLoad = false.obs;
   RxBool isPropertyDesLoad = false.obs;
+
+  // Dropdown data
+  RxList<UsageTypeModel> usageData = <UsageTypeModel>[].obs;
+  RxList<PropertyTypeModel> propertyData = <PropertyTypeModel>[].obs;
   RxList<PropertyDescriptionModel> propertyDesData =
       <PropertyDescriptionModel>[].obs;
 
+  // Area Details (dynamic floor-wise)
+  final RxMap<String, AreaDetail> areaData = <String, AreaDetail>{}.obs;
+  final List<String> categories = [
+    // FormLabels.slab.tr,
+    // FormLabels.papda.tr,
+    // FormLabels.patara.tr,
+    // FormLabels.nadiya.tr,
+    // FormLabels.khulu.tr,
+    // 'slab': slab,
+    'સ્લેબ',
+
+    'પાપડા',
+
+    'પાટરા',
+
+    'નાળિયા',
+    'ખુલ્લું'
+  ];
+  final TextEditingController newFloorController = TextEditingController();
+
   @override
   void onInit() {
-    fetchData();
     super.onInit();
+    fetchData();
   }
 
-  void fetchData() async {
+  Future<void> fetchData() async {
     await getUsageType();
     await getPropertyType();
   }
 
   Future<void> getUsageType() async {
     isUsageLoad.value = true;
-    final response = await authRepo.getUsageType();
-    usageData.value = response;
+    usageData.value = await authRepo.getUsageType();
     isUsageLoad.value = false;
   }
 
   Future<void> getPropertyType() async {
     isPropertyTypeLoad.value = true;
-
     selectedPropertyType = null;
     propertyType.clear();
     propertyData.clear();
 
-    final response = await authRepo.getPropertyType();
-    propertyData.value = response.toSet().toList();
-
+    propertyData.value = (await authRepo.getPropertyType()).toSet().toList();
     isPropertyTypeLoad.value = false;
   }
 
   Future<void> getPropertyDescription() async {
     if (selectedPropertyType == null || selectedPropertyType!.isEmpty) return;
-    propertyDesData.clear();
+
     isPropertyDesLoad.value = true;
     selectedPropertyDescription = null;
     propertyDescription.clear();
+    propertyDesData.clear();
 
     try {
       final response = await authRepo.getPropertyDescription(
-        propertyId: selectedPropertyType!,
-      );
-      propertyDesData.value = response.toSet().toList(); // avoid duplicates
+          propertyId: selectedPropertyType!);
+      propertyDesData.value = response.toSet().toList();
     } catch (e) {
       log('Error fetching property descriptions: $e');
     } finally {
@@ -87,9 +107,141 @@ class SurveyorFormScreenController extends GetxController {
     }
   }
 
+  final RxString selectedBaseFloor = ''.obs;
+
+// Define base floors (dropdown options)
+  final List<String> baseFloors = [
+    'ground',
+    'first',
+    'second',
+    'basementOne',
+    'basementTwo',
+  ];
+
+  void addNewFloorBasedOn(String baseFloor) {
+    // Count existing floors with this prefix
+    final matchingFloors = areaData.keys
+        .where((key) => key == baseFloor || key.startsWith('${baseFloor}_'))
+        .toList();
+
+    // Determine new floor key
+    String newKey;
+    if (matchingFloors.isEmpty) {
+      newKey = baseFloor;
+    } else {
+      newKey = "${baseFloor}_${matchingFloors.length}";
+    }
+
+    // Add to areaData
+    if (!areaData.containsKey(newKey)) {
+      areaData[newKey] = AreaDetail();
+      areaData.refresh();
+      AppSnackbar.showSnackbar(title: 'Success', message: 'Added $newKey');
+    } else {
+      AppSnackbar.showErrorSnackbar(message: "$newKey already exists.");
+    }
+  }
+
+  void addItem(String floor, String category) {
+    final detail = areaData[floor];
+    final target = detail?.categoriesMap[category];
+    if (target != null) {
+      target.items.add(AreaItem(length: 0, width: 0));
+      areaData.refresh();
+    }
+  }
+
+  void removeItem(String floor, String category, int index) {
+    final detail = areaData[floor];
+    final target = detail?.categoriesMap[category];
+    if (target != null && index < target.items.length) {
+      target.items.removeAt(index);
+      areaData.refresh();
+    }
+  }
+
+  void updateItem(String floor, String category, int index, AreaItem updated) {
+    final detail = areaData[floor];
+    if (detail != null) {
+      final target = getCategory(detail, category);
+      if (target != null && index < target.items.length) {
+        // Auto update count here
+        final newItem = AreaItem(
+          length: updated.length,
+          width: updated.width,
+          //count: updated.length * updated.width, // <--- fix
+        );
+        target.items[index] = newItem;
+        areaData.refresh();
+      }
+    }
+  }
+
+  /// Helper function to map string category name to AreaCategory field
+  AreaCategory? getCategory(AreaDetail detail, String category) {
+    switch (category.toLowerCase()) {
+      case 'slab':
+      case 'સ્લેબ':
+        return detail.slab;
+      case 'papda':
+      case 'પાપડા':
+        return detail.papda;
+      case 'patara':
+      case 'પાટરા':
+        return detail.patara;
+      case 'nadiya':
+      case 'નાળિયા':
+        return detail.nadiya;
+      case 'open':
+      case 'ખુલ્લું':
+        return detail.open;
+      default:
+        return null;
+    }
+  }
+
   void submitForm() {
     if (formKey.currentState?.validate() ?? false) {
-      // Submit logic here
+      // Handle final submission logic
+
+      final String timestampId = 'SUR${DateTime.now().millisecondsSinceEpoch}';
+      final now = DateTime.now();
+
+      //final String homeNumber = newHomeNumberController.text.trim(); // Shared for index & newHomeNumber
+
+      final surveyData = SurveyModel(
+        id: timestampId,
+        ownerName: ownerName.text.trim(),
+        oldHomeNumber: junagharNumber.text.trim(),
+        index: '1',
+        newHomeNumber: '1',
+        rentPersonName: kabjedarName.text.trim(),
+        address: address.text.trim(),
+        propertyStayType: selectedUsageId ?? '',
+        propertyType: {
+          (selectedPropertyType ?? ''): PropertyTypeItem(
+            propertyName: propertyType.text.trim(),
+            pId: selectedPropertyType,
+          )
+        },
+        propertyDescription: {
+          (selectedPropertyDescription ?? ''): PropertyDescriptionItem(
+              propertyId: selectedPropertyType,
+              propertyDes: propertyDescription.text.trim(),
+              propertyDesId: selectedPropertyDescription)
+        },
+        mobileNumber: mobileNumber.text.trim(),
+        waterPipeline: waterConnectionNumber.text.trim(),
+        banthkamYear: constructionYear.text.trim(),
+        totalFloors: totalFloors.text.trim(),
+        area:
+            Map<String, AreaDetail>.from(areaData), // Ensure correct conversion
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      log('Form--->${surveyData.toFirebase()}');
+
       Get.snackbar("Success", "Form submitted successfully");
     }
   }
@@ -107,6 +259,7 @@ class SurveyorFormScreenController extends GetxController {
     waterConnectionNumber.dispose();
     constructionYear.dispose();
     totalFloors.dispose();
+    newFloorController.dispose();
     super.onClose();
   }
 }
