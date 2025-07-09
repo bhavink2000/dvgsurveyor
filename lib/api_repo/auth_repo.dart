@@ -82,7 +82,7 @@ class AuthRepo {
         return querySnapshot.docs.first.data();
       }
     } catch (e) {
-      print('Error fetching user: $e');
+      log('Error fetching user: $e');
     }
     return null;
   }
@@ -96,7 +96,7 @@ class AuthRepo {
 
       return snapshot.data();
     } catch (e) {
-      print('Error saving user: $e');
+      log('Error saving user: $e');
       return null;
     }
   }

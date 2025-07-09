@@ -244,7 +244,7 @@ class _UserApprovalCardState extends State<UserApprovalCard> {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     if (selectedRole == null) {
-                      AppSnackbar.showSnackbar('Please select a role');
+                      AppSnackbar.showSnackbar(message: 'Please select a role');
 
                       return;
                     }
