@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/helper/firebase_const.dart';
 import 'package:dvgsurveyor/model/property_description_model.dart';
 import 'package:dvgsurveyor/model/property_type_model.dart';
+import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/usage_model.dart';
 import 'package:dvgsurveyor/model/user_collection_model.dart';
 
@@ -47,6 +48,14 @@ class AuthRepo {
             fromFirestore: (snapshot, _) =>
                 PropertyDescriptionModel.fromFirestore(snapshot),
             toFirestore: (model, _) => model.toFirestore(),
+          );
+
+  CollectionReference<SurveyModel> get _surveyCollection =>
+      FirebaseFirestore.instance
+          .collection(FirebaseConst.surveyCollection)
+          .withConverter<SurveyModel>(
+            fromFirestore: (snapshot, _) => SurveyModel.fromFirebase(snapshot),
+            toFirestore: (model, _) => model.toFirebase(),
           );
 
   /// Get user by username+password OR mobile number
@@ -171,6 +180,19 @@ class AuthRepo {
     } catch (e) {
       log('error property description $e');
       return [];
+    }
+  }
+
+  Future<SurveyModel?> saveSurveyForm({required SurveyModel surveyData}) async {
+    try {
+      final docRef = _surveyCollection.doc(surveyData.id);
+      await docRef.set(surveyData);
+      final snapshot = await docRef.get();
+
+      return snapshot.data();
+    } catch (e) {
+      log('Log: error to save survey form data -> $e');
+      return null;
     }
   }
 }

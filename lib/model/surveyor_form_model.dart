@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class PropertyTypeItem {
   final String? pId;
   final String? propertyName;
@@ -152,6 +154,9 @@ class AreaDetail {
 }
 
 class SurveyModel {
+  final String userId;
+  final String userRole;
+  final String userName;
   final String id;
   final String ownerName;
   final String oldHomeNumber;
@@ -171,6 +176,9 @@ class SurveyModel {
   final DateTime? updatedAt;
 
   SurveyModel({
+    required this.userId,
+    required this.userRole,
+    required this.userName,
     required this.id,
     required this.ownerName,
     required this.oldHomeNumber,
@@ -190,7 +198,10 @@ class SurveyModel {
     required this.updatedAt,
   });
 
-  factory SurveyModel.fromFirebase(Map<String, dynamic> json) => SurveyModel(
+  factory SurveyModel.fromFirebase(DocumentSnapshot json) => SurveyModel(
+        userId: json['userId'] ?? '',
+        userRole: json['userRole'] ?? '',
+        userName: json['userName'] ?? '',
         id: json['id'] ?? '',
         ownerName: json['ownerName'] ?? '',
         oldHomeNumber: json['oldHomeNumber'] ?? '',
@@ -218,6 +229,9 @@ class SurveyModel {
       );
 
   Map<String, dynamic> toFirebase() => {
+        'userId': userId,
+        'userRole': userRole,
+        'userName': userName,
         'id': id,
         'ownerName': ownerName,
         'oldHomeNumber': oldHomeNumber,
@@ -240,6 +254,9 @@ class SurveyModel {
       };
 
   SurveyModel copyWith({
+    String? userId,
+    String? userRole,
+    String? userName,
     String? id,
     String? ownerName,
     String? oldHomeNumber,
@@ -259,6 +276,9 @@ class SurveyModel {
     final DateTime? updatedAt,
   }) {
     return SurveyModel(
+      userId: userId ?? this.userId,
+      userRole: userRole ?? this.userRole,
+      userName: userName ?? this.userName,
       id: id ?? this.id,
       ownerName: ownerName ?? this.ownerName,
       oldHomeNumber: oldHomeNumber ?? this.oldHomeNumber,

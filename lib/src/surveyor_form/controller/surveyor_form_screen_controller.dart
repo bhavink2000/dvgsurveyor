@@ -5,6 +5,7 @@ import 'package:dvgsurveyor/model/property_description_model.dart';
 import 'package:dvgsurveyor/model/property_type_model.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/usage_model.dart';
+import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -200,16 +201,16 @@ class SurveyorFormScreenController extends GetxController {
     }
   }
 
-  void submitForm() {
+  void submitForm() async {
     if (formKey.currentState?.validate() ?? false) {
-      // Handle final submission logic
-
       final String timestampId = 'SUR${DateTime.now().millisecondsSinceEpoch}';
       final now = DateTime.now();
 
-      //final String homeNumber = newHomeNumberController.text.trim(); // Shared for index & newHomeNumber
-
       final surveyData = SurveyModel(
+        userId: SessionManager.getUser()?.id ?? '',
+        userRole: SessionManager.getUser()?.role ?? '',
+        userName:
+            '${SessionManager.getUser()?.firstName ?? ''} ${SessionManager.getUser()?.lastName ?? ''}',
         id: timestampId,
         ownerName: ownerName.text.trim(),
         oldHomeNumber: junagharNumber.text.trim(),
@@ -242,7 +243,14 @@ class SurveyorFormScreenController extends GetxController {
 
       log('Form--->${surveyData.toFirebase()}');
 
-      Get.snackbar("Success", "Form submitted successfully");
+      final response = await authRepo.saveSurveyForm(surveyData: surveyData);
+      if (response != null) {
+        AppSnackbar.showSnackbar(
+            title: 'Success', message: 'Data submit successfuly');
+        //Get.back();
+      } else {
+        AppSnackbar.showErrorSnackbar(message: 'Data failed to save');
+      }
     }
   }
 
