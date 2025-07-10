@@ -8,6 +8,8 @@ import 'package:dvgsurveyor/src/register_screen/binding/register_binding.dart';
 import 'package:dvgsurveyor/src/register_screen/register_screen.dart';
 import 'package:dvgsurveyor/src/splash_screen/binding/splash_screen_binding.dart';
 import 'package:dvgsurveyor/src/splash_screen/splash_screen.dart';
+import 'package:dvgsurveyor/src/survey_screen/binding/survey_screen_binding.dart';
+import 'package:dvgsurveyor/src/survey_screen/survey_screen.dart';
 import 'package:dvgsurveyor/src/surveyor_form/binding/surveyor_form_screen_binding.dart';
 import 'package:dvgsurveyor/src/surveyor_form/surveyor_form_screen.dart';
 import 'package:dvgsurveyor/src/user_mangement/binding/user_mangement_screen_binding.dart';
@@ -26,6 +28,7 @@ class AppRoutes {
   static const String drawerScreen = '/drawer_screen';
   static const String userMangementScreen = '/user_mangement_screen';
   static const String surveyorFormScreen = '/surveyor_form_screen';
+  static const String surveyScreen = '/survey_screen';
 
   static List<GetPage> pages = [
     GetPage(
@@ -103,6 +106,16 @@ class AppRoutes {
       page: () => const SurveyorFormScreen(),
       bindings: [
         SurveyorFormScreenBinding(),
+      ],
+      transition: Transition.fadeIn,
+      transitionDuration: 500.milliseconds,
+      curve: Curves.easeIn,
+    ),
+    GetPage(
+      name: surveyScreen,
+      page: () => const SurveyScreen(),
+      bindings: [
+        SurveyScreenBinding(),
       ],
       transition: Transition.fadeIn,
       transitionDuration: 500.milliseconds,
