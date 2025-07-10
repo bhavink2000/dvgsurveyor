@@ -195,4 +195,21 @@ class AuthRepo {
       return null;
     }
   }
+
+  Future<List<SurveyModel>> getSurveyData({required String userId}) async {
+    try {
+      final querySnap = await _surveyCollection
+          .where('userId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnap.docs
+          .map((doc) => doc.data())
+          .whereType<SurveyModel>()
+          .toList();
+    } catch (e) {
+      log('Log: get error in get survey data $e');
+      return [];
+    }
+  }
 }
