@@ -1,4 +1,5 @@
 // dashboard_screen.dart
+import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
@@ -72,7 +73,9 @@ class DashboardScreen extends GetWidget<DashboardController> {
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.toNamed(AppRoutes.surveyorFormScreen);
+                    },
                     icon: Icon(
                       Icons.add,
                       color: AppColors.tealPrimary,

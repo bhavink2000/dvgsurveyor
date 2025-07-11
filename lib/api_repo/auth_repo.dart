@@ -2,6 +2,10 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/helper/firebase_const.dart';
+import 'package:dvgsurveyor/model/property_description_model.dart';
+import 'package:dvgsurveyor/model/property_type_model.dart';
+import 'package:dvgsurveyor/model/surveyor_form_model.dart';
+import 'package:dvgsurveyor/model/usage_model.dart';
 import 'package:dvgsurveyor/model/user_collection_model.dart';
 
 class AuthRepo {
@@ -17,6 +21,41 @@ class AuthRepo {
             fromFirestore: (snapshot, _) =>
                 UserCollectionModel.fromFirestore(snapshot),
             toFirestore: (model, _) => model.toFirestore(),
+          );
+
+  CollectionReference<UsageTypeModel> get _usageTypeCollection =>
+      FirebaseFirestore.instance
+          .collection(FirebaseConst.usageCollection)
+          .withConverter<UsageTypeModel>(
+            fromFirestore: (snapshot, _) =>
+                UsageTypeModel.fromFirestore(snapshot),
+            toFirestore: (model, _) => model.toFirestore(),
+          );
+
+  CollectionReference<PropertyTypeModel> get _propertyTypeCollection =>
+      FirebaseFirestore.instance
+          .collection(FirebaseConst.propertyType)
+          .withConverter<PropertyTypeModel>(
+            fromFirestore: (snapshot, _) =>
+                PropertyTypeModel.fromFirestore(snapshot),
+            toFirestore: (model, _) => model.toFirestore(),
+          );
+
+  CollectionReference<PropertyDescriptionModel>
+      get _propertyDescriptionCollection => FirebaseFirestore.instance
+          .collection(FirebaseConst.propertyDescription)
+          .withConverter<PropertyDescriptionModel>(
+            fromFirestore: (snapshot, _) =>
+                PropertyDescriptionModel.fromFirestore(snapshot),
+            toFirestore: (model, _) => model.toFirestore(),
+          );
+
+  CollectionReference<SurveyModel> get _surveyCollection =>
+      FirebaseFirestore.instance
+          .collection(FirebaseConst.surveyCollection)
+          .withConverter<SurveyModel>(
+            fromFirestore: (snapshot, _) => SurveyModel.fromFirebase(snapshot),
+            toFirestore: (model, _) => model.toFirebase(),
           );
 
   /// Get user by username+password OR mobile number
@@ -52,7 +91,7 @@ class AuthRepo {
         return querySnapshot.docs.first.data();
       }
     } catch (e) {
-      print('Error fetching user: $e');
+      log('Error fetching user: $e');
     }
     return null;
   }
@@ -66,7 +105,7 @@ class AuthRepo {
 
       return snapshot.data();
     } catch (e) {
-      print('Error saving user: $e');
+      log('Error saving user: $e');
       return null;
     }
   }
@@ -95,6 +134,82 @@ class AuthRepo {
     } catch (e) {
       log('error update user $e');
       return null;
+    }
+  }
+
+  Future<List<UsageTypeModel>> getUsageType() async {
+    try {
+      final querySnapshot = await _usageTypeCollection.get();
+      return querySnapshot.docs
+          .map((doc) => doc.data())
+          .whereType<UsageTypeModel>()
+          .toList();
+    } catch (e) {
+      log('error usage type $e');
+      return [];
+    }
+  }
+
+  Future<List<PropertyTypeModel>> getPropertyType() async {
+    try {
+      final querySnapshot = await _propertyTypeCollection.get();
+      return querySnapshot.docs
+          .map((doc) => doc.data())
+          .whereType<PropertyTypeModel>()
+          .toList();
+    } catch (e) {
+      log('error get property type data $e');
+      return [];
+    }
+  }
+
+  Future<List<PropertyDescriptionModel>> getPropertyDescription({
+    required String propertyId,
+  }) async {
+    try {
+      final querySnapshot = await _propertyDescriptionCollection
+          .where(
+            'propertyTypeId',
+            isEqualTo: propertyId,
+          )
+          .get();
+      return querySnapshot.docs
+          .map((doc) => doc.data())
+          .whereType<PropertyDescriptionModel>()
+          .toList();
+    } catch (e) {
+      log('error property description $e');
+      return [];
+    }
+  }
+
+  Future<SurveyModel?> saveSurveyForm({required SurveyModel surveyData}) async {
+    try {
+      final docRef = _surveyCollection.doc(surveyData.id);
+      await docRef.set(surveyData);
+      final snapshot = await docRef.get();
+
+      return snapshot.data();
+    } catch (e) {
+      log('Log: error to save survey form data -> $e');
+      return null;
+    }
+  }
+
+  Future<List<SurveyModel>> getSurveyData({required String userId}) async {
+    try {
+      final querySnap = await _surveyCollection
+          .where('userId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnap.docs
+          .map((doc) => doc.data())
+          .whereType<SurveyModel>()
+          .toList();
+    } catch (e) {
+      log('Log: get error in get survey data $e');
+      return [];
     }
   }
 }

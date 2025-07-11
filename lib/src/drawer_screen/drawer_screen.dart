@@ -76,6 +76,21 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
           ),
           ListTile(
             leading: Icon(
+              Icons.person_2_rounded,
+              color: AppColors.tealDark,
+            ),
+            title: Text(
+              'Surveys',
+              style: AppFonts.text14(context).copyWith(
+                color: AppColors.tealDark,
+              ),
+            ),
+            onTap: () {
+              Get.toNamed(AppRoutes.surveyScreen);
+            },
+          ),
+          ListTile(
+            leading: Icon(
               Icons.logout,
               color: AppColors.tealDark,
             ),

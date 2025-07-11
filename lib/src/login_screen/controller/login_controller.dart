@@ -51,7 +51,8 @@ class LoginController extends GetxController {
       if (user != null) {
         if (user.isApproved == false) {
           AppSnackbar.showSnackbar(
-            'Your account is not approved yet.\nPlease wait for admin approval.',
+            title: 'Oops!',
+            message: 'Your account is not approved yet.\nPlease wait for admin approval.',
           );
           return;
         }
@@ -60,16 +61,16 @@ class LoginController extends GetxController {
           user: user,
         );
 
-        AppSnackbar.showSnackbar('Welcome ${user.username}');
+        AppSnackbar.showSnackbar(title: 'Hello',message: 'Welcome ${user.username}');
         _clearControllers();
 
         Get.offAllNamed(AppRoutes.dashScreen);
       } else {
-        AppSnackbar.showSnackbar('User not exists');
+        AppSnackbar.showErrorSnackbar(message: 'User not exists');
       }
     } catch (e) {
       _clearControllers();
-      AppSnackbar.showErrorSnackbar('Login failed: ${e.toString()}');
+      AppSnackbar.showErrorSnackbar(message: 'Login failed: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
