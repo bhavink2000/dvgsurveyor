@@ -64,13 +64,15 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
           ),
 
           // ───── Menu Items ─────
-          SizedBox(height: 16.h),
-          _buildDrawerItem(
-            icon: Icons.manage_accounts_rounded,
-            title: AppConst.userManagement,
-            onTap: () => Get.toNamed(AppRoutes.userMangementScreen),
-            context: context,
-          ),
+          SizedBox(height: controller.userData?.role != 'Worker' ? 16.h : 0.h),
+          controller.userData?.role != 'Worker'
+              ? _buildDrawerItem(
+                  icon: Icons.manage_accounts_rounded,
+                  title: AppConst.userManagement,
+                  onTap: () => Get.toNamed(AppRoutes.userMangementScreen),
+                  context: context,
+                )
+              : SizedBox(),
           _buildDrawerItem(
             icon: Icons.assignment_outlined,
             title: AppConst.surveys,
