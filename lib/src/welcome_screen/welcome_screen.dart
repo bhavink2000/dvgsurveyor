@@ -15,71 +15,100 @@ class WelcomeScreen extends GetWidget<WelcomeScreenController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tealPrimary,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          //We take the image from the assets
-          Lottie.asset(
-            AppImages.dvgWelcomeGif,
-            width: 500.w,
-            height: 200.h,
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          //Texts and Styling of them
-          Text(
-            AppConst.welcomeToDVG,
-            textAlign: TextAlign.center,
-            style: AppFonts.text20(context).copyWith(
-                color: AppColors.offWhite,
-                fontSize: 24,
-                fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 20),
-          Text(
-            AppConst.welcomeMessage,
-            textAlign: TextAlign.center,
-            style: AppFonts.text14(context).copyWith(
-              color: AppColors.offWhite,
-            ),
-          ),
-          SizedBox(
-            height: 30,
-          ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Spacer(),
 
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.offWhite,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+              /// Animation
+              Lottie.asset(
+                AppImages.dvgWelcomeGif,
+                width: 280.w,
+                height: 180.h,
+                fit: BoxFit.contain,
               ),
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-            ),
-            onPressed: () {
-              controller.onGetStarted(context);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  AppConst.getStarted,
-                  style: AppFonts.text16(context).copyWith(
-                    color: AppColors.tealPrimary,
-                    fontWeight: FontWeight.bold,
+
+              SizedBox(height: 24.h),
+
+              /// Main Heading
+              Text(
+                AppConst.welcomeToDVG,
+                textAlign: TextAlign.center,
+                style: AppFonts.text20(context).copyWith(
+                  color: AppColors.offWhite,
+                  fontSize: 26.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              SizedBox(height: 16.h),
+
+              /// Subheading Message
+              Text(
+                AppConst.welcomeMessage,
+                textAlign: TextAlign.center,
+                style: AppFonts.text14(context).copyWith(
+                  color: AppColors.offWhite.withValues(alpha: 0.9),
+                  fontSize: 14.sp,
+                  height: 1.5,
+                ),
+              ),
+
+              SizedBox(height: 40.h),
+
+              /// Get Started Button
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.offWhite,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 14.h, horizontal: 32.w),
+                  elevation: 2,
                 ),
-                SizedBox(width: 10.w),
-                const Icon(
-                  Icons.arrow_forward,
-                  color: AppColors.tealPrimary,
+                onPressed: () {
+                  controller.onGetStarted(context);
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      AppConst.getStarted,
+                      style: AppFonts.text16(context).copyWith(
+                        color: AppColors.tealPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 10.w),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      color: AppColors.tealPrimary,
+                      size: 20.sp,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+
+              const Spacer(),
+
+              /// Optional Footer (like version info)
+              Text(
+                "${AppConst.appName} ${AppConst.appVersion}",
+                style: AppFonts.text14(context).copyWith(
+                  color: Colors.white70,
+                  fontSize: 12.sp,
+                ),
+              ),
+
+              SizedBox(height: 12.h),
+            ],
           ),
-        ],
-      ).paddingSymmetric(horizontal: 20),
+        ),
+      ),
     );
   }
 }
