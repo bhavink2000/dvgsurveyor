@@ -18,59 +18,65 @@ class LoginScreen extends GetWidget<LoginController> {
       backgroundColor: AppColors.offWhite,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: Container(
-          alignment: Alignment.topCenter,
-          margin:
-              EdgeInsets.only(top: 30.h, left: 24.w, right: 28.w, bottom: 12.h),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
           child: Form(
-            key: controller.formKey,
+            key: controller.loginFormKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
+              children: [
+                SizedBox(height: 32.h),
+
+                /// Logo or Title Block
                 Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    '${AppConst.welcomeTo} \n${AppConst.appName}!',
-                    textAlign: TextAlign.start,
-                    style: AppFonts.text20(context).copyWith(
-                      color: AppColors.tealPrimary,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${AppConst.welcomeTo} \n${AppConst.appName}!',
+                        style: AppFonts.text20(context).copyWith(
+                          color: AppColors.tealPrimary,
+                          fontSize: 30.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        AppConst.enterYourDetails,
+                        style: AppFonts.text14(context).copyWith(
+                          color: AppColors.almostBlack,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    AppConst.enterYourDetails,
-                    textAlign: TextAlign.start,
-                    style: AppFonts.text14(context).copyWith(
-                      color: AppColors.almostBlack,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 50),
+
+                SizedBox(height: 48.h),
+
+                /// Username
                 CustomTextField(
                   controller: controller.usernameController,
                   keyboardType: TextInputType.name,
                   hintText: AppConst.username,
-                  prefixIcon: Icon(Icons.person, color: AppColors.tealDark),
+                  prefixIcon:
+                      Icon(Icons.person_outline, color: AppColors.tealDark),
                   textCapitalization: TextCapitalization.none,
                   textAlign: TextAlign.start,
                   textInputAction: TextInputAction.next,
                   validator: controller.validateUsername,
                 ),
-                SizedBox(height: 20),
+
+                SizedBox(height: 16.h),
+
+                /// Password with toggle
                 Obx(() => CustomTextField(
                       controller: controller.passwordController,
                       keyboardType: TextInputType.visiblePassword,
                       hintText: AppConst.password,
-                      prefixIcon: Icon(Icons.lock, color: AppColors.tealDark),
-                      textCapitalization: TextCapitalization.none,
-                      textAlign: TextAlign.start,
-                      textInputAction: TextInputAction.done,
+                      prefixIcon:
+                          Icon(Icons.lock_outline, color: AppColors.tealDark),
                       obscureText: !controller.isPasswordVisible.value,
+                      textInputAction: TextInputAction.done,
                       validator: controller.validatePassword,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -82,21 +88,23 @@ class LoginScreen extends GetWidget<LoginController> {
                         onPressed: controller.togglePasswordVisibility,
                       ),
                     )),
-                SizedBox(height: 20.h),
+
+                SizedBox(height: 28.h),
+
+                /// Login Button
                 Obx(() => ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.tealPrimary,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 36.w, vertical: 12.h),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        minimumSize: Size(double.infinity, 48.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.r),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
                       ),
                       onPressed: () {
-                        if (controller.isLoading.value == false) {
-                          if (controller.formKey.currentState!.validate()) {
-                            controller.login();
-                          }
+                        if (!controller.isLoading.value &&
+                            controller.loginFormKey.currentState!.validate()) {
+                          controller.login();
                         }
                       },
                       child: controller.isLoading.value
@@ -110,11 +118,16 @@ class LoginScreen extends GetWidget<LoginController> {
                             )
                           : Text(
                               AppConst.login,
-                              style: AppFonts.text14(context)
-                                  .copyWith(color: AppColors.offWhite),
+                              style: AppFonts.text14(context).copyWith(
+                                color: AppColors.offWhite,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                     )),
-                SizedBox(height: 20.h),
+
+                SizedBox(height: 24.h),
+
+                /// Sign up prompt
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -124,6 +137,7 @@ class LoginScreen extends GetWidget<LoginController> {
                         color: AppColors.almostBlack,
                       ),
                     ),
+                    SizedBox(width: 4.w),
                     GestureDetector(
                       onTap: () {
                         Get.toNamed(AppRoutes.registerScreen);
@@ -138,16 +152,19 @@ class LoginScreen extends GetWidget<LoginController> {
                     ),
                   ],
                 ),
+
                 const Spacer(),
+
+                /// Version Label
                 Text(
-                  "Surveyor v1.0",
+                  "${AppConst.surveyor} ${AppConst.appVersion}",
                   style: GoogleFonts.inter(
+                    fontSize: 12.sp,
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.grey.shade400
                         : Colors.grey.shade600,
-                    fontSize: 12,
                   ),
-                )
+                ),
               ],
             ),
           ),
