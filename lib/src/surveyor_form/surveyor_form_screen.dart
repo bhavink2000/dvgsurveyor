@@ -451,18 +451,29 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
     required String initialValue,
     required Function(String) onChanged,
   }) {
+    final TextEditingController controller =
+        TextEditingController(text: initialValue);
+    final FocusNode focusNode = FocusNode();
+
+    focusNode.addListener(() {
+      if (focusNode.hasFocus && controller.text.trim() == '0.0') {
+        controller.clear();
+      }
+    });
+
     return SizedBox(
       width: 85.w,
       height: 30.h,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
         child: TextFormField(
-          initialValue: initialValue,
+          controller: controller,
+          focusNode: focusNode,
           decoration: InputDecoration(
             labelText: label,
             labelStyle: AppFonts.text14(context).copyWith(fontSize: 12),
             isDense: true,
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
           ),
           keyboardType: TextInputType.number,
           onChanged: onChanged,

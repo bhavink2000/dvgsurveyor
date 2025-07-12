@@ -71,6 +71,16 @@ class AreaItem {
         'width': width,
         'count': count,
       };
+
+  AreaItem copyWith({
+    double? length,
+    double? width,
+  }) {
+    return AreaItem(
+      length: length ?? this.length,
+      width: width ?? this.width,
+    );
+  }
 }
 
 class AreaCategory {

@@ -22,63 +22,58 @@ class LabeledDropdownRow<T extends DropdownItem> extends StatelessWidget {
     required this.selectedId,
     required this.items,
     required this.onChanged,
-    required this.isLoading,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Left: readonly text input
-        Expanded(
-            child: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: CustomTextField(
-            controller: controller,
-            readOnly: true,
-            contentPadding: EdgeInsets.only(left: 12),
-            labelText: label.tr,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '${label.tr} જરૂરી છે';
-              }
-              return null;
-            },
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          // Read-only field showing selected name
+          Expanded(
+            child: CustomTextField(
+              controller: controller,
+              readOnly: true,
+              contentPadding: const EdgeInsets.only(left: 12),
+              labelText: label.tr,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return '${label.tr} જરૂરી છે';
+                }
+                return null;
+              },
+            ),
           ),
-        )),
-        const SizedBox(width: 12),
-        // Right: dropdown
-        Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: SizedBox(
-            width: 150,
-            height: 60,
+          const SizedBox(width: 12),
+          // Dropdown button
+          SizedBox(
+            width: 140,
+            height: 58,
             child: DropdownButtonFormField<String>(
               isExpanded: true,
-              value: items.any((e) => (e as dynamic).id == selectedId)
-                  ? selectedId
-                  : null,
+              value: items.any((e) => e.id == selectedId) ? selectedId : null,
               items: items.map((item) {
-                final id = (item as dynamic).id as String;
-                final name = (item as dynamic).name as String;
-                return DropdownMenuItem<String>(
-                  value: id,
-                  child: Text(name),
+                return DropdownMenuItem(
+                  value: item.id,
+                  child: Text(item.name, overflow: TextOverflow.ellipsis),
                 );
               }).toList(),
               onChanged: (value) {
-                if (value != null) {
-                  final item =
-                      items.firstWhere((e) => (e as dynamic).id == value);
-                  controller.text = (item as dynamic).name;
-                  onChanged(value);
-                }
+                final selected = items.firstWhere(
+                  (item) => item.id == value,
+                  orElse: () => items.first,
+                );
+                controller.text = selected.name;
+                onChanged(value);
               },
               decoration: InputDecoration(
                 labelText: label,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Colors.teal),
@@ -91,16 +86,12 @@ class LabeledDropdownRow<T extends DropdownItem> extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.arrow_drop_down),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'પસંદગી જરૂરી છે';
-                }
-                return null;
-              },
+              validator: (value) =>
+                  (value == null || value.isEmpty) ? 'પસંદગી જરૂરી છે' : null,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
