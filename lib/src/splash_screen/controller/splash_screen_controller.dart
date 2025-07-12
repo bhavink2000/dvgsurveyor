@@ -7,8 +7,6 @@ class SplashScreenController extends GetxController
     with GetSingleTickerProviderStateMixin {
   late AnimationController logoController;
   late Animation<Offset> logoAnimation;
-  late Animation<Offset> textLeftAnimation;
-  late Animation<Offset> textRightAnimation;
   late Animation<double> opacityAnimation;
 
   @override
@@ -25,7 +23,7 @@ class SplashScreenController extends GetxController
 
   void initAnimation() {
     logoController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 2000),
       vsync: this, // uses GetSingleTickerProviderStateMixin
     );
 
@@ -36,26 +34,6 @@ class SplashScreenController extends GetxController
       CurvedAnimation(
         parent: logoController,
         curve: const Interval(0, 0.5, curve: Curves.easeOut),
-      ),
-    );
-
-    textLeftAnimation = Tween<Offset>(
-      begin: const Offset(0, 0),
-      end: const Offset(-0.05, 0),
-    ).animate(
-      CurvedAnimation(
-        parent: logoController,
-        curve: const Interval(0.3, 0.8, curve: Curves.easeInOut),
-      ),
-    );
-
-    textRightAnimation = Tween<Offset>(
-      begin: const Offset(0, 0),
-      end: const Offset(0.05, 0),
-    ).animate(
-      CurvedAnimation(
-        parent: logoController,
-        curve: const Interval(0.3, 0.8, curve: Curves.easeInOut),
       ),
     );
 

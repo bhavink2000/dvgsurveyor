@@ -1,6 +1,3 @@
-import 'package:dvgsurveyor/helper/app_colors.dart';
-import 'package:dvgsurveyor/helper/app_const.dart';
-import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_images_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -21,42 +18,12 @@ class SplashScreen extends GetWidget<SplashScreenController> {
             SlideTransition(
               position: controller.logoAnimation,
               child: Image.asset(
-                AppImages.dvgLogo,
-                width: 200.w,
-                height: 200.h,
+                AppImages.dvgWel,
+                width: 300.w,
+                height: 300.h,
               ),
             ),
-            FadeTransition(
-              opacity: controller.opacityAnimation,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SlideTransition(
-                    position: controller.textLeftAnimation,
-                    child: Text(
-                      AppConst.dvg,
-                      style: AppFonts.text20(context).copyWith(
-                        fontSize: 24.sp,
-                        color: AppColors.tealPrimary,
-                      ),
-                    ),
-                  ),
-                  //const SizedBox(width: 8),
-                  SlideTransition(
-                    position: controller.textRightAnimation,
-                    child: Text(
-                      AppConst.surveyor,
-                      style: AppFonts.text20(context).copyWith(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.tealPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            SizedBox(height: 150.h),
           ],
         ),
       ),
