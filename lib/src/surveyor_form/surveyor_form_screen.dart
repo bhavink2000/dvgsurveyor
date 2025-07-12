@@ -67,42 +67,35 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                 controller.mobileNumber,
                 keyboardType: TextInputType.phone,
               ),
-              // PROPERTY TYPE DROPDOWN
               Obx(() {
                 return LabeledDropdownRow<PropertyTypeModel>(
                   label: FormLabels.propertyType.tr,
                   controller: controller.propertyType,
-                  selectedId: controller.selectedPropertyType,
-                  items: controller.propertyData, // Ensure unique items
+                  selectedId: controller.selectedPropertyType.value,
+                  items: controller.propertyData,
                   isLoading: controller.isPropertyTypeLoad.value,
                   onChanged: (val) {
-                    // Clear the second dropdown value when the first dropdown changes
-                    controller.selectedPropertyDescription =
-                        null; // Clear second dropdown value
+                    controller.selectedPropertyType.value = val;
+                    controller.selectedPropertyDescription.value = null;
+                    controller.propertyDescription.clear();
+                    controller.propertyDesData.clear();
 
-                    // Update the first dropdown value
-                    controller.selectedPropertyType = val;
-
-                    // Fetch the new data for the second dropdown
                     controller.getPropertyDescription();
                   },
                 );
               }),
-
-              // PROPERTY DESCRIPTION DROPDOWN
               Obx(() {
                 return LabeledDropdownRow<PropertyDescriptionModel>(
                   label: FormLabels.propertyDescription.tr,
                   controller: controller.propertyDescription,
-                  selectedId: controller.selectedPropertyDescription,
-                  items: controller.propertyDesData, // Ensure unique items
+                  selectedId: controller.selectedPropertyDescription.value,
+                  items: controller.propertyDesData,
                   isLoading: controller.isPropertyDesLoad.value,
                   onChanged: (val) {
-                    controller.selectedPropertyDescription = val;
+                    controller.selectedPropertyDescription.value = val;
                   },
                 );
               }),
-
               buildInput(
                 FormLabels.waterConnectionNumber,
                 controller.waterConnectionNumber,
@@ -412,7 +405,6 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                       const SizedBox(height: 16),
                     ],
                   )),
-
               ElevatedButton(
                 onPressed: controller.submitForm,
                 child: Text(

@@ -28,8 +28,8 @@ class SurveyorFormScreenController extends GetxController {
 
   // Dropdown selections
   String? selectedUsageId;
-  String? selectedPropertyType;
-  String? selectedPropertyDescription;
+  RxnString selectedPropertyType = RxnString();
+  RxnString selectedPropertyDescription = RxnString();
 
   // Loading indicators
   RxBool isUsageLoad = false.obs;
@@ -52,11 +52,8 @@ class SurveyorFormScreenController extends GetxController {
     // FormLabels.khulu.tr,
     // 'slab': slab,
     'સ્લેબ',
-
     'પાપડા',
-
     'પાટરા',
-
     'નાળિયા',
     'ખુલ્લું'
   ];
@@ -79,28 +76,43 @@ class SurveyorFormScreenController extends GetxController {
     isUsageLoad.value = false;
   }
 
+  // Fetch Property Types
   Future<void> getPropertyType() async {
     isPropertyTypeLoad.value = true;
-    selectedPropertyType = null;
+
+    // Clear selections and data
+    selectedPropertyType.value = null;
+    selectedPropertyDescription.value = null;
     propertyType.clear();
-    propertyData.clear();
-
-    propertyData.value = (await authRepo.getPropertyType()).toSet().toList();
-    isPropertyTypeLoad.value = false;
-  }
-
-  Future<void> getPropertyDescription() async {
-    if (selectedPropertyType == null || selectedPropertyType!.isEmpty) return;
-
-    isPropertyDesLoad.value = true;
-    selectedPropertyDescription = null;
     propertyDescription.clear();
+    propertyData.clear();
     propertyDesData.clear();
 
     try {
-      final response = await authRepo.getPropertyDescription(
-          propertyId: selectedPropertyType!);
-      propertyDesData.value = response.toSet().toList();
+      final data = await authRepo.getPropertyType();
+      propertyData.value = data.toSet().toList();
+    } catch (e) {
+      log('Error fetching property types: $e');
+    } finally {
+      isPropertyTypeLoad.value = false;
+    }
+  }
+
+  // Fetch Descriptions based on selected type
+  Future<void> getPropertyDescription() async {
+    if (selectedPropertyType.value == null) return;
+
+    isPropertyDesLoad.value = true;
+    propertyDescription.clear();
+    selectedPropertyDescription.value = null;
+    propertyDesData.clear();
+
+    try {
+      final data = await authRepo.getPropertyDescription(
+        propertyId: selectedPropertyType.value!,
+      );
+      propertyDesData.value = data.toSet().toList();
+      propertyDesData.sort((a, b) => a.name.compareTo(b.name));
     } catch (e) {
       log('Error fetching property descriptions: $e');
     } finally {
@@ -220,16 +232,17 @@ class SurveyorFormScreenController extends GetxController {
         address: address.text.trim(),
         propertyStayType: selectedUsageId ?? '',
         propertyType: {
-          (selectedPropertyType ?? ''): PropertyTypeItem(
+          (selectedPropertyType.value ?? ''): PropertyTypeItem(
             propertyName: propertyType.text.trim(),
-            pId: selectedPropertyType,
+            pId: selectedPropertyType.value,
           )
         },
         propertyDescription: {
-          (selectedPropertyDescription ?? ''): PropertyDescriptionItem(
-              propertyId: selectedPropertyType,
-              propertyDes: propertyDescription.text.trim(),
-              propertyDesId: selectedPropertyDescription)
+          (selectedPropertyDescription.value ?? ''): PropertyDescriptionItem(
+            propertyId: selectedPropertyType.value,
+            propertyDes: propertyDescription.text.trim(),
+            propertyDesId: selectedPropertyDescription.value,
+          )
         },
         mobileNumber: mobileNumber.text.trim(),
         waterPipeline: waterConnectionNumber.text.trim(),
