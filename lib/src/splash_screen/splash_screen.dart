@@ -10,21 +10,18 @@ class SplashScreen extends GetWidget<SplashScreenController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SlideTransition(
-              position: controller.logoAnimation,
-              child: Image.asset(
-                AppImages.dvgWel,
-                width: 300.w,
-                height: 300.h,
-              ),
+        child: FadeTransition(
+          opacity: controller.opacityAnimation,
+          child: SlideTransition(
+            position: controller.logoAnimation,
+            child: Image.asset(
+              AppImages.dvgWel,
+              width: 220.w,
+              height: 220.h,
+              fit: BoxFit.contain,
             ),
-            SizedBox(height: 150.h),
-          ],
+          ),
         ),
       ),
     );
