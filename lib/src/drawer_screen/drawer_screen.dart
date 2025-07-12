@@ -1,5 +1,6 @@
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
+import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/src/drawer_screen/controller/drawer_screen_controller.dart';
 import 'package:flutter/material.dart';
@@ -12,98 +13,104 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      width: 220.w,
       backgroundColor: AppColors.offWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topRight: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+          topRight: Radius.circular(20.r),
+          bottomRight: Radius.circular(20.r),
         ),
       ),
-      width: 220.w,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: AppColors.tealPrimary),
-            child: SizedBox(
-              width: double.infinity,
+          // ───── Drawer Header ─────
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 24.h),
+            decoration: BoxDecoration(
+              color: AppColors.tealPrimary,
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20.r),
+              ),
+            ),
+            child: SafeArea(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircleAvatar(
-                    radius: 30,
+                    radius: 30.r,
                     backgroundColor: AppColors.offWhite,
-                    child: Icon(
-                      Icons.person_2_rounded,
-                      size: 40,
-                      color: AppColors.tealPrimary,
-                    ),
+                    child: Icon(Icons.person,
+                        size: 32.sp, color: AppColors.tealPrimary),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Text(
-                    controller.userData?.username.toUpperCase() ?? '',
-                    style: AppFonts.text20(context).copyWith(
+                    controller.userData?.username.toUpperCase() ??
+                        AppConst.userNm,
+                    style: AppFonts.text16(context).copyWith(
                       color: AppColors.offWhite,
                       fontWeight: FontWeight.bold,
-                      fontSize: 24.sp,
                     ),
                   ),
                   Text(
-                    controller.userData?.role ?? '',
+                    controller.userData?.role ?? AppConst.user,
                     style: AppFonts.text14(context).copyWith(
-                      color: AppColors.offWhite,
-                      fontWeight: FontWeight.bold,
+                      color: AppColors.offWhite.withOpacity(0.9),
+                      fontSize: 12,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          ListTile(
-            leading: Icon(
-              Icons.person_2_rounded,
-              color: AppColors.tealDark,
-            ),
-            title: Text(
-              'User Mangement',
-              style: AppFonts.text14(context).copyWith(
-                color: AppColors.tealDark,
-              ),
-            ),
-            onTap: () {
-              Get.toNamed(AppRoutes.userMangementScreen);
-            },
+
+          // ───── Menu Items ─────
+          SizedBox(height: 16.h),
+          _buildDrawerItem(
+            icon: Icons.manage_accounts_rounded,
+            title: AppConst.userManagement,
+            onTap: () => Get.toNamed(AppRoutes.userMangementScreen),
+            context: context,
           ),
-          ListTile(
-            leading: Icon(
-              Icons.person_2_rounded,
-              color: AppColors.tealDark,
-            ),
-            title: Text(
-              'Surveys',
-              style: AppFonts.text14(context).copyWith(
-                color: AppColors.tealDark,
-              ),
-            ),
-            onTap: () {
-              Get.toNamed(AppRoutes.surveyScreen);
-            },
+          _buildDrawerItem(
+            icon: Icons.assignment_outlined,
+            title: AppConst.surveys,
+            onTap: () => Get.toNamed(AppRoutes.surveyScreen),
+            context: context,
           ),
-          ListTile(
-            leading: Icon(
-              Icons.logout,
-              color: AppColors.tealDark,
-            ),
-            title: Text(
-              'Logout',
-              style: AppFonts.text14(context).copyWith(
-                color: AppColors.tealDark,
-              ),
-            ),
+          const Spacer(),
+          Divider(thickness: 1, indent: 16.w, endIndent: 16.w),
+          _buildDrawerItem(
+            icon: Icons.logout,
+            title: AppConst.logout,
             onTap: controller.logout,
+            context: context,
           ),
+          SizedBox(height: 16.h),
         ],
       ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    required BuildContext context,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+      leading: Icon(icon, color: AppColors.tealDark, size: 22.sp),
+      title: Text(
+        title,
+        style: AppFonts.text14(context).copyWith(
+          color: AppColors.tealDark,
+        ),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      hoverColor: AppColors.tealPrimary.withOpacity(0.1),
     );
   }
 }
