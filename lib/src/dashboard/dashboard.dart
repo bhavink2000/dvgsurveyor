@@ -1,4 +1,3 @@
-// dashboard_screen.dart
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_const.dart';
@@ -16,11 +15,19 @@ class DashboardScreen extends GetWidget<DashboardController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tealPrimary,
-      drawer: DrawerScreen(),
+      drawer: const DrawerScreen(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.toNamed(AppRoutes.surveyorFormScreen),
+        backgroundColor: AppColors.tealDark,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+        child: Icon(Icons.add, color: AppColors.offWhite),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ───── App Bar Row ─────
             Row(
               children: [
                 Builder(
@@ -29,70 +36,109 @@ class DashboardScreen extends GetWidget<DashboardController> {
                     onPressed: () => Scaffold.of(context).openDrawer(),
                   ),
                 ),
+                SizedBox(width: 8.w),
                 Text(
                   AppConst.appName,
                   style: AppFonts.text20(context).copyWith(
                     color: AppColors.offWhite,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18.sp,
+                    fontSize: 20.sp,
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ],
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Welcome, ${controller.userData?.firstName ?? ''}',
-                        style: AppFonts.text20(context).copyWith(
-                          color: AppColors.offWhite,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 24.sp,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        'Here is your dashboard',
-                        style: AppFonts.text14(context).copyWith(
-                          color: AppColors.offWhite,
-                          fontSize: 12.sp,
-                        ),
-                      ),
-                    ],
-                  ).paddingOnly(left: 16.w),
-                ),
-                Container(
-                  width: 50.w,
-                  height: 40.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.offWhite,
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      Get.toNamed(AppRoutes.surveyorFormScreen);
-                    },
-                    icon: Icon(
-                      Icons.add,
-                      color: AppColors.tealPrimary,
-                      size: 20,
+
+            // ───── Welcome Section ─────
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Welcome, ${controller.userData?.firstName ?? ''}',
+                    style: AppFonts.text20(context).copyWith(
+                      color: AppColors.offWhite,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24.sp,
                     ),
                   ),
-                ).paddingOnly(right: 16.w),
-              ],
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Here is your dashboard',
+                    style: AppFonts.text14(context).copyWith(
+                      color: AppColors.offWhite.withOpacity(0.8),
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ],
+              ),
             ),
+
+            SizedBox(height: 16.h),
+
+            // ───── Main Content ─────
             Expanded(
               child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
                   color: AppColors.offWhite,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(24.r)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // ───── Horizontal Filter Chips ─────
+                    Obx(() => SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: controller.filterLabels
+                                .map((label) => Padding(
+                                      padding: EdgeInsets.only(right: 8.w),
+                                      child: ChoiceChip(
+                                        label: Text(label),
+                                        selected:
+                                            controller.selectedFilter.value ==
+                                                label,
+                                        selectedColor: AppColors.tealPrimary,
+                                        backgroundColor: Colors.grey.shade200,
+                                        labelStyle:
+                                            AppFonts.text14(context).copyWith(
+                                          color:
+                                              controller.selectedFilter.value ==
+                                                      label
+                                                  ? AppColors.offWhite
+                                                  : AppColors.tealPrimary,
+                                          fontSize: 12,
+                                        ),
+                                        onSelected: (_) {
+                                          controller.selectedFilter.value =
+                                              label;
+                                          // Optional: Call controller.loadDataForFilter(label);
+                                        },
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                        )),
+                    SizedBox(height: 16.h),
+
+                    // ───── Data Placeholder ─────
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          'No surveys to show yet.',
+                          style: AppFonts.text14(context).copyWith(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
