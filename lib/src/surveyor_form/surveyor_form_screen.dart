@@ -242,7 +242,7 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                                         TextSpan(text: floor.toUpperCase()),
                                         TextSpan(
                                           text:
-                                              '  (${floorArea.totalArea.toStringAsFixed(2)} sqft)',
+                                              '  (${floorArea.totalArea.toStringAsFixed(2)} sq.mt)',
                                           style:
                                               AppFonts.text14(context).copyWith(
                                             fontSize: 11,

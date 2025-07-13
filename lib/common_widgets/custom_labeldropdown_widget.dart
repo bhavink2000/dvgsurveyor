@@ -54,6 +54,7 @@ class LabeledDropdownRow<T extends DropdownItem> extends StatelessWidget {
             height: 50,
             child: DropdownButtonFormField<String>(
               isExpanded: true,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               value: items.any((e) => e.id == selectedId) ? selectedId : null,
               items: items.map((item) {
                 return DropdownMenuItem(
