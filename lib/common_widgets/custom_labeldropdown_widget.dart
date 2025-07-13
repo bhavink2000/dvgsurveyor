@@ -1,4 +1,5 @@
 import 'package:dvgsurveyor/common_widgets/common_textfield_widget.dart';
+import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -50,14 +51,18 @@ class LabeledDropdownRow<T extends DropdownItem> extends StatelessWidget {
           // Dropdown button
           SizedBox(
             width: 140,
-            height: 58,
+            height: 50,
             child: DropdownButtonFormField<String>(
               isExpanded: true,
               value: items.any((e) => e.id == selectedId) ? selectedId : null,
               items: items.map((item) {
                 return DropdownMenuItem(
                   value: item.id,
-                  child: Text(item.name, overflow: TextOverflow.ellipsis),
+                  child: Text(
+                    item.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppFonts.text14(context),
+                  ),
                 );
               }).toList(),
               onChanged: (value) {

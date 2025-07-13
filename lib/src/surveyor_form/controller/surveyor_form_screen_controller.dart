@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
+import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/model/property_description_model.dart';
 import 'package:dvgsurveyor/model/property_type_model.dart';
@@ -62,6 +63,8 @@ class SurveyorFormScreenController extends GetxController {
     'basementOne',
     'basementTwo',
   ];
+
+  RxBool isFormSubmit = false.obs;
 
   @override
   void onInit() {
@@ -155,6 +158,11 @@ class SurveyorFormScreenController extends GetxController {
     }
   }
 
+  void removeFloor(String floor) {
+    areaData.remove(floor);
+    update(); // or setState / notifyListeners based on your state management
+  }
+
   AreaCategory? getCategory(AreaDetail detail, String category) {
     switch (category) {
       case 'સ્લેબ':
@@ -175,56 +183,73 @@ class SurveyorFormScreenController extends GetxController {
   Future<void> submitForm() async {
     if (!(formKey.currentState?.validate() ?? false)) return;
 
+    isFormSubmit.value = true;
+
     final now = DateTime.now();
     final id = 'SUR${now.millisecondsSinceEpoch}';
     final user = SessionManager.getUser();
 
-    final surveyData = SurveyModel(
-      id: id,
-      userId: user?.id ?? '',
-      userRole: user?.role ?? '',
-      userName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
-      ownerName: ownerName.text.trim(),
-      oldHomeNumber: junagharNumber.text.trim(),
-      newHomeNumber: '1',
-      index: '1',
-      rentPersonName: kabjedarName.text.trim(),
-      address: address.text.trim(),
-      propertyStayType: selectedUsageId ?? '',
-      propertyType: {
-        selectedPropertyType.value ?? '': PropertyTypeItem(
-          pId: selectedPropertyType.value,
-          propertyName: propertyType.text.trim(),
-        )
-      },
-      propertyDescription: {
-        selectedPropertyDescription.value ?? '': PropertyDescriptionItem(
-          propertyDesId: selectedPropertyDescription.value,
-          propertyId: selectedPropertyType.value,
-          propertyDes: propertyDescription.text.trim(),
-        )
-      },
-      mobileNumber: mobileNumber.text.trim(),
-      waterPipeline: waterConnectionNumber.text.trim(),
-      banthkamYear: constructionYear.text.trim(),
-      totalFloors: totalFloors.text.trim(),
-      area: Map<String, AreaDetail>.from(areaData),
-      createdAt: now,
-      updatedAt: now,
-    );
+    try {
+      final previousCount =
+          await authRepo.getSurveyData(userId: user?.id ?? '');
+      final int nextIndex = previousCount.length + 1;
 
-    final result = await authRepo.saveSurveyForm(surveyData: surveyData);
-    if (result != null) {
-      AppSnackbar.showSnackbar(title: 'Success', message: 'Data submitted');
-      // Get.back();
-    } else {
-      AppSnackbar.showErrorSnackbar(message: 'Failed to submit data');
+      final surveyData = SurveyModel(
+        id: id,
+        userId: user?.id ?? '',
+        userRole: user?.role ?? '',
+        userName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
+        ownerName: ownerName.text.trim(),
+        oldHomeNumber: junagharNumber.text.trim(),
+        newHomeNumber: nextIndex.toString(),
+        index: nextIndex.toString(),
+        rentPersonName: kabjedarName.text.trim(),
+        address: address.text.trim(),
+        propertyStayType: selectedUsageId ?? '',
+        propertyType: {
+          selectedPropertyType.value ?? '': PropertyTypeItem(
+            pId: selectedPropertyType.value,
+            propertyName: propertyType.text.trim(),
+          )
+        },
+        propertyDescription: {
+          selectedPropertyDescription.value ?? '': PropertyDescriptionItem(
+            propertyDesId: selectedPropertyDescription.value,
+            propertyId: selectedPropertyType.value,
+            propertyDes: propertyDescription.text.trim(),
+          )
+        },
+        mobileNumber: mobileNumber.text.trim(),
+        waterPipeline: waterConnectionNumber.text.trim(),
+        banthkamYear: constructionYear.text.trim(),
+        totalFloors: totalFloors.text.trim(),
+        area: Map<String, AreaDetail>.from(areaData),
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final result = await authRepo.saveSurveyForm(surveyData: surveyData);
+      if (result != null) {
+        AppSnackbar.showSnackbar(
+          title: 'Successfull',
+          message: 'Form Submitted',
+        );
+
+        await Future.delayed(Duration(seconds: 1));
+        Get.offNamed(AppRoutes.dashScreen); // Navigate to dashboard
+      } else {
+        AppSnackbar.showErrorSnackbar(message: 'Failed to submit form');
+      }
+    } catch (e) {
+      AppSnackbar.showErrorSnackbar(message: 'Error:  ${e.toString()}');
+    } finally {
+      isFormSubmit.value = false;
     }
   }
 
   @override
   void onClose() {
-    [
+    for (var c in [
       ownerName,
       junagharNumber,
       kabjedarName,
@@ -237,7 +262,9 @@ class SurveyorFormScreenController extends GetxController {
       constructionYear,
       totalFloors,
       newFloorController
-    ].forEach((c) => c.dispose());
+    ]) {
+      c.dispose();
+    }
     super.onClose();
   }
 }
