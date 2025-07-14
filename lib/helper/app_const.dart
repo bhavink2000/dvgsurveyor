@@ -28,11 +28,19 @@ class AppConst {
   static const String password = "Password";
 
   static const String logout = 'Logout';
-  static const String areYouSure = 'Are you sure you want to logout from your account?';
+  static const String areYouSure =
+      'Are you sure you want to logout from your account?';
   static const String cancel = 'Cancel';
 
   static const String userManagement = 'User Management';
   static const String surveys = 'Surveys';
   static const String userNm = 'USERNAME';
   static const String user = 'USER';
+  static const String propertType = 'Property Type';
+  static const String propertyDesc = 'Property Description'; 
+  static const String addNewProperty = 'Add New Property';
+  static const String deleteProperty = 'Delete Property';
+  static const String delete = 'Delete';
+  static const String areYouSureToDelete =
+      'Are you sure you want to delete this property?';
 }
