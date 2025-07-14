@@ -1,4 +1,5 @@
 import 'package:dvgsurveyor/common_widgets/common_textfield_widget.dart';
+import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,7 +13,7 @@ class LabeledDropdownRow<T extends DropdownItem> extends StatelessWidget {
   final TextEditingController controller;
   final String? selectedId;
   final List<T> items;
-  final Function(String value) onChanged;
+  final Function(String?) onChanged;
   final bool isLoading;
 
   const LabeledDropdownRow({
@@ -22,72 +23,68 @@ class LabeledDropdownRow<T extends DropdownItem> extends StatelessWidget {
     required this.selectedId,
     required this.items,
     required this.onChanged,
-    required this.isLoading,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Left: readonly text input
-        Expanded(
-            child: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: CustomTextField(
-            controller: controller,
-            readOnly: true,
-            contentPadding: EdgeInsets.only(left: 12),
-            labelText: label.tr,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '${label.tr} જરૂરી છે';
-              }
-              return null;
-            },
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          // Read-only field showing selected name
+          Expanded(
+            child: CustomTextField(
+              controller: controller,
+              readOnly: true,
+              contentPadding: const EdgeInsets.only(left: 12),
+              labelText: label.tr,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return '${label.tr} જરૂરી છે';
+                }
+                return null;
+              },
+            ),
           ),
-        )),
-        const SizedBox(width: 12),
-        // Right: dropdown
-        Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: SizedBox(
-            width: 150,
-            height: 60,
+          const SizedBox(width: 12),
+          // Dropdown button
+          SizedBox(
+            width: 140,
+            height: 50,
             child: DropdownButtonFormField<String>(
               isExpanded: true,
-              value: selectedId,
-              //value: items.any((e) => e.id == selectedId) ? selectedId : null,
-              items: items
-                  .toSet()
-                  .map(
-                    (item) => DropdownMenuItem(
-                      value: item.id,
-                      child: Text(item.name),
-                    ),
-                  )
-                  .toList(),
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              value: items.any((e) => e.id == selectedId) ? selectedId : null,
+              items: items.map((item) {
+                return DropdownMenuItem(
+                  value: item.id,
+                  child: Text(
+                    item.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppFonts.text14(context),
+                  ),
+                );
+              }).toList(),
               onChanged: (value) {
-                if (value != null) {
-                  onChanged(value);
-                  controller.text = items.firstWhere((e) => e.id == value).name;
-                }
+                final selected = items.firstWhere(
+                  (item) => item.id == value,
+                  orElse: () => items.first,
+                );
+                controller.text = selected.name;
+                onChanged(value);
               },
-              isDense: true,
               decoration: InputDecoration(
+                labelText: label,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.grey),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Colors.teal),
                 ),
               ),
-              // only loading the icon
               icon: isLoading
                   ? const SizedBox(
                       width: 20,
@@ -95,16 +92,12 @@ class LabeledDropdownRow<T extends DropdownItem> extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.arrow_drop_down),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'પસંદગી જરૂરી છે';
-                }
-                return null;
-              },
+              validator: (value) =>
+                  (value == null || value.isEmpty) ? 'પસંદગી જરૂરી છે' : null,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -13,147 +13,148 @@ class RegisterScreen extends GetWidget<RegisterController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(),
+      resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.tealPrimary),
+      ),
       body: SafeArea(
-        child: Container(
-          alignment: Alignment.topCenter,
-          margin:
-              EdgeInsets.only(top: 0.h, left: 24.w, right: 28.w, bottom: 12.h),
-          child: SingleChildScrollView(
-            child: Form(
-              key: controller.formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      '${AppConst.createAccount} \n${AppConst.appName}!',
-                      style: AppFonts.text20(context).copyWith(
-                        color: AppColors.tealPrimary,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+          child: Form(
+            key: controller.registerFormKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                /// Title
+                Text(
+                  '${AppConst.createAccount} \n${AppConst.appName}!',
+                  style: AppFonts.text20(context).copyWith(
+                    color: AppColors.tealPrimary,
+                    fontSize: 28.sp,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      AppConst.fillInYourDetails,
-                      style: AppFonts.text14(context).copyWith(
-                        color: AppColors.almostBlack,
-                      ),
-                      textAlign: TextAlign.start,
-                    ),
+                ),
+                SizedBox(height: 8.h),
+
+                /// Subtitle
+                Text(
+                  AppConst.fillInYourDetails,
+                  style: AppFonts.text14(context).copyWith(
+                    color: AppColors.almostBlack,
                   ),
-                  SizedBox(height: 16.h),
-                  CustomTextField(
-                    controller: controller.firstNameController,
-                    keyboardType: TextInputType.name,
-                    hintText: AppConst.firstName,
-                    prefixIcon: Icon(Icons.person, color: AppColors.tealDark),
-                    textCapitalization: TextCapitalization.none,
-                    textAlign: TextAlign.start,
-                    textInputAction: TextInputAction.next,
-                    validator: controller.validateFirstName,
-                  ),
-                  SizedBox(height: 16.h),
-                  CustomTextField(
-                    controller: controller.lastNameController,
-                    keyboardType: TextInputType.name,
-                    hintText: AppConst.lastName,
-                    prefixIcon: Icon(Icons.person_2, color: AppColors.tealDark),
-                    textCapitalization: TextCapitalization.none,
-                    textAlign: TextAlign.start,
-                    textInputAction: TextInputAction.next,
-                    validator: controller.validateLastName,
-                  ),
-                  SizedBox(height: 16.h),
-                  CustomTextField(
-                    controller: controller.phoneController,
-                    keyboardType: TextInputType.phone,
-                    hintText: AppConst.phoneNumber,
-                    prefixIcon: Icon(Icons.phone, color: AppColors.tealDark),
-                    textCapitalization: TextCapitalization.none,
-                    textAlign: TextAlign.start,
-                    textInputAction: TextInputAction.next,
-                    validator: controller.validatePhoneNumber,
-                  ),
-                  SizedBox(height: 16.h),
-                  CustomTextField(
-                    controller: controller.usernameController,
-                    keyboardType: TextInputType.name,
-                    hintText: AppConst.username,
-                    prefixIcon: Icon(Icons.person_3, color: AppColors.tealDark),
-                    textCapitalization: TextCapitalization.none,
-                    textAlign: TextAlign.start,
-                    textInputAction: TextInputAction.next,
-                    validator: controller.validateUsername,
-                  ),
-                  SizedBox(height: 16.h),
-                  Obx(() => CustomTextField(
-                        controller: controller.passwordController,
-                        keyboardType: TextInputType.visiblePassword,
-                        hintText: AppConst.password,
-                        prefixIcon: Icon(Icons.lock, color: AppColors.tealDark),
-                        textCapitalization: TextCapitalization.none,
-                        textAlign: TextAlign.start,
-                        textInputAction: TextInputAction.done,
-                        obscureText: !controller.isPasswordVisible.value,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            controller.isPasswordVisible.value
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: AppColors.tealDark,
-                          ),
-                          onPressed: controller.togglePasswordVisibility,
+                ),
+
+                SizedBox(height: 28.h),
+
+                /// First Name
+                CustomTextField(
+                  controller: controller.firstNameController,
+                  keyboardType: TextInputType.name,
+                  hintText: AppConst.firstName,
+                  prefixIcon: Icon(Icons.person, color: AppColors.tealDark),
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  validator: controller.validateFirstName,
+                ),
+                SizedBox(height: 16.h),
+
+                /// Last Name
+                CustomTextField(
+                  controller: controller.lastNameController,
+                  keyboardType: TextInputType.name,
+                  hintText: AppConst.lastName,
+                  prefixIcon: Icon(Icons.person_2, color: AppColors.tealDark),
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  validator: controller.validateLastName,
+                ),
+                SizedBox(height: 16.h),
+
+                /// Phone
+                CustomTextField(
+                  controller: controller.phoneController,
+                  keyboardType: TextInputType.phone,
+                  hintText: AppConst.phoneNumber,
+                  prefixIcon: Icon(Icons.phone, color: AppColors.tealDark),
+                  textInputAction: TextInputAction.next,
+                  validator: controller.validatePhoneNumber,
+                ),
+                SizedBox(height: 16.h),
+
+                /// Username
+                CustomTextField(
+                  controller: controller.usernameController,
+                  keyboardType: TextInputType.name,
+                  hintText: AppConst.username,
+                  prefixIcon:
+                      Icon(Icons.person_outline, color: AppColors.tealDark),
+                  textInputAction: TextInputAction.next,
+                  validator: controller.validateUsername,
+                ),
+                SizedBox(height: 16.h),
+
+                /// Password
+                Obx(() => CustomTextField(
+                      controller: controller.passwordController,
+                      keyboardType: TextInputType.visiblePassword,
+                      hintText: AppConst.password,
+                      prefixIcon: Icon(Icons.lock, color: AppColors.tealDark),
+                      obscureText: !controller.isPasswordVisible.value,
+                      textInputAction: TextInputAction.done,
+                      validator: controller.validatePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.isPasswordVisible.value
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.tealDark,
                         ),
-                        validator: controller.validatePassword,
-                      )),
-                  SizedBox(height: 20.h),
-                  Obx(() => ElevatedButton(
+                        onPressed: controller.togglePasswordVisibility,
+                      ),
+                    )),
+                SizedBox(height: 28.h),
+
+                /// Submit Button
+                Obx(() => SizedBox(
+                      width: double.infinity,
+                      height: 48.h,
+                      child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.tealPrimary,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 36.w, vertical: 12.h),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
+                            borderRadius: BorderRadius.circular(10.r),
                           ),
                         ),
                         onPressed: () {
-                          if (controller.isLoading.value == false) {
-                            if (controller.formKey.currentState!.validate()) {
-                              controller.registerUser();
-                            }
+                          if (!controller.isLoading.value &&
+                              controller.registerFormKey.currentState!.validate()) {
+                            controller.registerUser();
                           }
                         },
-                        child: SizedBox(
-                          height: 20.h,
-                          child: Center(
-                            child: controller.isLoading.value
-                                ? SizedBox(
-                                    width: 20.w,
-                                    height: 20.w,
-                                    child: CircularProgressIndicator(
-                                      backgroundColor: AppColors.tealPrimary,
-                                      color: AppColors.offWhite,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(
-                                    AppConst.createAccount,
-                                    style: AppFonts.text14(context).copyWith(
-                                      color: AppColors.offWhite,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      )),
-                  SizedBox(height: 20.h),
-                ],
-              ),
+                        child: controller.isLoading.value
+                            ? SizedBox(
+                                width: 20.w,
+                                height: 20.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.offWhite),
+                                ),
+                              )
+                            : Text(
+                                AppConst.createAccount,
+                                style: AppFonts.text14(context).copyWith(
+                                  color: AppColors.offWhite,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    )),
+
+                SizedBox(height: 24.h),
+              ],
             ),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:dvgsurveyor/helper/app_colors.dart';
+import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_enums.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
@@ -19,51 +20,70 @@ class UserMangementScreen extends GetWidget<UserMangementScreenController> {
         iconTheme: IconThemeData(color: AppColors.offWhite),
         backgroundColor: AppColors.tealPrimary,
         title: Text(
-          'User Mangement',
+          AppConst.userManagement,
           style: AppFonts.text20(context).copyWith(
             color: AppColors.offWhite,
           ),
         ),
       ),
       body: Obx(() {
-        return controller.isLoading.value == true
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : ListView.builder(
-                itemCount: controller.userList.length,
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                itemBuilder: (context, index) {
-                  var userData = controller.userList[index];
-                  return UserApprovalCard(
-                    name: "${userData.firstName} ${userData.lastName}",
-                    mobile: userData.mobileNumber,
-                    initialRole:
-                        RoleEnumExtension.fromString(userData.role ?? 'Worker'),
-                    initialExcel: userData.isExcelDownload ?? false,
-                    initialEdit: userData.isEditable ?? false,
-                    initialDelete: userData.isDelete ?? false,
-                    isApproved: userData.isApproved ?? false,
-                    onSave: ({
-                      required RoleEnum selectedRole,
-                      required bool isExcel,
-                      required bool isEdit,
-                      required bool isDelete,
-                    }) {
-                      final userDetails = userData.copyWith(
-                        role: selectedRole.displayName,
-                        isExcelDownload: isExcel,
-                        isEditable: isEdit,
-                        isDelete: isDelete,
-                        isApproved: true,
-                      );
-                      controller.updateUser(userData: userDetails);
-                      log('Saving User ${userData.id}');
-                      log('Role: ${selectedRole.displayName}, \nExcel: $isExcel, \nEdit: $isEdit, \nDelete: $isDelete');
-                    },
-                  );
-                },
-              );
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.userList.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.group_off, size: 64, color: Colors.grey.shade400),
+                const SizedBox(height: 16),
+                Text(
+                  'No users found for approval.',
+                  style: AppFonts.text16(context).copyWith(
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return ListView.builder(
+          itemCount: controller.userList.length,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          itemBuilder: (context, index) {
+            var userData = controller.userList[index];
+            return UserApprovalCard(
+              name: "${userData.firstName} ${userData.lastName}",
+              mobile: userData.mobileNumber,
+              initialRole:
+                  RoleEnumExtension.fromString(userData.role ?? 'Worker'),
+              initialExcel: userData.isExcelDownload ?? false,
+              initialEdit: userData.isEditable ?? false,
+              initialDelete: userData.isDelete ?? false,
+              isApproved: userData.isApproved ?? false,
+              isSaving: controller.isSavingMap[userData.id] ?? false,
+              onSave: ({
+                required RoleEnum selectedRole,
+                required bool isExcel,
+                required bool isEdit,
+                required bool isDelete,
+              }) {
+                final userDetails = userData.copyWith(
+                  role: selectedRole.displayName,
+                  isExcelDownload: isExcel,
+                  isEditable: isEdit,
+                  isDelete: isDelete,
+                  isApproved: true,
+                );
+                controller.updateUser(userData: userDetails);
+                log('Saving User ${userData.id}');
+                log('Role: ${selectedRole.displayName}, \nExcel: $isExcel, \nEdit: $isEdit, \nDelete: $isDelete');
+              },
+            );
+          },
+        );
       }),
     );
   }
@@ -77,6 +97,7 @@ class UserApprovalCard extends StatefulWidget {
   final bool initialEdit;
   final bool initialDelete;
   final bool isApproved;
+  final bool isSaving;
   final void Function({
     required RoleEnum selectedRole,
     required bool isExcel,
@@ -94,6 +115,7 @@ class UserApprovalCard extends StatefulWidget {
     required this.initialDelete,
     required this.onSave,
     required this.isApproved,
+    required this.isSaving,
   });
 
   @override
@@ -242,21 +264,34 @@ class _UserApprovalCardState extends State<UserApprovalCard> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    if (selectedRole == null) {
-                      AppSnackbar.showSnackbar(message: 'Please select a role');
-
-                      return;
-                    }
-                    widget.onSave(
-                      selectedRole: selectedRole!,
-                      isExcel: isExcel,
-                      isEdit: isEdit,
-                      isDelete: isDelete,
-                    );
-                  },
-                  icon: const Icon(Icons.save),
-                  label: Text(widget.isApproved == false ? "Approved" : "Save"),
+                  onPressed: widget.isSaving
+                      ? null
+                      : () {
+                          if (selectedRole == null) {
+                            AppSnackbar.showSnackbar(
+                                message: 'Please select a role');
+                            return;
+                          }
+                          widget.onSave(
+                            selectedRole: selectedRole!,
+                            isExcel: isExcel,
+                            isEdit: isEdit,
+                            isDelete: isDelete,
+                          );
+                        },
+                  icon: widget.isSaving
+                      ? const SizedBox.shrink()
+                      : const Icon(Icons.save),
+                  label: widget.isSaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(widget.isApproved == false ? "Approved" : "Save"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.tealPrimary,
                     foregroundColor: Colors.white,

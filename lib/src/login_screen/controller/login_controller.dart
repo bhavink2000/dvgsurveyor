@@ -10,27 +10,32 @@ class LoginController extends GetxController {
 
   LoginController({required this.authRepo});
 
+  // Controllers
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-  final formKey = GlobalKey<FormState>();
 
-  // Reactive variables
-  var isLoading = false.obs;
-  var isPasswordVisible = false.obs;
+  // Form Key (should be declared in the widget ideally to avoid duplicate key issues)
+  final loginFormKey = GlobalKey<FormState>();
 
+  // Reactive State
+  final isLoading = false.obs;
+  final isPasswordVisible = false.obs;
+
+  // Toggle password visibility
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
+  // ──────── Validators ──────── //
   String? validateUsername(String? value) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return 'Please enter your username';
     }
     return null;
   }
 
   String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return 'Please enter your password';
     }
     if (value.length < 6) {
@@ -39,43 +44,59 @@ class LoginController extends GetxController {
     return null;
   }
 
+  // ──────── Login Logic ──────── //
   Future<void> login() async {
-    isLoading.value = true;
+    if (isLoading.value) return;
+
+    final isFormValid = loginFormKey.currentState?.validate() ?? false;
+    if (!isFormValid) return;
 
     try {
+      isLoading.value = true;
+
       final user = await authRepo.getUser(
         username: usernameController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      if (user != null) {
-        if (user.isApproved == false) {
-          AppSnackbar.showSnackbar(
-            title: 'Oops!',
-            message: 'Your account is not approved yet.\nPlease wait for admin approval.',
-          );
-          return;
-        }
-
-        await SessionManager.saveUser(
-          user: user,
-        );
-
-        AppSnackbar.showSnackbar(title: 'Hello',message: 'Welcome ${user.username}');
-        _clearControllers();
-
-        Get.offAllNamed(AppRoutes.dashScreen);
-      } else {
-        AppSnackbar.showErrorSnackbar(message: 'User not exists');
+      if (user == null) {
+        AppSnackbar.showErrorSnackbar(message: 'User not found');
+        return;
       }
+
+      if (user.isApproved == false) {
+        AppSnackbar.showSnackbar(
+          title: 'Pending Approval',
+          message:
+              'Your account is not approved yet.\nPlease wait for admin approval.',
+        );
+        return;
+      }
+
+      // Hide keyboard
+      FocusManager.instance.primaryFocus?.unfocus();
+
+      // Save session
+      await SessionManager.saveUser(user: user);
+
+      AppSnackbar.showSnackbar(
+        title: 'Welcome!',
+        message: 'Hello, ${user.username}',
+      );
+
+      // Navigate to dashboard, clear fields after navigation
+      await Future.delayed(const Duration(milliseconds: 500));
+      Get.offAllNamed(AppRoutes.dashScreen)?.then((_) {
+        _clearControllers();
+      });
     } catch (e) {
-      _clearControllers();
       AppSnackbar.showErrorSnackbar(message: 'Login failed: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
   }
 
+  // ──────── Helpers ──────── //
   void _clearControllers() {
     usernameController.clear();
     passwordController.clear();

@@ -1,38 +1,41 @@
-import 'dart:developer';
-
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
 import 'package:dvgsurveyor/model/user_collection_model.dart';
 import 'package:get/get.dart';
 
 class UserMangementScreenController extends GetxController {
-  final AuthRepo? authRepo = AuthRepo();
+  final AuthRepo authRepo = AuthRepo();
 
-  RxList<UserCollectionModel> userList = List<UserCollectionModel>.empty().obs;
-  RxBool isLoading = false.obs;
+  final RxList<UserCollectionModel> userList = <UserCollectionModel>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxMap<String, bool> isSavingMap = <String, bool>{}.obs;
 
   @override
   void onReady() {
-    getAllUser();
     super.onReady();
+    getAllUsers();
   }
 
-  Future<void> getAllUser() async {
+  Future<void> getAllUsers() async {
     isLoading.value = true;
-    final response = await authRepo?.getAllUser();
-    if (response != null) {
+    final response = await authRepo.getAllUser();
+    if (response.isNotEmpty) {
       userList.value = response;
     } else {
-      userList.value = [];
+      userList.clear();
     }
-
     isLoading.value = false;
   }
 
-  Future<void> updateUser({UserCollectionModel? userData}) async {
-    log(userData.toString());
-    final respose = await authRepo?.updateUser(userData: userData);
-    if (respose != null) {
-      getAllUser();
+  Future<void> updateUser({required UserCollectionModel userData}) async {
+    final userId = userData.id;
+
+    isSavingMap[userId] = true;
+
+    final res = await authRepo.updateUser(userData: userData);
+    if (res != null) {
+      await getAllUsers();
     }
+
+    isSavingMap[userId] = false;
   }
 }

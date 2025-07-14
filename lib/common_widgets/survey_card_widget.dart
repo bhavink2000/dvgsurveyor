@@ -18,6 +18,18 @@ class SurveyCardWidget extends StatelessWidget {
         .map((e) => e.propertyDes ?? '-')
         .join(', ');
 
+    final totalArea =
+        area.values.fold<double>(0, (sum, detail) => sum + detail.totalArea);
+    final constructedArea = area.values.fold<double>(0, (sum, detail) {
+      return sum +
+          detail.slab.totalCount +
+          detail.papda.totalCount +
+          detail.patara.totalCount +
+          detail.nadiya.totalCount;
+    });
+    final openArea = area.values
+        .fold<double>(0, (sum, detail) => sum + detail.open.totalCount);
+
     return Card(
       color: Colors.grey[50],
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -27,7 +39,7 @@ class SurveyCardWidget extends StatelessWidget {
       ),
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.only(left: 12, right: 0, bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -48,33 +60,23 @@ class SurveyCardWidget extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.teal.shade700,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
-                    ),
+                    color: AppColors.tealPrimary,
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _headerLabel(context, 'N:', data.newHomeNumber),
-                      _headerLabel(context, 'O:', data.oldHomeNumber),
-                    ],
+                  child: Text(
+                    'N: ${data.newHomeNumber} | O: ${data.oldHomeNumber}',
+                    style: AppFonts.text14(context).copyWith(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],
             ),
-
-            /// Address and Rent
             _labelValueRow(context, 'Address', data.address),
             _labelValueRow(context, 'Rent', data.rentPersonName),
-
             const Divider(),
-
-            /// Info Columns
             Row(
-              //spacing: 10,
-              //runSpacing: 12,
               children: [
                 _infoColumn(context, 'Mobile', data.mobileNumber.toString()),
                 _infoColumn(context, 'Year', data.banthkamYear.toString()),
@@ -83,95 +85,100 @@ class SurveyCardWidget extends StatelessWidget {
                     context, 'Water Con', data.waterPipeline.toString()),
               ],
             ),
-
             const SizedBox(height: 12),
-
-            /// Property Type, Desc, Total Floors
             Row(
-              //spacing: 20,
-              //runSpacing: 12,
               children: [
                 _infoColumn(context, 'Type', propertyTypeName),
                 _infoColumn(context, 'Desc', propertyDescriptionName),
                 _infoColumn(context, 'Floors', data.totalFloors.toString()),
               ],
             ),
-
             const Divider(),
-
-            /// Floor-wise area
-            Text(
-              'Total Area:',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _infoColumn(
+                  context,
+                  'Total Area',
+                  totalArea.toString(),
+                  isArea: true,
+                ),
+                _infoColumn(
+                  context,
+                  'Construcated Area',
+                  constructedArea.toString(),
+                  isArea: true,
+                ),
+                _infoColumn(
+                  context,
+                  'Open Area',
+                  openArea.toString(),
+                  isArea: true,
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: area.entries.map((entry) {
-                  final floorName = entry.key;
-                  final total = entry.value.totalArea;
-                  return Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.tealDark),
-                      borderRadius: BorderRadius.circular(6),
-                      color: AppColors.tealExtraLight,
-                    ),
-                    child: Text(
-                      '$floorName: ${total.toString()} sq.ft',
-                      style: AppFonts.text14(context).copyWith(
-                        color: AppColors.tealDark,
-                        fontSize: 12,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-
             const Divider(),
-
-            /// Created At
             _labelValueRow(
-                context, 'Created', formatFullDateTime(data.createdAt)),
+              context,
+              'Created',
+              formatFullDateTime(data.createdAt),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _infoColumn(BuildContext context, String label, String value) {
-    return SizedBox(
-      width: 75.w,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$label:',
-            style: AppFonts.text14(context).copyWith(
-              color: AppColors.almostBlack,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+  Widget _infoColumn(BuildContext context, String label, String value,
+      {bool isArea = false}) {
+    return isArea == true
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$label:',
+                style: AppFonts.text14(context).copyWith(
+                  color: AppColors.almostBlack,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${value} sq.mt',
+                style: AppFonts.text14(context).copyWith(
+                  color: AppColors.darkGrey,
+                  fontSize: 10,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          )
+        : SizedBox(
+            width: 75.w,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$label:',
+                  style: AppFonts.text14(context).copyWith(
+                    color: AppColors.almostBlack,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: AppFonts.text14(context).copyWith(
+                    color: AppColors.darkGrey,
+                    fontSize: 10,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: AppFonts.text14(context).copyWith(
-              color: AppColors.darkGrey,
-              fontSize: 10,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
+          );
   }
 
   Widget _labelValueRow(BuildContext context, String label, String value) {
@@ -195,16 +202,6 @@ class SurveyCardWidget extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _headerLabel(BuildContext context, String prefix, String value) {
-    return Text(
-      '$prefix $value',
-      style: AppFonts.text14(context).copyWith(
-        color: AppColors.offWhite,
-        fontSize: 10,
       ),
     );
   }

@@ -1,12 +1,12 @@
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 
 class AppSnackbar {
-  static void showSnackbar(
-      {required String message,
-      String? title,
-      Duration duration = const Duration(seconds: 2)}) {
+  static void showSnackbar({
+    required String message,
+    String? title,
+    Duration duration = const Duration(seconds: 2),
+  }) {
     Get.snackbar(
       title ?? 'Success', // Title (optional, leave empty)
       message,
@@ -15,8 +15,6 @@ class AppSnackbar {
       colorText: AppColors.offWhite,
       borderRadius: 8,
       duration: duration,
-      isDismissible: true,
-      forwardAnimationCurve: Curves.easeOutBack,
     );
   }
 
@@ -31,8 +29,6 @@ class AppSnackbar {
       colorText: AppColors.offWhite,
       borderRadius: 8,
       duration: duration,
-      isDismissible: true,
-      forwardAnimationCurve: Curves.easeOutBack,
     );
   }
 }

@@ -2,7 +2,7 @@ class AppConst {
   static const String appName = "DVG Surveyor";
   static const String dvg = "DVG";
   static const String surveyor = "Surveyor";
-  static const String appVersion = "1.0.0";
+  static const String appVersion = "v1.0";
   static const String appPackageName = "com.dvg.surveyor";
   static const String appAuthor = "DVG Team";
   static const String appDescription = "A surveyor application for DVG team.";
@@ -26,4 +26,13 @@ class AppConst {
   static const String email = "Email";
   static const String username = "Username";
   static const String password = "Password";
+
+  static const String logout = 'Logout';
+  static const String areYouSure = 'Are you sure you want to logout from your account?';
+  static const String cancel = 'Cancel';
+
+  static const String userManagement = 'User Management';
+  static const String surveys = 'Surveys';
+  static const String userNm = 'USERNAME';
+  static const String user = 'USER';
 }

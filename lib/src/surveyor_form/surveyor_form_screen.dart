@@ -10,6 +10,7 @@ import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/usage_model.dart';
 import 'package:dvgsurveyor/src/surveyor_form/controller/surveyor_form_screen_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -65,44 +66,37 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
               buildInput(
                 FormLabels.mobileNumber,
                 controller.mobileNumber,
-                keyboardType: TextInputType.phone,
+                keyboardType: TextInputType.number,
               ),
-              // PROPERTY TYPE DROPDOWN
               Obx(() {
                 return LabeledDropdownRow<PropertyTypeModel>(
                   label: FormLabels.propertyType.tr,
                   controller: controller.propertyType,
-                  selectedId: controller.selectedPropertyType,
-                  items: controller.propertyData, // Ensure unique items
+                  selectedId: controller.selectedPropertyType.value,
+                  items: controller.propertyData,
                   isLoading: controller.isPropertyTypeLoad.value,
                   onChanged: (val) {
-                    // Clear the second dropdown value when the first dropdown changes
-                    controller.selectedPropertyDescription =
-                        null; // Clear second dropdown value
+                    controller.selectedPropertyType.value = val;
+                    controller.selectedPropertyDescription.value = null;
+                    controller.propertyDescription.clear();
+                    controller.propertyDesData.clear();
 
-                    // Update the first dropdown value
-                    controller.selectedPropertyType = val;
-
-                    // Fetch the new data for the second dropdown
                     controller.getPropertyDescription();
                   },
                 );
               }),
-
-              // PROPERTY DESCRIPTION DROPDOWN
               Obx(() {
                 return LabeledDropdownRow<PropertyDescriptionModel>(
                   label: FormLabels.propertyDescription.tr,
                   controller: controller.propertyDescription,
-                  selectedId: controller.selectedPropertyDescription,
-                  items: controller.propertyDesData, // Ensure unique items
+                  selectedId: controller.selectedPropertyDescription.value,
+                  items: controller.propertyDesData,
                   isLoading: controller.isPropertyDesLoad.value,
                   onChanged: (val) {
-                    controller.selectedPropertyDescription = val;
+                    controller.selectedPropertyDescription.value = val;
                   },
                 );
               }),
-
               buildInput(
                 FormLabels.waterConnectionNumber,
                 controller.waterConnectionNumber,
@@ -240,19 +234,45 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                                 child: ExpansionTile(
                                   title: RichText(
                                     text: TextSpan(
-                                      style: AppFonts.text16(context),
+                                      style: AppFonts.text16(context).copyWith(
+                                        color: AppColors.almostBlack,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                       children: [
                                         TextSpan(text: floor.toUpperCase()),
                                         TextSpan(
                                           text:
-                                              '  (${floorArea.totalArea.toStringAsFixed(2)} sqft)',
+                                              '  (${floorArea.totalArea.toStringAsFixed(2)} sq.mt)',
                                           style:
                                               AppFonts.text14(context).copyWith(
-                                            fontSize: 10,
+                                            fontSize: 11,
+                                            color: AppColors.darkGrey,
+                                            fontWeight: FontWeight.w400,
                                           ),
                                         ),
                                       ],
                                     ),
+                                  ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons
+                                          .expand_more), // This replaces default arrow
+                                      const SizedBox(width: 8),
+                                      InkWell(
+                                        onTap: () =>
+                                            controller.removeFloor(floor),
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(4.0),
+                                          child: Icon(
+                                            Icons.delete_forever,
+                                            color: AppColors.coralAccent,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   children: controller.categories.map((cat) {
                                     final category =
@@ -412,16 +432,27 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                       const SizedBox(height: 16),
                     ],
                   )),
-
-              ElevatedButton(
-                onPressed: controller.submitForm,
-                child: Text(
-                  'Submit',
-                  style: AppFonts.text16(context).copyWith(
-                    color: AppColors.offWhite,
-                  ),
-                ),
-              ),
+              Obx(() => ElevatedButton(
+                    onPressed: controller.submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.tealDark,
+                    ),
+                    child: controller.isFormSubmit.value
+                        ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: AppColors.offWhite,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'Submit',
+                            style: AppFonts.text16(context).copyWith(
+                              color: AppColors.offWhite,
+                            ),
+                          ),
+                  )),
               SizedBox(height: 16.h),
             ],
           ),
@@ -441,6 +472,9 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
         controller: ctrl,
         readOnly: isReadOny ?? false,
         keyboardType: keyboardType,
+        inputFormatters: keyboardType == TextInputType.number
+            ? [FilteringTextInputFormatter.digitsOnly]
+            : null,
         labelText: labelKey.tr,
         validator: validator ??
             (value) {
@@ -465,14 +499,20 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
         child: TextFormField(
-          initialValue: initialValue,
+          initialValue: initialValue == '0.0' ? '' : initialValue,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(
+              RegExp(
+                  r'^\d{0,5}(\.\d{0,3})?$'), // up to 5 digits before and 4 after decimal
+            ),
+          ],
           decoration: InputDecoration(
             labelText: label,
             labelStyle: AppFonts.text14(context).copyWith(fontSize: 12),
             isDense: true,
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
           ),
-          keyboardType: TextInputType.number,
           onChanged: onChanged,
         ),
       ),
