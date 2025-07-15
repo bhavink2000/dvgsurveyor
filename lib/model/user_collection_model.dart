@@ -17,6 +17,7 @@ class UserCollectionModel {
   final bool? isApproved; // Default value, can be changed later
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? gamName;
 
   UserCollectionModel({
     required this.id,
@@ -35,6 +36,7 @@ class UserCollectionModel {
     this.isApproved = false, // Default value for isApproved
     this.createdAt,
     this.updatedAt,
+    this.gamName,
   });
 
   // Convert to Firestore document map
@@ -55,6 +57,7 @@ class UserCollectionModel {
       'isApproved': isApproved, // Include isApproved in Firestore document
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'gamName': gamName,
       // Note: 'id' is not included as it's the document ID in Firestore
     };
   }
@@ -81,6 +84,7 @@ class UserCollectionModel {
       isApproved: data['isApproved'] ?? false, // Default value for isApproved
       createdAt: data['createdAt']?.toDate(),
       updatedAt: data['updatedAt']?.toDate(),
+      gamName: data['gamName'] ?? '',
     );
   }
 
@@ -107,6 +111,7 @@ class UserCollectionModel {
       updatedAt: json['updatedAt'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'])
           : null,
+      gamName: json['gamName'] ?? '',
     );
   }
 
@@ -129,6 +134,7 @@ class UserCollectionModel {
       'isApproved': isApproved, // Include isApproved in JSON
       'createdAt': createdAt?.millisecondsSinceEpoch,
       'updatedAt': updatedAt?.millisecondsSinceEpoch,
+      'gamName': gamName,
     };
   }
 
@@ -150,6 +156,7 @@ class UserCollectionModel {
     bool? isApproved,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? gamName,
   }) {
     return UserCollectionModel(
       id: id ?? this.id,
@@ -168,6 +175,7 @@ class UserCollectionModel {
       isApproved: isApproved ?? this.isApproved, // Include isApproved in copy
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      gamName: gamName ?? this.gamName,
     );
   }
 }
