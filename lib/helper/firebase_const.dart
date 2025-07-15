@@ -4,4 +4,5 @@ class FirebaseConst {
   static const String usageCollection = 'usageType';
   static const String propertyType = 'propertyType';
   static const String propertyDescription = 'propertyDescription';
+  static const String gamNameCollection = 'gamName';
 }
