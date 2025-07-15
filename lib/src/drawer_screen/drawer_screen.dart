@@ -73,6 +73,15 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
                   context: context,
                 )
               : SizedBox(),
+          //SizedBox(height: controller.userData?.role != 'Worker' ? 16.h : 0.h),
+          controller.userData?.role != 'Worker'
+              ? _buildDrawerItem(
+                  icon: Icons.contrast_rounded,
+                  title: AppConst.propertType,
+                  onTap: () => Get.toNamed(AppRoutes.propertyTypeScreen),
+                  context: context,
+                )
+              : SizedBox(),
           _buildDrawerItem(
             icon: Icons.assignment_outlined,
             title: AppConst.surveys,

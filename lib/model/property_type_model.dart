@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/common_widgets/custom_labeldropdown_widget.dart';
 
-class PropertyTypeModel implements DropdownItem{
+class PropertyTypeModel implements DropdownItem {
   final String id;
   final String name;
   final bool isActive;
@@ -16,7 +16,7 @@ class PropertyTypeModel implements DropdownItem{
     this.updatedAt,
   });
 
-  /// 🔄 From Firestore
+  ///  From Firestore
   factory PropertyTypeModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return PropertyTypeModel(
@@ -28,7 +28,7 @@ class PropertyTypeModel implements DropdownItem{
     );
   }
 
-  /// 🔁 To Firestore
+  ///  To Firestore
   Map<String, dynamic> toFirestore() {
     return {
       'id': id,
@@ -39,7 +39,32 @@ class PropertyTypeModel implements DropdownItem{
     };
   }
 
-  /// 🧪 CopyWith
+  // Generic Map-based (e.g. JSON, SharedPrefs, etc.)
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'isActive': isActive,
+      'createdAt': createdAt?.millisecondsSinceEpoch,
+      'updatedAt': updatedAt?.millisecondsSinceEpoch,
+    };
+  }
+
+  factory PropertyTypeModel.fromMap(Map<String, dynamic> map) {
+    return PropertyTypeModel(
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      isActive: map['isActive'] ?? true,
+      createdAt: map['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'])
+          : null,
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'])
+          : null,
+    );
+  }
+
+  ///  CopyWith
   PropertyTypeModel copyWith({
     String? id,
     String? name,
