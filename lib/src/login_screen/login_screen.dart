@@ -53,11 +53,68 @@ class LoginScreen extends GetWidget<LoginController> {
 
                 SizedBox(height: 48.h),
 
+                Obx(() {
+                  return DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    value: controller.gamList
+                            .any((e) => e.id == controller.selectedGam)
+                        ? controller.selectedGam
+                        : null,
+                    items: controller.gamList.map((item) {
+                      return DropdownMenuItem(
+                        value: item.id,
+                        child: Text(
+                          item.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppFonts.text14(context),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      final selected = controller.gamList.firstWhere(
+                        (item) => item.id == value,
+                        orElse: () => controller.gamList.first,
+                      );
+                      controller.selectedGam = selected.id;
+                    },
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      labelText: AppConst.cityName,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey.shade400,
+                          width: 1.5,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                          width: 1.5,
+                        ),
+                      ),
+                      labelStyle: GoogleFonts.inter(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                      ),
+                      errorStyle: GoogleFonts.inter(fontSize: 10),
+                    ),
+                    icon: const Icon(Icons.arrow_drop_down),
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'Please select city'
+                        : null,
+                  );
+                }),
+                SizedBox(height: 16),
+
                 /// Username
                 CustomTextField(
                   controller: controller.usernameController,
                   keyboardType: TextInputType.name,
-                  hintText: AppConst.username,
+                  labelText: AppConst.username,
                   prefixIcon:
                       Icon(Icons.person_outline, color: AppColors.tealDark),
                   textCapitalization: TextCapitalization.none,
@@ -72,7 +129,7 @@ class LoginScreen extends GetWidget<LoginController> {
                 Obx(() => CustomTextField(
                       controller: controller.passwordController,
                       keyboardType: TextInputType.visiblePassword,
-                      hintText: AppConst.password,
+                      labelText: AppConst.password,
                       prefixIcon:
                           Icon(Icons.lock_outline, color: AppColors.tealDark),
                       obscureText: !controller.isPasswordVisible.value,

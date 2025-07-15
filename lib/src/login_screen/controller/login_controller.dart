@@ -1,14 +1,19 @@
+import 'dart:developer';
+
+import 'package:dvgsurveyor/api_repo/app_repo.dart';
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
+import 'package:dvgsurveyor/model/gam_model.dart';
 import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginController extends GetxController {
   final AuthRepo authRepo;
+  final AppRepo appRepo;
 
-  LoginController({required this.authRepo});
+  LoginController({required this.authRepo, required this.appRepo});
 
   // Controllers
   final usernameController = TextEditingController();
@@ -20,6 +25,29 @@ class LoginController extends GetxController {
   // Reactive State
   final isLoading = false.obs;
   final isPasswordVisible = false.obs;
+
+  RxBool isGamLoad = false.obs;
+  RxList<GamModel> gamList = <GamModel>[].obs;
+  String? selectedGam = '';
+
+  @override
+  void onInit() {
+    fetchGamName();
+    super.onInit();
+  }
+
+  Future<void> fetchGamName() async {
+    isGamLoad.value = true;
+    try {
+      final res = await appRepo.getGam();
+
+      gamList.value = res;
+    } catch (e) {
+      log('Log: Error in fetch gam name $e');
+    } finally {
+      isGamLoad.value = false;
+    }
+  }
 
   // Toggle password visibility
   void togglePasswordVisibility() {
@@ -57,6 +85,7 @@ class LoginController extends GetxController {
       final user = await authRepo.getUser(
         username: usernameController.text.trim(),
         password: passwordController.text.trim(),
+        gamName: selectedGam,
       );
 
       if (user == null) {
