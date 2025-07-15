@@ -4,6 +4,8 @@ import 'package:dvgsurveyor/src/drawer_screen/binding/drawer_binding.dart';
 import 'package:dvgsurveyor/src/drawer_screen/drawer_screen.dart';
 import 'package:dvgsurveyor/src/login_screen/binding/login_binding.dart';
 import 'package:dvgsurveyor/src/login_screen/login_screen.dart';
+import 'package:dvgsurveyor/src/property_desc_screen/binding/property_desc_screen_binding.dart';
+import 'package:dvgsurveyor/src/property_desc_screen/property_desc_screen.dart';
 import 'package:dvgsurveyor/src/property_screen/binding/property_screen_binding.dart';
 import 'package:dvgsurveyor/src/property_screen/property_screen.dart';
 import 'package:dvgsurveyor/src/register_screen/binding/register_binding.dart';
@@ -32,7 +34,7 @@ class AppRoutes {
   static const String surveyorFormScreen = '/surveyor_form_screen';
   static const String surveyScreen = '/survey_screen';
   static const String propertyTypeScreen = '/property_screen';
-  static const String propertyDescSCreen = '/property_desc_screen';
+  static const String propertyDescScreen = '/property_desc_screen';
 
   static List<GetPage> pages = [
     GetPage(
@@ -130,6 +132,16 @@ class AppRoutes {
       page: () => const PropertyScreen(),
       bindings: [
         PropertyScreenBinding(),
+      ],
+      transition: Transition.fadeIn,
+      transitionDuration: 500.milliseconds,
+      curve: Curves.easeIn,
+    ),
+    GetPage(
+      name: propertyDescScreen,
+      page: () => const PropertyDescScreen(),
+      bindings: [
+        PropertyDescScreenBinding(),
       ],
       transition: Transition.fadeIn,
       transitionDuration: 500.milliseconds,

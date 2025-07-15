@@ -37,10 +37,15 @@ class AppConst {
   static const String userNm = 'USERNAME';
   static const String user = 'USER';
   static const String propertType = 'Property Type';
-  static const String propertyDesc = 'Property Description'; 
+  static const String propertyDesc = 'Property Description';
   static const String addNewProperty = 'Add New Property';
   static const String deleteProperty = 'Delete Property';
   static const String delete = 'Delete';
   static const String areYouSureToDelete =
       'Are you sure you want to delete this property?';
+
+  static const String addNewProDesc = 'Add New Property Description';
+  static const String deleteProDesc = 'Property Description';
+  static const String areYouSureToDeleteProDesc =
+      'Are you sure you want to delete this property Description?';
 }
