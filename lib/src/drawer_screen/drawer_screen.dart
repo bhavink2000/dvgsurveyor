@@ -67,18 +67,26 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
           SizedBox(height: controller.userData?.role != 'Worker' ? 16.h : 0.h),
           controller.userData?.role != 'Worker'
               ? _buildDrawerItem(
-                  icon: Icons.manage_accounts_rounded,
+                  icon: Icons.supervisor_account,
                   title: AppConst.userManagement,
                   onTap: () => Get.toNamed(AppRoutes.userMangementScreen),
                   context: context,
                 )
               : SizedBox(),
-          //SizedBox(height: controller.userData?.role != 'Worker' ? 16.h : 0.h),
+
           controller.userData?.role != 'Worker'
               ? _buildDrawerItem(
-                  icon: Icons.contrast_rounded,
+                  icon: Icons.category_rounded,
                   title: AppConst.propertType,
                   onTap: () => Get.toNamed(AppRoutes.propertyTypeScreen),
+                  context: context,
+                )
+              : SizedBox(),
+          controller.userData?.role != 'Worker'
+              ? _buildDrawerItem(
+                  icon: Icons.description_rounded,
+                  title: AppConst.propertyDesc,
+                  onTap: () => Get.toNamed(AppRoutes.propertyDescScreen),
                   context: context,
                 )
               : SizedBox(),
