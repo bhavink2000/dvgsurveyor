@@ -30,4 +30,32 @@ class AppRepo {
       return [];
     }
   }
+
+  Future<GamModel?> addUpdateCity({
+    required GamModel cityData,
+    bool isEdit = false,
+    bool isDelete = false,
+  }) async {
+    try {
+      final docRef = _gamCollection.doc(cityData.id);
+
+      // DELETE
+      if (isDelete) {
+        await docRef.delete();
+        return null; // No need to fetch deleted doc
+      }
+
+      //  ADD or UPDATE
+      final dataToSave = isEdit ? cityData : cityData.copyWith(id: docRef.id);
+
+      await docRef.set(dataToSave);
+
+      final snapshot = await docRef.get();
+
+      return snapshot.exists ? snapshot.data() : null;
+    } catch (e) {
+      log("Error in addUpdatePropertyType: $e");
+      return null;
+    }
+  }
 }
