@@ -167,12 +167,17 @@ class AuthRepo {
     required String propertyId,
   }) async {
     try {
-      final querySnapshot = await _propertyDescriptionCollection
-          .where(
-            'propertyTypeId',
-            isEqualTo: propertyId,
-          )
-          .get();
+      var querySnapshot;
+      if (propertyId == '') {
+        querySnapshot = await _propertyDescriptionCollection.get();
+      } else {
+        querySnapshot = await _propertyDescriptionCollection
+            .where(
+              'propertyTypeId',
+              isEqualTo: propertyId,
+            )
+            .get();
+      }
       return querySnapshot.docs
           .map((doc) => doc.data())
           .whereType<PropertyDescriptionModel>()
@@ -237,6 +242,32 @@ class AuthRepo {
       return snapshot.exists ? snapshot.data() : null;
     } catch (e) {
       log("Error in addUpdatePropertyType: $e");
+      return null;
+    }
+  }
+
+  Future<PropertyDescriptionModel?> addUpdatePropertyDesc(
+      {required PropertyDescriptionModel proDescData,
+      bool isEdit = false,
+      bool isDelete = false}) async {
+    try {
+      final docRef = _propertyDescriptionCollection.doc(proDescData.id);
+
+      if (isDelete) {
+        await docRef.delete();
+        return null;
+      }
+
+      final dataSave =
+          isEdit ? proDescData : proDescData.copyWith(id: docRef.id);
+
+      await docRef.set(dataSave);
+
+      final snapshot = await docRef.get();
+
+      return snapshot.exists ? snapshot.data() : null;
+    } catch (e) {
+      log('Error in add update property Desc $e');
       return null;
     }
   }
