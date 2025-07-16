@@ -203,18 +203,27 @@ class AuthRepo {
     }
   }
 
-  Future<SurveyModel?> saveSurveyForm({required SurveyModel surveyData}) async {
-    try {
-      final docRef = _surveyCollection.doc(surveyData.id);
-      await docRef.set(surveyData);
-      final snapshot = await docRef.get();
+  Future<SurveyModel?> saveSurveyForm({
+  required SurveyModel surveyData,
+  bool? isEditData = false,
+}) async {
+  try {
+    final docRef = _surveyCollection.doc(surveyData.id);
 
-      return snapshot.data();
-    } catch (e) {
-      log('Log: error to save survey form data -> $e');
-      return null;
+    if (isEditData == true) {
+      await docRef.update(surveyData.toFirebase()); // Convert model to Map
+    } else {
+      await docRef.set(surveyData);
     }
+
+    final snapshot = await docRef.get();
+    return snapshot.data();
+  } catch (e) {
+    log('Log: error to save survey form data -> $e');
+    return null;
   }
+}
+
 
   Future<List<SurveyModel>> getSurveyData({required String userId}) async {
     try {
