@@ -57,10 +57,10 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                 return LabeledDropdownRow<UsageTypeModel>(
                   label: FormLabels.usageType.tr,
                   controller: controller.usageType,
-                  selectedId: controller.selectedUsageId,
+                  selectedId: controller.selectedUsageId.value,
                   items: controller.usageData,
                   isLoading: controller.isUsageLoad.value,
-                  onChanged: (val) => controller.selectedUsageId = val,
+                  onChanged: (val) => controller.selectedUsageId.value = val,
                 );
               }),
               buildInput(
@@ -447,7 +447,9 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                             ),
                           )
                         : Text(
-                            'Submit',
+                            controller.isEditMode.value == true
+                                ? 'Update'
+                                : 'Submit',
                             style: AppFonts.text16(context).copyWith(
                               color: AppColors.offWhite,
                             ),
