@@ -19,3 +19,49 @@ extension RoleEnumExtension on RoleEnum {
     );
   }
 }
+
+enum AreaCategoryType { slab, papda, patara, nadiya, open }
+
+
+extension AreaCategoryTypeExtension on AreaCategoryType {
+  String get label {
+    switch (this) {
+      case AreaCategoryType.slab:
+        return 'સ્લેબ';
+      case AreaCategoryType.papda:
+        return 'પાપડા';
+      case AreaCategoryType.patara:
+        return 'પાટરા';
+      case AreaCategoryType.nadiya:
+        return 'નાળિયા';
+      case AreaCategoryType.open:
+        return 'ખુલ્લું';
+    }
+  }
+}
+
+enum FloorType {
+  ground,
+  first,
+  second,
+  third,
+  basementOne,
+}
+
+extension FloorTypeExt on FloorType {
+  String get label {
+    switch (this) {
+      case FloorType.ground:
+        return 'Ground';
+      case FloorType.first:
+        return 'First';
+      case FloorType.second:
+        return 'Second';
+      case FloorType.third:
+        return 'Third';
+      case FloorType.basementOne:
+        return 'Basement One';
+    }
+  }
+}
+

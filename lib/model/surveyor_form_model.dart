@@ -186,6 +186,7 @@ class SurveyModel {
   final DateTime? updatedAt;
   final String? gamName;
   final Map<String, LocationMap> locationMap;
+  final bool? isFormEdit;
 
   SurveyModel({
     required this.userId,
@@ -210,6 +211,7 @@ class SurveyModel {
     required this.updatedAt,
     this.gamName,
     required this.locationMap,
+    this.isFormEdit = false,
   });
 
   factory SurveyModel.fromFirebase(DocumentSnapshot json) {
@@ -247,6 +249,7 @@ class SurveyModel {
       locationMap: (data['locationMap'] as Map<String, dynamic>? ?? {}).map(
         (key, value) => MapEntry(key, LocationMap.fromMap(value)),
       ),
+      isFormEdit: data['isFormEdit'] ?? false,
     );
   }
 
@@ -276,6 +279,7 @@ class SurveyModel {
         'gamName': gamName,
         'locationMap':
             locationMap.map((key, value) => MapEntry(key, value.toMap())),
+        'isFormEdit': isFormEdit,
       };
 
   SurveyModel copyWith({
@@ -300,7 +304,8 @@ class SurveyModel {
     final DateTime? createdAt,
     final DateTime? updatedAt,
     String? gamName,
-    Map<String, LocationMap>? locationData,
+    Map<String, LocationMap>? locationMap,
+    bool? isFormEdit,
   }) {
     return SurveyModel(
       userId: userId ?? this.userId,
@@ -324,7 +329,8 @@ class SurveyModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       gamName: gamName ?? this.gamName,
-      locationMap: locationData ?? this.locationMap,
+      locationMap: locationMap ?? this.locationMap,
+      isFormEdit: isFormEdit ?? this.isFormEdit,
     );
   }
 }
