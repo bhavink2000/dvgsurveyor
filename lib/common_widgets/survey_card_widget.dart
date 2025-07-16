@@ -1,13 +1,23 @@
+import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
+import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 class SurveyCardWidget extends StatelessWidget {
   final SurveyModel data;
+  final bool? isEditSurvey;
+  final bool? isDeleteSUrvey;
 
-  const SurveyCardWidget({super.key, required this.data});
+  const SurveyCardWidget({
+    super.key,
+    required this.data,
+    this.isEditSurvey = false,
+    this.isDeleteSUrvey = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -118,10 +128,59 @@ class SurveyCardWidget extends StatelessWidget {
               ],
             ),
             const Divider(),
-            _labelValueRow(
-              context,
-              'Created',
-              formatFullDateTime(data.createdAt),
+            Row(
+              children: [
+                _infoColumn(
+                  context,
+                  'Created',
+                  formatFullDateTime(data.createdAt),
+                ),
+                Spacer(),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  onPressed: () async {
+                    if (isEditSurvey == false) {
+                      AppSnackbar.showSnackbar(
+                        title: 'Opps!',
+                        message:
+                            'You have no permission for edit survey. \n Please contact to admin',
+                      );
+                      return;
+                    }
+                    Get.toNamed(
+                      AppRoutes.surveyorFormScreen,
+                      arguments: {
+                        'isEdit': true,
+                        'surveyData': data,
+                      },
+                    );
+                  },
+                  icon: Icon(
+                    Icons.edit,
+                    size: 20,
+                    color: AppColors.tealDark,
+                  ),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    if (isEditSurvey == false) {
+                      AppSnackbar.showSnackbar(
+                        title: 'Opps!',
+                        message:
+                            'You have no permission for delete survey. \n Please contact to admin',
+                      );
+                    }
+                  },
+                  icon: Icon(
+                    Icons.delete,
+                    size: 20,
+                    color: AppColors.tealDark,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -150,12 +209,12 @@ class SurveyCardWidget extends StatelessWidget {
                   color: AppColors.darkGrey,
                   fontSize: 10,
                 ),
-                overflow: TextOverflow.ellipsis,
+                //overflow: TextOverflow.ellipsis,
               ),
             ],
           )
         : SizedBox(
-            width: 75.w,
+            width: label == 'Created' ? 150.w : 75.w,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -174,7 +233,7 @@ class SurveyCardWidget extends StatelessWidget {
                     color: AppColors.darkGrey,
                     fontSize: 10,
                   ),
-                  overflow: TextOverflow.ellipsis,
+                  //overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
