@@ -48,4 +48,11 @@ class AppConst {
   static const String deleteProDesc = 'Property Description';
   static const String areYouSureToDeleteProDesc =
       'Are you sure you want to delete this property Description?';
+
+  static const String gamName = 'Gam Name';
+  static const String cityName = 'City Name';
+  static const String cityManagement = 'City Management';
+  static const String areYouSureToDeleteCity =
+      'Are you sure you want to delete this city?';
+  static const String addNewCity = 'Add New City';
 }

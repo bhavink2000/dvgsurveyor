@@ -64,10 +64,12 @@ class AuthRepo {
     String? password,
     String? mobileNumber,
     String? userId,
+    String? gamName, // new field to update
   }) async {
     try {
       QuerySnapshot<UserCollectionModel> querySnapshot;
 
+      // Step 1: Get user by mobile or username/password
       if (mobileNumber != null) {
         querySnapshot = await _userCollection
             .where('mobileNumber', isEqualTo: mobileNumber)
@@ -79,20 +81,33 @@ class AuthRepo {
             .where('password', isEqualTo: password)
             .limit(1)
             .get();
-      } else {
+      } else if (userId != null) {
+        // if userId is directly passed
         final docRef = _userCollection.doc(userId);
-
         final snapshot = await docRef.get();
-
         return snapshot.data();
+      } else {
+        return null; // no valid params
       }
 
+      // Step 2: If user found, update gamName
       if (querySnapshot.docs.isNotEmpty) {
-        return querySnapshot.docs.first.data();
+        final userDoc = querySnapshot.docs.first;
+        final userId = userDoc.id;
+
+        // Only update if gamName is provided
+        if (gamName != null && gamName.isNotEmpty) {
+          await _userCollection.doc(userId).update({'gamName': gamName});
+        }
+
+        // Step 3: Get updated snapshot
+        final updatedSnapshot = await _userCollection.doc(userId).get();
+        return updatedSnapshot.data();
       }
     } catch (e) {
-      log('Error fetching user: $e');
+      log('Error fetching or updating user: $e');
     }
+
     return null;
   }
 

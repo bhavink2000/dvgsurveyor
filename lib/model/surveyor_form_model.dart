@@ -184,6 +184,7 @@ class SurveyModel {
   final Map<String, AreaDetail> area;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? gamName;
 
   SurveyModel({
     required this.userId,
@@ -206,6 +207,7 @@ class SurveyModel {
     required this.area,
     required this.createdAt,
     required this.updatedAt,
+    this.gamName,
   });
 
   factory SurveyModel.fromFirebase(DocumentSnapshot json) => SurveyModel(
@@ -236,6 +238,7 @@ class SurveyModel {
         ),
         createdAt: json['createdAt']?.toDate(),
         updatedAt: json['updatedAt']?.toDate(),
+        gamName: json['gamName'] ?? '',
       );
 
   Map<String, dynamic> toFirebase() => {
@@ -261,6 +264,7 @@ class SurveyModel {
         'area': area.map((key, value) => MapEntry(key, value.toMap())),
         'createdAt': createdAt,
         'updatedAt': updatedAt,
+        'gamName': gamName,
       };
 
   SurveyModel copyWith({
@@ -284,6 +288,7 @@ class SurveyModel {
     Map<String, AreaDetail>? area,
     final DateTime? createdAt,
     final DateTime? updatedAt,
+    String? gamName,
   }) {
     return SurveyModel(
       userId: userId ?? this.userId,
@@ -306,6 +311,7 @@ class SurveyModel {
       area: area ?? this.area,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      gamName: gamName ?? this.gamName,
     );
   }
 }
