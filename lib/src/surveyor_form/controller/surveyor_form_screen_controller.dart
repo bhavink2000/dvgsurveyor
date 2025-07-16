@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
+import 'package:dvgsurveyor/helper/location_helper.dart';
 import 'package:dvgsurveyor/model/property_description_model.dart';
 import 'package:dvgsurveyor/model/property_type_model.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
@@ -60,8 +61,8 @@ class SurveyorFormScreenController extends GetxController {
     'ground',
     'first',
     'second',
+    'Third',
     'basementOne',
-    'basementTwo',
   ];
 
   RxBool isFormSubmit = false.obs;
@@ -183,6 +184,8 @@ class SurveyorFormScreenController extends GetxController {
   Future<void> submitForm() async {
     if (!(formKey.currentState?.validate() ?? false)) return;
 
+    final location = await LocationHelper().getCurrentPosition();
+
     isFormSubmit.value = true;
 
     final now = DateTime.now();
@@ -226,6 +229,12 @@ class SurveyorFormScreenController extends GetxController {
         area: Map<String, AreaDetail>.from(areaData),
         createdAt: now,
         updatedAt: now,
+        locationMap: {
+          'loc': LocationMap(
+            lag: location.latitude.toString(),
+            lug: location.longitude.toString(),
+          )
+        },
       );
 
       final result = await authRepo.saveSurveyForm(surveyData: surveyData);
