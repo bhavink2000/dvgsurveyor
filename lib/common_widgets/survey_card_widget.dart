@@ -1,13 +1,26 @@
+import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
+import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
+import 'package:dvgsurveyor/src/survey_screen/controller/survey_screen_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 class SurveyCardWidget extends StatelessWidget {
   final SurveyModel data;
+  final bool? isEditSurvey;
+  final bool? isDeleteSUrvey;
+  final SurveyScreenController? surveyCon;
 
-  const SurveyCardWidget({super.key, required this.data});
+  const SurveyCardWidget({
+    super.key,
+    required this.data,
+    this.isEditSurvey = false,
+    this.isDeleteSUrvey = false,
+    this.surveyCon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -118,10 +131,66 @@ class SurveyCardWidget extends StatelessWidget {
               ],
             ),
             const Divider(),
-            _labelValueRow(
-              context,
-              'Created',
-              formatFullDateTime(data.createdAt),
+            Row(
+              children: [
+                _infoColumn(
+                  context,
+                  'Created',
+                  formatFullDateTime(data.createdAt),
+                ),
+                Spacer(),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  onPressed: () async {
+                    if (isEditSurvey == false) {
+                      AppSnackbar.showSnackbar(
+                        title: 'Opps!',
+                        message:
+                            'You have no permission for edit survey. \n Please contact to admin',
+                      );
+                      return;
+                    }
+                    Get.toNamed(
+                      AppRoutes.surveyorFormScreen,
+                      arguments: {
+                        'isEdit': true,
+                        'surveyData': data,
+                      },
+                    )?.then((_) {
+                      // Refresh the survey list after coming back
+                      surveyCon
+                          ?.fetchSurveyData(); // or whatever method reloads the list
+                    });
+                    ;
+                  },
+                  icon: Icon(
+                    Icons.edit,
+                    size: 20,
+                    color: AppColors.tealDark,
+                  ),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    if (isDeleteSUrvey == false) {
+                      AppSnackbar.showSnackbar(
+                        title: 'Opps!',
+                        message:
+                            'You have no permission for delete survey. \n Please contact to admin',
+                      );
+                      return;
+                    }
+                    surveyCon?.deleteSurvey(sId: data.id);
+                  },
+                  icon: Icon(
+                    Icons.delete,
+                    size: 20,
+                    color: AppColors.tealDark,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -150,12 +219,12 @@ class SurveyCardWidget extends StatelessWidget {
                   color: AppColors.darkGrey,
                   fontSize: 10,
                 ),
-                overflow: TextOverflow.ellipsis,
+                //overflow: TextOverflow.ellipsis,
               ),
             ],
           )
         : SizedBox(
-            width: 75.w,
+            width: label == 'Created' ? 150.w : 75.w,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -174,7 +243,7 @@ class SurveyCardWidget extends StatelessWidget {
                     color: AppColors.darkGrey,
                     fontSize: 10,
                   ),
-                  overflow: TextOverflow.ellipsis,
+                  //overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

@@ -11,27 +11,35 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          iconTheme: IconThemeData(color: AppColors.offWhite),
-          backgroundColor: AppColors.tealPrimary,
-          title: Text(
-            'Surveys',
-            style: AppFonts.text20(context).copyWith(
-              color: AppColors.offWhite,
-            ),
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: AppColors.offWhite),
+        backgroundColor: AppColors.tealPrimary,
+        title: Text(
+          'Surveys',
+          style: AppFonts.text20(context).copyWith(
+            color: AppColors.offWhite,
           ),
         ),
-        body: Obx(() {
+      ),
+      body: Obx(
+        () {
           return controller.isSurveyLoad.value == true
               ? Center(child: CircularProgressIndicator())
               : ListView.builder(
                   itemCount: controller.surveyData.length,
                   itemBuilder: (context, index) {
                     var survey = controller.surveyData[index];
-                    return SurveyCardWidget(data: survey);
+                    return SurveyCardWidget(
+                      data: survey,
+                      isEditSurvey: controller.userData?.isEditable,
+                      isDeleteSUrvey: controller.userData?.isDelete,
+                      surveyCon: controller,
+                    );
                   },
                   padding: EdgeInsets.only(bottom: 12),
                 );
-        }));
+        },
+      ),
+    );
   }
 }

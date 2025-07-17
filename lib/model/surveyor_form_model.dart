@@ -130,7 +130,7 @@ class AreaDetail {
         'papda': papda,
         'પાપડા': papda,
         'patara': patara,
-        'પાટરા': patara,
+        'પતરા': patara,
         'nadiya': nadiya,
         'નાળિયા': nadiya,
         'open': open,
@@ -185,6 +185,8 @@ class SurveyModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? gamName;
+  final Map<String, LocationMap> locationMap;
+  final bool? isFormEdit;
 
   SurveyModel({
     required this.userId,
@@ -208,38 +210,48 @@ class SurveyModel {
     required this.createdAt,
     required this.updatedAt,
     this.gamName,
+    required this.locationMap,
+    this.isFormEdit = false,
   });
 
-  factory SurveyModel.fromFirebase(DocumentSnapshot json) => SurveyModel(
-        userId: json['userId'] ?? '',
-        userRole: json['userRole'] ?? '',
-        userName: json['userName'] ?? '',
-        id: json['id'] ?? '',
-        ownerName: json['ownerName'] ?? '',
-        oldHomeNumber: json['oldHomeNumber'] ?? '',
-        index: json['index'] ?? '',
-        newHomeNumber: json['newHomeNumber'] ?? '',
-        rentPersonName: json['rentPersonName'] ?? '',
-        address: json['address'] ?? '',
-        propertyStayType: json['propertyStayType'] ?? '',
-        propertyType: (json['propertyType'] as Map<String, dynamic>? ?? {}).map(
-          (key, value) => MapEntry(key, PropertyTypeItem.fromMap(value)),
-        ),
-        propertyDescription:
-            (json['propertyDescription'] as Map<String, dynamic>? ?? {}).map(
-          (key, value) => MapEntry(key, PropertyDescriptionItem.fromMap(value)),
-        ),
-        mobileNumber: json['mobileNumber'] ?? '',
-        waterPipeline: json['waterPipeline'] ?? '0',
-        banthkamYear: json['banthkamYear'] ?? '0',
-        totalFloors: json['totalFloors'] ?? '0',
-        area: (json['area'] as Map<String, dynamic>? ?? {}).map(
-          (key, value) => MapEntry(key, AreaDetail.fromMap(value)),
-        ),
-        createdAt: json['createdAt']?.toDate(),
-        updatedAt: json['updatedAt']?.toDate(),
-        gamName: json['gamName'] ?? '',
-      );
+  factory SurveyModel.fromFirebase(DocumentSnapshot json) {
+    final data = json.data() as Map<String, dynamic>? ?? {};
+
+    return SurveyModel(
+      userId: data['userId'] ?? '',
+      userRole: data['userRole'] ?? '',
+      userName: data['userName'] ?? '',
+      id: data['id'] ?? '',
+      ownerName: data['ownerName'] ?? '',
+      oldHomeNumber: data['oldHomeNumber'] ?? '',
+      index: data['index'] ?? '',
+      newHomeNumber: data['newHomeNumber'] ?? '',
+      rentPersonName: data['rentPersonName'] ?? '',
+      address: data['address'] ?? '',
+      propertyStayType: data['propertyStayType'] ?? '',
+      propertyType: (data['propertyType'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, PropertyTypeItem.fromMap(value)),
+      ),
+      propertyDescription:
+          (data['propertyDescription'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, PropertyDescriptionItem.fromMap(value)),
+      ),
+      mobileNumber: data['mobileNumber'] ?? '',
+      waterPipeline: data['waterPipeline'] ?? '0',
+      banthkamYear: data['banthkamYear'] ?? '0',
+      totalFloors: data['totalFloors'] ?? '0',
+      area: (data['area'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, AreaDetail.fromMap(value)),
+      ),
+      createdAt: data['createdAt']?.toDate(),
+      updatedAt: data['updatedAt']?.toDate(),
+      gamName: data['gamName'] ?? '',
+      locationMap: (data['locationMap'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, LocationMap.fromMap(value)),
+      ),
+      isFormEdit: data['isFormEdit'] ?? false,
+    );
+  }
 
   Map<String, dynamic> toFirebase() => {
         'userId': userId,
@@ -265,6 +277,9 @@ class SurveyModel {
         'createdAt': createdAt,
         'updatedAt': updatedAt,
         'gamName': gamName,
+        'locationMap':
+            locationMap.map((key, value) => MapEntry(key, value.toMap())),
+        'isFormEdit': isFormEdit,
       };
 
   SurveyModel copyWith({
@@ -289,6 +304,8 @@ class SurveyModel {
     final DateTime? createdAt,
     final DateTime? updatedAt,
     String? gamName,
+    Map<String, LocationMap>? locationMap,
+    bool? isFormEdit,
   }) {
     return SurveyModel(
       userId: userId ?? this.userId,
@@ -312,6 +329,36 @@ class SurveyModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       gamName: gamName ?? this.gamName,
+      locationMap: locationMap ?? this.locationMap,
+      isFormEdit: isFormEdit ?? this.isFormEdit,
+    );
+  }
+}
+
+class LocationMap {
+  final String lag;
+  final String lug;
+
+  LocationMap({required this.lag, required this.lug});
+
+  factory LocationMap.fromMap(Map<String, dynamic> map) {
+    return LocationMap(
+      lag: map['lag'] ?? '',
+      lug: map['lug'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'lag': lag,
+      'lug': lug,
+    };
+  }
+
+  LocationMap copyWith({String? lag, String? lug}) {
+    return LocationMap(
+      lag: lag ?? this.lag,
+      lug: lug ?? this.lug,
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'dart:developer';
+
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
+import 'package:dvgsurveyor/helper/location_helper.dart';
 import 'package:dvgsurveyor/model/property_description_model.dart';
 import 'package:dvgsurveyor/model/property_type_model.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
@@ -31,7 +33,7 @@ class SurveyorFormScreenController extends GetxController {
   final newFloorController = TextEditingController();
 
   // Dropdown Selections
-  String? selectedUsageId;
+  RxnString selectedUsageId = RxnString();
   RxnString selectedPropertyType = RxnString();
   RxnString selectedPropertyDescription = RxnString();
 
@@ -51,7 +53,7 @@ class SurveyorFormScreenController extends GetxController {
   final List<String> categories = [
     'સ્લેબ',
     'પાપડા',
-    'પાટરા',
+    'પતરા',
     'નાળિયા',
     'ખુલ્લું'
   ];
@@ -60,19 +62,54 @@ class SurveyorFormScreenController extends GetxController {
     'ground',
     'first',
     'second',
+    'Third',
     'basementOne',
-    'basementTwo',
   ];
 
   RxBool isFormSubmit = false.obs;
+  final RxBool isEditMode = false.obs;
 
+  SurveyModel? survey;
   @override
   void onInit() {
     super.onInit();
+    final args = Get.arguments;
+    if (args != null && args['isEdit'] == true) {
+      survey = args['surveyData'];
+      isEditMode.value = args['isEdit'] ?? false;
+
+      prefillForm(survey!);
+    }
     fetchData();
   }
 
+  void prefillForm(SurveyModel survey) {
+    ownerName.text = survey.ownerName;
+    junagharNumber.text = survey.oldHomeNumber;
+    kabjedarName.text = survey.rentPersonName;
+    address.text = survey.address;
+    mobileNumber.text = survey.mobileNumber;
+    waterConnectionNumber.text = survey.waterPipeline;
+    constructionYear.text = survey.banthkamYear;
+    totalFloors.text = survey.totalFloors;
+
+    // Dropdown values
+    selectedUsageId.value = survey.propertyStayType;
+    usageType.text = selectedUsageId.value ?? '';
+    selectedPropertyType.value = survey.propertyType.keys.first;
+    selectedPropertyDescription.value = survey.propertyDescription.keys.first;
+
+    propertyType.text = survey.propertyType.values.first.propertyName ?? '';
+    propertyDescription.text =
+        survey.propertyDescription.values.first.propertyDes ?? '';
+
+    // Area
+    areaData.clear();
+    areaData.addAll(survey.area);
+  }
+
   Future<void> fetchData() async {
+    //if (isEditMode.value == true) return;
     await getUsageType();
     await getPropertyType();
   }
@@ -85,12 +122,14 @@ class SurveyorFormScreenController extends GetxController {
 
   Future<void> getPropertyType() async {
     isPropertyTypeLoad.value = true;
-    selectedPropertyType.value = null;
-    selectedPropertyDescription.value = null;
-    propertyType.clear();
-    propertyDescription.clear();
-    propertyData.clear();
-    propertyDesData.clear();
+    if (isEditMode.value == false) {
+      selectedPropertyType.value = null;
+      selectedPropertyDescription.value = null;
+      propertyType.clear();
+      propertyDescription.clear();
+      propertyData.clear();
+      propertyDesData.clear();
+    }
 
     try {
       propertyData.value = (await authRepo.getPropertyType()).toSet().toList();
@@ -111,7 +150,8 @@ class SurveyorFormScreenController extends GetxController {
 
     try {
       final data = await authRepo.getPropertyDescription(
-          propertyId: selectedPropertyType.value!);
+        propertyId: selectedPropertyType.value!,
+      );
       propertyDesData.value = data.toSet().toList()
         ..sort((a, b) => a.name.compareTo(b.name));
     } catch (e) {
@@ -169,7 +209,7 @@ class SurveyorFormScreenController extends GetxController {
         return detail.slab;
       case 'પાપડા':
         return detail.papda;
-      case 'પાટરા':
+      case 'પતરા':
         return detail.patara;
       case 'નાળિયા':
         return detail.nadiya;
@@ -185,14 +225,17 @@ class SurveyorFormScreenController extends GetxController {
 
     isFormSubmit.value = true;
 
-    final now = DateTime.now();
-    final id = 'SUR${now.millisecondsSinceEpoch}';
-    final user = SessionManager.getUser();
-
     try {
-      final previousCount =
-          await authRepo.getSurveyData(userId: user?.id ?? '');
-      final int nextIndex = previousCount.length + 1;
+      final user = SessionManager.getUser();
+      final location = await LocationHelper().getCurrentPosition();
+      final now = DateTime.now();
+
+      final bool isEdit = isEditMode.value;
+      final id =
+          isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
+      final newIndex = isEdit
+          ? (survey?.index ?? '')
+          : (await authRepo.getSurveyData(userId: user?.id ?? '')).length + 1;
 
       final surveyData = SurveyModel(
         id: id,
@@ -201,11 +244,12 @@ class SurveyorFormScreenController extends GetxController {
         userName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
         ownerName: ownerName.text.trim(),
         oldHomeNumber: junagharNumber.text.trim(),
-        newHomeNumber: nextIndex.toString(),
-        index: nextIndex.toString(),
+        newHomeNumber:
+            isEdit ? (survey?.newHomeNumber ?? '') : newIndex.toString(),
+        index: isEdit ? (survey?.index ?? '') : newIndex.toString(),
         rentPersonName: kabjedarName.text.trim(),
         address: address.text.trim(),
-        propertyStayType: selectedUsageId ?? '',
+        propertyStayType: selectedUsageId.value ?? '',
         propertyType: {
           selectedPropertyType.value ?? '': PropertyTypeItem(
             pId: selectedPropertyType.value,
@@ -224,24 +268,32 @@ class SurveyorFormScreenController extends GetxController {
         banthkamYear: constructionYear.text.trim(),
         totalFloors: totalFloors.text.trim(),
         area: Map<String, AreaDetail>.from(areaData),
-        createdAt: now,
+        createdAt: isEdit ? survey?.createdAt : now,
         updatedAt: now,
+        gamName: user?.gamName ?? '',
+        locationMap: {
+          'loc': LocationMap(
+            lag: location.latitude.toString(),
+            lug: location.longitude.toString(),
+          )
+        },
+        isFormEdit: isEdit,
       );
 
-      final result = await authRepo.saveSurveyForm(surveyData: surveyData);
-      if (result != null) {
-        AppSnackbar.showSnackbar(
-          title: 'Successfull',
-          message: 'Form Submitted',
-        );
+      final result = await authRepo.saveSurveyForm(
+        surveyData: surveyData,
+        isEditData: isEdit,
+      );
 
-        await Future.delayed(Duration(seconds: 1));
-        Get.offNamed(AppRoutes.dashScreen); // Navigate to dashboard
+      if (result != null) {
+        AppSnackbar.showSnackbar(title: 'Success', message: 'Form Submitted');
+        await Future.delayed(const Duration(seconds: 1));
+        Get.offNamedUntil(AppRoutes.dashScreen, (route) => false);
       } else {
         AppSnackbar.showErrorSnackbar(message: 'Failed to submit form');
       }
     } catch (e) {
-      AppSnackbar.showErrorSnackbar(message: 'Error:  ${e.toString()}');
+      AppSnackbar.showErrorSnackbar(message: 'Error: ${e.toString()}');
     } finally {
       isFormSubmit.value = false;
     }
