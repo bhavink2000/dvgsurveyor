@@ -55,4 +55,8 @@ class AppConst {
   static const String areYouSureToDeleteCity =
       'Are you sure you want to delete this city?';
   static const String addNewCity = 'Add New City';
+
+  static const String survey = 'Survey';
+  static const String areYouSureToDeleteSurvey =
+      'Are you sure you want to delete this Survey?';
 }

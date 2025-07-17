@@ -204,26 +204,25 @@ class AuthRepo {
   }
 
   Future<SurveyModel?> saveSurveyForm({
-  required SurveyModel surveyData,
-  bool? isEditData = false,
-}) async {
-  try {
-    final docRef = _surveyCollection.doc(surveyData.id);
+    required SurveyModel surveyData,
+    bool? isEditData = false,
+  }) async {
+    try {
+      final docRef = _surveyCollection.doc(surveyData.id);
 
-    if (isEditData == true) {
-      await docRef.update(surveyData.toFirebase()); // Convert model to Map
-    } else {
-      await docRef.set(surveyData);
+      if (isEditData == true) {
+        await docRef.update(surveyData.toFirebase()); // Convert model to Map
+      } else {
+        await docRef.set(surveyData);
+      }
+
+      final snapshot = await docRef.get();
+      return snapshot.data();
+    } catch (e) {
+      log('Log: error to save survey form data -> $e');
+      return null;
     }
-
-    final snapshot = await docRef.get();
-    return snapshot.data();
-  } catch (e) {
-    log('Log: error to save survey form data -> $e');
-    return null;
   }
-}
-
 
   Future<List<SurveyModel>> getSurveyData({required String userId}) async {
     try {
@@ -292,6 +291,17 @@ class AuthRepo {
       return snapshot.exists ? snapshot.data() : null;
     } catch (e) {
       log('Error in add update property Desc $e');
+      return null;
+    }
+  }
+
+  Future<SurveyModel?> deleteSurvey({String? surveyId}) async {
+    try {
+      final docRef = _surveyCollection.doc(surveyId);
+      await docRef.delete();
+      return null;
+    } catch (e) {
+      log('Log error in delete survey ->$e');
       return null;
     }
   }
