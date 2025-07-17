@@ -31,7 +31,7 @@ extension AreaCategoryTypeExtension on AreaCategoryType {
       case AreaCategoryType.papda:
         return 'પાપડા';
       case AreaCategoryType.patara:
-        return 'પાટરા';
+        return 'પતરા';
       case AreaCategoryType.nadiya:
         return 'નાળિયા';
       case AreaCategoryType.open:

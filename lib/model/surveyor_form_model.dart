@@ -130,7 +130,7 @@ class AreaDetail {
         'papda': papda,
         'પાપડા': papda,
         'patara': patara,
-        'પાટરા': patara,
+        'પતરા': patara,
         'nadiya': nadiya,
         'નાળિયા': nadiya,
         'open': open,

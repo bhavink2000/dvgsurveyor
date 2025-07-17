@@ -53,7 +53,7 @@ class SurveyorFormScreenController extends GetxController {
   final List<String> categories = [
     'સ્લેબ',
     'પાપડા',
-    'પાટરા',
+    'પતરા',
     'નાળિયા',
     'ખુલ્લું'
   ];
@@ -214,7 +214,7 @@ class SurveyorFormScreenController extends GetxController {
         return detail.slab;
       case 'પાપડા':
         return detail.papda;
-      case 'પાટરા':
+      case 'પતરા':
         return detail.patara;
       case 'નાળિયા':
         return detail.nadiya;
