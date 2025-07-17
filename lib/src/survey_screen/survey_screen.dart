@@ -33,6 +33,7 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
                       data: survey,
                       isEditSurvey: controller.userData?.isEditable,
                       isDeleteSUrvey: controller.userData?.isDelete,
+                      surveyCon: controller,
                     );
                   },
                   padding: EdgeInsets.only(bottom: 12),

@@ -3,6 +3,7 @@ import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
+import 'package:dvgsurveyor/src/survey_screen/controller/survey_screen_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -11,12 +12,14 @@ class SurveyCardWidget extends StatelessWidget {
   final SurveyModel data;
   final bool? isEditSurvey;
   final bool? isDeleteSUrvey;
+  final SurveyScreenController? surveyCon;
 
   const SurveyCardWidget({
     super.key,
     required this.data,
     this.isEditSurvey = false,
     this.isDeleteSUrvey = false,
+    this.surveyCon,
   });
 
   @override
@@ -166,13 +169,15 @@ class SurveyCardWidget extends StatelessWidget {
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
                   onPressed: () {
-                    if (isEditSurvey == false) {
+                    if (isDeleteSUrvey == false) {
                       AppSnackbar.showSnackbar(
                         title: 'Opps!',
                         message:
                             'You have no permission for delete survey. \n Please contact to admin',
                       );
+                      return;
                     }
+                    surveyCon?.deleteSurvey(sId: data.id);
                   },
                   icon: Icon(
                     Icons.delete,
