@@ -288,7 +288,7 @@ class SurveyorFormScreenController extends GetxController {
       if (result != null) {
         AppSnackbar.showSnackbar(title: 'Success', message: 'Form Submitted');
         await Future.delayed(const Duration(seconds: 1));
-        Get.offNamed(AppRoutes.dashScreen);
+        Get.offNamedUntil(AppRoutes.dashScreen, (route) => false);
       } else {
         AppSnackbar.showErrorSnackbar(message: 'Failed to submit form');
       }

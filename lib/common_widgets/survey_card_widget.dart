@@ -157,7 +157,12 @@ class SurveyCardWidget extends StatelessWidget {
                         'isEdit': true,
                         'surveyData': data,
                       },
-                    );
+                    )?.then((_) {
+                      // Refresh the survey list after coming back
+                      surveyCon
+                          ?.fetchSurveyData(); // or whatever method reloads the list
+                    });
+                    ;
                   },
                   icon: Icon(
                     Icons.edit,
