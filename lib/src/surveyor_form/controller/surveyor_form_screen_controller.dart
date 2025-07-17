@@ -133,9 +133,6 @@ class SurveyorFormScreenController extends GetxController {
 
     try {
       propertyData.value = (await authRepo.getPropertyType()).toSet().toList();
-      if (isEditMode.value == true) {
-        getPropertyDescription();
-      }
     } catch (e) {
       log('Error: $e');
     } finally {
@@ -146,12 +143,10 @@ class SurveyorFormScreenController extends GetxController {
   Future<void> getPropertyDescription() async {
     if (selectedPropertyType.value == null) return;
 
-    if (isEditMode.value == false) {
-      isPropertyDesLoad.value = true;
-      selectedPropertyDescription.value = null;
-      propertyDescription.clear();
-      propertyDesData.clear();
-    }
+    isPropertyDesLoad.value = true;
+    selectedPropertyDescription.value = null;
+    propertyDescription.clear();
+    propertyDesData.clear();
 
     try {
       final data = await authRepo.getPropertyDescription(
