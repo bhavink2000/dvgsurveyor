@@ -69,7 +69,7 @@ class UserCollectionModel {
   ) {
     final data = doc.data() as Map<String, dynamic>;
     return UserCollectionModel(
-      id: data['id'], // Document ID from Firestore
+      id: data['id'] ?? doc.id, // Document ID from Firestore
       username: data['username'] ?? '',
       password: data['password'] ?? '',
       firstName: data['firstName'] ?? '',

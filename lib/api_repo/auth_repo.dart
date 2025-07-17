@@ -115,7 +115,8 @@ class AuthRepo {
   Future<UserCollectionModel?> saveUser({UserCollectionModel? user}) async {
     try {
       final docRef = _userCollection.doc(user?.id);
-      await docRef.set(user!);
+      final newModel = user?.copyWith(id: docRef.id);
+      await docRef.set(newModel!);
       final snapshot = await docRef.get();
 
       return snapshot.data();
