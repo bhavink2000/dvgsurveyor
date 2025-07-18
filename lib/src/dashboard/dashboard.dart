@@ -3,6 +3,8 @@ import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
+import 'package:dvgsurveyor/src/dashboard/dashboard_widget/city_wise_card.dart';
+import 'package:dvgsurveyor/src/dashboard/dashboard_widget/date_wise_card.dart';
 import 'package:dvgsurveyor/src/drawer_screen/drawer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -80,62 +82,23 @@ class DashboardScreen extends GetWidget<DashboardController> {
             Expanded(
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(16.w),
+                padding: EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: AppColors.offWhite,
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(24.r)),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(24.r),
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // ───── Horizontal Filter Chips ─────
-                    Obx(() => SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: controller.filterLabels
-                                .map((label) => Padding(
-                                      padding: EdgeInsets.only(right: 8.w),
-                                      child: ChoiceChip(
-                                        label: Text(label),
-                                        selected:
-                                            controller.selectedFilter.value ==
-                                                label,
-                                        selectedColor: AppColors.tealPrimary,
-                                        backgroundColor: Colors.grey.shade200,
-                                        labelStyle:
-                                            AppFonts.text14(context).copyWith(
-                                          color:
-                                              controller.selectedFilter.value ==
-                                                      label
-                                                  ? AppColors.offWhite
-                                                  : AppColors.tealPrimary,
-                                          fontSize: 12,
-                                        ),
-                                        onSelected: (_) {
-                                          controller.selectedFilter.value =
-                                              label;
-                                          // Optional: Call controller.loadDataForFilter(label);
-                                        },
-                                      ),
-                                    ))
-                                .toList(),
-                          ),
-                        )),
-                    SizedBox(height: 16.h),
-
-                    // ───── Data Placeholder ─────
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          'No surveys to show yet.',
-                          style: AppFonts.text14(context).copyWith(
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                child: SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 16.h),
+                      CityWiseCard(),
+                      SizedBox(height: 12.h),
+                      DateWiseCard()
+                    ],
+                  ),
                 ),
               ),
             ),
