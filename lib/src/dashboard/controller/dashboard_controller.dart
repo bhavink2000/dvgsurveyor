@@ -21,6 +21,15 @@ class DashboardController extends GetxController {
   // Change from `String?` to `Rxn<GamModel>` for dropdown binding
   Rxn<GamModel> selectedGam = Rxn<GamModel>();
 
+  final RxInt cityTotalSurveyCount = 0.obs;
+  final RxInt cityTotalAreaCount = 0.obs;
+
+  final RxInt dateTotalSurveyCount = 0.obs;
+  final RxInt dateTotalAreaCount = 0.obs;
+
+  final Rxn<DateTime> selectedStartDate = Rxn<DateTime>();
+  final Rxn<DateTime> selectedEndDate = Rxn<DateTime>();
+
   @override
   void onInit() {
     super.onInit();
@@ -49,41 +58,93 @@ class DashboardController extends GetxController {
     userData = SessionManager.getUser();
   }
 
-  final Rxn<DateTime> startDate = Rxn<DateTime>();
-  final Rxn<DateTime> endDate = Rxn<DateTime>();
-
   Future<void> pickStartDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: startDate.value ?? DateTime.now(),
+      initialDate: selectedStartDate.value ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime.now(), // disables future dates
     );
-    if (picked != null) startDate.value = picked;
+    if (picked != null) selectedStartDate.value = picked;
   }
 
   Future<void> pickEndDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: endDate.value ?? DateTime.now(),
+      initialDate: selectedEndDate.value ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime.now(), // disables future dates
     );
-    if (picked != null) endDate.value = picked;
+    if (picked != null) selectedEndDate.value = picked;
   }
 
   void applyDateFilter() {
-    if (startDate.value != null && endDate.value != null) {
-      if (startDate.value!.isAfter(endDate.value!)) {
+    if (selectedStartDate.value != null && selectedEndDate.value != null) {
+      if (selectedStartDate.value!.isAfter(selectedEndDate.value!)) {
         Get.snackbar('Invalid Date Range', 'Start date can’t be after end date',
             backgroundColor: Colors.red.shade100, colorText: Colors.red);
         return;
       }
-      // TODO: perform your filter action
-      print("Filter applied: ${startDate.value} - ${endDate.value}");
+      fetchDateSurveySummary();
+
+      print(
+          "Filter applied: ${selectedStartDate.value} - ${selectedEndDate.value}");
     } else {
       Get.snackbar('Missing Dates', 'Please select both start and end dates',
           backgroundColor: Colors.orange.shade100, colorText: Colors.orange);
+    }
+  }
+
+  Future<void> fetchCitySurveySummary({String? userId}) async {
+    try {
+      final surveys = await appRepo.getSurveyDataByCityDateWorker(
+        userId: userId ?? userData!.id,
+        cityName:
+            selectedGam.value!.name.isNotEmpty ? selectedGam.value?.name : null,
+        startDate: null,
+        endDate: null,
+      );
+
+      cityTotalSurveyCount.value = surveys.length;
+
+      int areaSum = 0;
+      for (final survey in surveys) {
+        for (final area in survey.area.values) {
+          areaSum += (area.totalArea).toInt();
+        }
+      }
+
+      cityTotalAreaCount.value = areaSum;
+    } catch (e) {
+      cityTotalSurveyCount.value = 0;
+      cityTotalAreaCount.value = 0;
+      log('Error in fetchCitySurveySummary: $e');
+    }
+  }
+
+  Future<void> fetchDateSurveySummary({String? userId}) async {
+    try {
+      final surveys = await appRepo.getSurveyDataByCityDateWorker(
+        userId: userId ?? userData!.id,
+        cityName: null,
+        startDate: selectedStartDate.value,
+        endDate: selectedEndDate.value,
+      );
+
+      dateTotalSurveyCount.value = surveys.length;
+
+      int areaSum = 0;
+      for (final survey in surveys) {
+        for (final area in survey.area.values) {
+          areaSum += (area.totalArea).toInt();
+        }
+      }
+
+      dateTotalAreaCount.value = areaSum;
+    } catch (e) {
+      dateTotalSurveyCount.value = 0;
+      dateTotalAreaCount.value = 0;
+      log('Error in fetchDateSurveySummary: $e');
     }
   }
 }
