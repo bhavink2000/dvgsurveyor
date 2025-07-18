@@ -99,6 +99,7 @@ class CityWiseCard extends GetWidget<DashboardController> {
                         onChanged: (val) {
                           if (val != null) {
                             controller.selectedGam.value = val;
+                            controller.fetchCitySurveySummary();
                           }
                         },
                       ),
@@ -123,7 +124,7 @@ class CityWiseCard extends GetWidget<DashboardController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildStatLabel(context, 'Total Survey'),
-                        Text('125',
+                        Text('${controller.cityTotalSurveyCount}',
                             style: AppFonts.text20(context).copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.teal.shade700,
@@ -136,7 +137,7 @@ class CityWiseCard extends GetWidget<DashboardController> {
                             )),
                         const SizedBox(height: 12),
                         _buildStatLabel(context, 'Total Area'),
-                        Text('5000.007 sq.mt',
+                        Text('${controller.cityTotalAreaCount} sq.mt',
                             style: AppFonts.text20(context).copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.teal.shade700,

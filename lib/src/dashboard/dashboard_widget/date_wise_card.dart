@@ -57,7 +57,7 @@ class DateWiseCard extends GetWidget<DashboardController> {
                           border: Border.all(color: Colors.grey.shade300),
                         ),
                         child: Obx(() {
-                          final start = controller.startDate.value;
+                          final start = controller.selectedStartDate.value;
                           return Row(
                             children: [
                               Icon(Icons.calendar_today_outlined,
@@ -96,7 +96,7 @@ class DateWiseCard extends GetWidget<DashboardController> {
                           border: Border.all(color: Colors.grey.shade300),
                         ),
                         child: Obx(() {
-                          final end = controller.endDate.value;
+                          final end = controller.selectedEndDate.value;
                           return Row(
                             children: [
                               Icon(Icons.calendar_today_outlined,
@@ -169,14 +169,14 @@ class DateWiseCard extends GetWidget<DashboardController> {
                     ),
                   ),
                   const Spacer(),
-                  Column(
+                  Obx(()=>Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildStatLabel(
                         context,
                         'Total Survey',
                       ),
-                      Text('125',
+                      Text('${controller.dateTotalSurveyCount}',
                           style: AppFonts.text20(context).copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.teal.shade700,
@@ -189,7 +189,7 @@ class DateWiseCard extends GetWidget<DashboardController> {
                           )),
                       const SizedBox(height: 12),
                       _buildStatLabel(context, 'Total Area'),
-                      Text('500.40 sq.mt',
+                      Text('${controller.dateTotalAreaCount} sq.mt',
                           style: AppFonts.text20(context).copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.teal.shade700,
@@ -201,7 +201,7 @@ class DateWiseCard extends GetWidget<DashboardController> {
                             ],
                           )),
                     ],
-                  ),
+                  )),
                 ],
               ),
             ),
