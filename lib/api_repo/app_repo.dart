@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/helper/firebase_const.dart';
 import 'package:dvgsurveyor/model/gam_model.dart';
+import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 
 class AppRepo {
   AppRepo._();
@@ -16,6 +17,14 @@ class AppRepo {
         fromFirestore: (snapshot, _) => GamModel.fromFirestore(snapshot),
         toFirestore: (model, _) => model.toFirestore(),
       );
+
+  CollectionReference<SurveyModel> get _surveyCollection =>
+      FirebaseFirestore.instance
+          .collection(FirebaseConst.surveyCollection)
+          .withConverter<SurveyModel>(
+            fromFirestore: (snapshot, _) => SurveyModel.fromFirebase(snapshot),
+            toFirestore: (model, _) => model.toFirebase(),
+          );
 
   Future<List<GamModel>> getGam() async {
     try {
@@ -56,6 +65,45 @@ class AppRepo {
     } catch (e) {
       log("Error in addUpdatePropertyType: $e");
       return null;
+    }
+  }
+
+  Future<List<SurveyModel>> getSurveyDataByCityDateWorker({
+    required String userId,
+    String? cityName, // optional
+    DateTime? startDate, // optional
+    DateTime? endDate, // optional
+  }) async {
+    try {
+      Query query = _surveyCollection.where('userId', isEqualTo: userId);
+
+      if (cityName != null && cityName.isNotEmpty) {
+        query = query.where('gamName', isEqualTo: cityName);
+      }
+
+      if (startDate != null) {
+        query = query.where('createdAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
+      }
+
+      if (endDate != null) {
+        // Add 1 day to include the full end date
+        final adjustedEnd = endDate.add(const Duration(days: 1));
+        query = query.where('createdAt',
+            isLessThan: Timestamp.fromDate(adjustedEnd));
+      }
+
+      query = query.orderBy('createdAt', descending: true);
+
+      final querySnap = await query.get();
+
+      return querySnap.docs
+          .map((doc) => doc.data())
+          .whereType<SurveyModel>()
+          .toList();
+    } catch (e) {
+      log('Log: get error in getSurveyData $e');
+      return [];
     }
   }
 }
