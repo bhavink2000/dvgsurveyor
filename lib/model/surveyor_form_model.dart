@@ -132,7 +132,7 @@ class AreaDetail {
         'patara': patara,
         'પતરા': patara,
         'nadiya': nadiya,
-        'નાળિયા': nadiya,
+        'નળિયા': nadiya,
         'open': open,
         'ખુલ્લું': open,
       };

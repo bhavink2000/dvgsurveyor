@@ -56,7 +56,7 @@ class SurveyorFormScreenController extends GetxController {
     'સ્લેબ',
     'પાપડા',
     'પતરા',
-    'નાળિયા',
+    'નળિયા',
     'ખુલ્લું'
   ];
   final RxString selectedBaseFloor = ''.obs;
@@ -213,7 +213,7 @@ class SurveyorFormScreenController extends GetxController {
         return detail.papda;
       case 'પતરા':
         return detail.patara;
-      case 'નાળિયા':
+      case 'નળિયા':
         return detail.nadiya;
       case 'ખુલ્લું':
         return detail.open;
