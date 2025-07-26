@@ -57,7 +57,7 @@ class CityWiseCard extends GetWidget<DashboardController> {
                     SizedBox(
                       width: 110,
                       height: 34,
-                      child: DropdownButtonFormField<GamModel>(
+                      child: DropdownButtonFormField<GamModel?>(
                         value: controller.selectedGam.value,
                         isExpanded: true,
                         decoration: InputDecoration(
@@ -87,15 +87,25 @@ class CityWiseCard extends GetWidget<DashboardController> {
                                     CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.arrow_drop_down),
-                        items: controller.gamList.map((gam) {
-                          return DropdownMenuItem<GamModel>(
-                            value: gam,
+                        items: [
+                          const DropdownMenuItem<GamModel>(
+                            value: null,
                             child: Text(
-                              gam.name.capitalizeFirst ?? '',
-                              style: const TextStyle(fontSize: 13),
+                              'Select City',
+                              style:
+                                  TextStyle(fontSize: 13, color: Colors.grey),
                             ),
-                          );
-                        }).toList(),
+                          ),
+                          ...controller.gamList.map((gam) {
+                            return DropdownMenuItem<GamModel>(
+                              value: gam,
+                              child: Text(
+                                gam.name.capitalizeFirst ?? '',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            );
+                          }).toList(),
+                        ],
                         onChanged: (val) {
                           if (val != null) {
                             controller.selectedGam.value = val;

@@ -42,11 +42,6 @@ class DashboardController extends GetxController {
     try {
       final res = await appRepo.getGam();
       gamList.value = res;
-
-      // Optionally preselect first item
-      if (gamList.isNotEmpty && selectedGam.value == null) {
-        selectedGam.value = gamList.first;
-      }
     } catch (e) {
       log('Log: Error in fetch gam name $e');
     } finally {
