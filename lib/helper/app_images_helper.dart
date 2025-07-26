@@ -10,4 +10,5 @@ class AppImages {
   static const String cityWise = 'assets/images/city_wise.png';
   static const String dateWise = 'assets/images/date_wise.png';
   static const String excelDownload = 'assets/images/excel_download.png';
+  static const String workerWise = 'assets/images/worker_wise.jpg';
 }
