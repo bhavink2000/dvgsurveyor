@@ -39,6 +39,9 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
               buildInput(
                 FormLabels.surveyNumber,
                 controller.surveyNumber,
+                validator: (value) {
+                  return null;
+                },
               ),
               buildInput(
                 FormLabels.ownerName,
