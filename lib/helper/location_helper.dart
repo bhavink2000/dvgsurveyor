@@ -1,16 +1,16 @@
 import 'dart:developer';
 import 'package:location/location.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart' as perm;
 
 class LocationHelper {
   final Location _location = Location();
 
   Future<void> requestAllPermissions() async {
     final permissions = [
-      Permission.location,
-      Permission.storage,
-      Permission.photos, // For Android 13+
-      Permission.mediaLibrary, // Optional for iOS
+      perm.Permission.location,
+      perm.Permission.storage,
+      perm.Permission.photos, // For Android 13+
+      perm.Permission.mediaLibrary, // Optional for iOS
     ];
 
     for (var permission in permissions) {
@@ -20,7 +20,7 @@ class LocationHelper {
         final result = await permission.request();
         if (!result.isGranted) {
           if (await permission.isPermanentlyDenied) {
-            await openAppSettings(); // Opens system settings
+            await perm.openAppSettings(); // Opens system settings
           }
 
           log('Permission ${permission.toString()} denied.');
@@ -40,5 +40,30 @@ class LocationHelper {
 
   Future<LocationData> getCurrentPosition() async {
     return await _location.getLocation();
+  }
+
+  Future<bool> checkPermission() async {
+    PermissionStatus permissionGranted = await _location.hasPermission();
+
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return false;
+      }
+    }
+
+    if (permissionGranted == PermissionStatus.deniedForever) {
+      return false;
+    }
+
+    bool serviceEnabled = await _location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _location.requestService();
+      if (!serviceEnabled) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

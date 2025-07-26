@@ -132,7 +132,7 @@ class AreaDetail {
         'patara': patara,
         'પતરા': patara,
         'nadiya': nadiya,
-        'નાળિયા': nadiya,
+        'નળિયા': nadiya,
         'open': open,
         'ખુલ્લું': open,
       };
@@ -187,6 +187,8 @@ class SurveyModel {
   final String? gamName;
   final Map<String, LocationMap> locationMap;
   final bool? isFormEdit;
+  final String? surveyNumber;
+  final String? remarks;
 
   SurveyModel({
     required this.userId,
@@ -212,6 +214,8 @@ class SurveyModel {
     this.gamName,
     required this.locationMap,
     this.isFormEdit = false,
+    this.surveyNumber,
+    this.remarks,
   });
 
   factory SurveyModel.fromFirebase(DocumentSnapshot json) {
@@ -250,6 +254,8 @@ class SurveyModel {
         (key, value) => MapEntry(key, LocationMap.fromMap(value)),
       ),
       isFormEdit: data['isFormEdit'] ?? false,
+      surveyNumber: data['surveyNumber'] ?? '',
+      remarks: data['remarks'] ?? '',
     );
   }
 
@@ -280,6 +286,8 @@ class SurveyModel {
         'locationMap':
             locationMap.map((key, value) => MapEntry(key, value.toMap())),
         'isFormEdit': isFormEdit,
+        'surveyNumber': surveyNumber,
+        'remarks': remarks,
       };
 
   SurveyModel copyWith({
@@ -306,6 +314,8 @@ class SurveyModel {
     String? gamName,
     Map<String, LocationMap>? locationMap,
     bool? isFormEdit,
+    String? surveyNumber,
+    String? remarks,
   }) {
     return SurveyModel(
       userId: userId ?? this.userId,
@@ -331,6 +341,8 @@ class SurveyModel {
       gamName: gamName ?? this.gamName,
       locationMap: locationMap ?? this.locationMap,
       isFormEdit: isFormEdit ?? this.isFormEdit,
+      surveyNumber: surveyNumber ?? this.surveyNumber,
+      remarks: remarks ?? this.remarks,
     );
   }
 }

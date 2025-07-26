@@ -36,11 +36,13 @@ class SurveyScreenController extends GetxController {
     userData = await AuthRepo.instance.getUser(userId: userData?.id);
   }
 
-  Future<void> fetchSurveyData() async {
+  Future<void> fetchSurveyData({
+    String? userId,
+  }) async {
     isSurveyLoad.value = true;
     try {
       final response = await authRepo.getSurveyData(
-          userId: SessionManager.getUser()?.id ?? '');
+          userId: userId ?? '');
       surveyData.value = response;
       isSurveyLoad.value = false;
     } catch (e) {

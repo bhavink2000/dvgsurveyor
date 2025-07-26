@@ -31,6 +31,8 @@ class SurveyorFormScreenController extends GetxController {
   final constructionYear = TextEditingController();
   final totalFloors = TextEditingController();
   final newFloorController = TextEditingController();
+  final surveyNumber = TextEditingController();
+  final remarks = TextEditingController();
 
   // Dropdown Selections
   RxnString selectedUsageId = RxnString();
@@ -54,7 +56,7 @@ class SurveyorFormScreenController extends GetxController {
     'સ્લેબ',
     'પાપડા',
     'પતરા',
-    'નાળિયા',
+    'નળિયા',
     'ખુલ્લું'
   ];
   final RxString selectedBaseFloor = ''.obs;
@@ -211,7 +213,7 @@ class SurveyorFormScreenController extends GetxController {
         return detail.papda;
       case 'પતરા':
         return detail.patara;
-      case 'નાળિયા':
+      case 'નળિયા':
         return detail.nadiya;
       case 'ખુલ્લું':
         return detail.open;
@@ -278,6 +280,8 @@ class SurveyorFormScreenController extends GetxController {
           )
         },
         isFormEdit: isEdit,
+        surveyNumber: surveyNumber.text.trim(),
+        remarks: remarks.text.trim(),
       );
 
       final result = await authRepo.saveSurveyForm(

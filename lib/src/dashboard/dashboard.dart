@@ -2,6 +2,8 @@ import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
+import 'package:dvgsurveyor/helper/app_snackbar.dart';
+import 'package:dvgsurveyor/helper/location_helper.dart';
 import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
 import 'package:dvgsurveyor/src/dashboard/dashboard_widget/city_wise_card.dart';
 import 'package:dvgsurveyor/src/dashboard/dashboard_widget/date_wise_card.dart';
@@ -19,7 +21,18 @@ class DashboardScreen extends GetWidget<DashboardController> {
       backgroundColor: AppColors.tealPrimary,
       drawer: const DrawerScreen(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppRoutes.surveyorFormScreen),
+        onPressed: () async {
+          final hasPermission = await LocationHelper().checkPermission();
+          if (!hasPermission) {
+            AppSnackbar.showSnackbar(
+              title: 'Location Required',
+              message: 'Please enable location permission to continue.',
+            );
+            return;
+          }
+
+          Get.toNamed(AppRoutes.surveyorFormScreen);
+        },
         backgroundColor: AppColors.tealDark,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
