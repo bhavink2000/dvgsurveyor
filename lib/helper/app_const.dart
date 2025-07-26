@@ -59,4 +59,7 @@ class AppConst {
   static const String survey = 'Survey';
   static const String areYouSureToDeleteSurvey =
       'Are you sure you want to delete this Survey?';
+
+      static const String areYouSureToDeleteUser =
+      'Are you sure you want to delete this user?';
 }
