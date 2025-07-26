@@ -31,6 +31,8 @@ class SurveyorFormScreenController extends GetxController {
   final constructionYear = TextEditingController();
   final totalFloors = TextEditingController();
   final newFloorController = TextEditingController();
+  final surveyNumber = TextEditingController();
+  final remarks = TextEditingController();
 
   // Dropdown Selections
   RxnString selectedUsageId = RxnString();
@@ -278,6 +280,8 @@ class SurveyorFormScreenController extends GetxController {
           )
         },
         isFormEdit: isEdit,
+        surveyNumber: surveyNumber.text.trim(),
+        remarks: remarks.text.trim(),
       );
 
       final result = await authRepo.saveSurveyForm(

@@ -20,6 +20,8 @@ class GujaratiTranslations extends Translations {
           FormLabels.patara: 'પતરા',
           FormLabels.nadiya: 'નળીયા',
           FormLabels.khulu: 'ખુલ્લુ',
+          FormLabels.surveyNumber: 'સરવે નંબર',
+          FormLabels.remarks: 'ટિપ્પણીઓ',
 
           // Optional: Additional translations (uncomment and use as needed)
           // 'propertyTypeResidential': 'રહેણાંક',
@@ -49,4 +51,6 @@ class FormLabels {
   static const String patara = 'patara';
   static const String nadiya = 'nadiya';
   static const String khulu = 'khulu';
+  static const String surveyNumber = 'surveyNumber';
+  static const String remarks = 'remarks';
 }

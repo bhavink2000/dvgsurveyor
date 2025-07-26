@@ -57,37 +57,74 @@ class SurveyCardWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Left Side: Owner + Address + Rent
                 Expanded(
-                  child: Text(
-                    data.ownerName,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.tealDark,
-                    ),
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data.ownerName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.tealDark,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      _labelValueRow(context, 'Address', data.address),
+                      _labelValueRow(context, 'Rent', data.rentPersonName),
+                    ],
                   ),
                 ),
+                const SizedBox(width: 10),
+                // Right Side: House number + Survey number
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.tealPrimary,
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.tealPrimary.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(2, 2),
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    'N: ${data.newHomeNumber} | O: ${data.oldHomeNumber}',
-                    style: AppFonts.text14(context).copyWith(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'New: ${data.newHomeNumber}',
+                        style: AppFonts.text14(context).copyWith(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Old: ${data.oldHomeNumber}',
+                        style: AppFonts.text14(context).copyWith(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        'Survey: ${data.surveyNumber}',
+                        style: AppFonts.text14(context).copyWith(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            _labelValueRow(context, 'Address', data.address),
-            _labelValueRow(context, 'Rent', data.rentPersonName),
             const Divider(),
             Row(
               children: [

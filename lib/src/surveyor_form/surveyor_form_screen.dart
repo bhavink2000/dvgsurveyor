@@ -37,6 +37,10 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
           child: Column(
             children: [
               buildInput(
+                FormLabels.surveyNumber,
+                controller.surveyNumber,
+              ),
+              buildInput(
                 FormLabels.ownerName,
                 controller.ownerName,
               ),
@@ -111,6 +115,13 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                 FormLabels.totalFloors,
                 controller.totalFloors,
                 keyboardType: TextInputType.number,
+              ),
+              buildInput(
+                FormLabels.remarks,
+                controller.remarks,
+                validator: (value) {
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               Obx(() => Column(
