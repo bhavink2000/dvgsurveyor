@@ -227,10 +227,17 @@ class AuthRepo {
 
   Future<List<SurveyModel>> getSurveyData({required String userId}) async {
     try {
-      final querySnap = await _surveyCollection
-          .where('userId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
-          .get();
+      final querySnap;
+      if (userId != '' || userId.isNotEmpty) {
+        querySnap = await _surveyCollection
+            .where('userId', isEqualTo: userId)
+            .orderBy('createdAt', descending: true)
+            .get();
+      } else {
+        querySnap = await _surveyCollection
+            .orderBy('createdAt', descending: true)
+            .get();
+      }
 
       return querySnap.docs
           .map((doc) => doc.data())

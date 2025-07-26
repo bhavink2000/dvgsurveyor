@@ -104,6 +104,7 @@ class SurveyCardWidget extends StatelessWidget {
                 _infoColumn(context, 'Type', propertyTypeName),
                 _infoColumn(context, 'Desc', propertyDescriptionName),
                 _infoColumn(context, 'Floors', data.totalFloors.toString()),
+                _infoColumn(context, 'Survey By', data.userName),
               ],
             ),
             const Divider(),
