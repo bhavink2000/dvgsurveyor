@@ -30,6 +30,13 @@ class DashboardController extends GetxController {
   final Rxn<DateTime> selectedStartDate = Rxn<DateTime>();
   final Rxn<DateTime> selectedEndDate = Rxn<DateTime>();
 
+  final RxList<UserCollectionModel> allWorkers = <UserCollectionModel>[].obs;
+  final RxList<String> workerList = <String>[].obs; // Just for dropdown
+  final Rx<String?> selectedWorker = Rx<String?>(null);
+  RxBool isWorkerLoad = false.obs;
+  final RxInt workerTotalSurveyCount = 0.obs;
+  final RxInt workerTotalAreaCount = 0.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -51,6 +58,22 @@ class DashboardController extends GetxController {
 
   Future<void> getUserDataFromStorage() async {
     userData = SessionManager.getUser();
+    if (userData?.role == 'Admin') {
+      await getAllWorker();
+    }
+  }
+
+  Future<void> getAllWorker() async {
+    isWorkerLoad.value = true;
+    try {
+      final workerRes = await authRepo.getAllUser(); // List<UserModel>
+      allWorkers.value = workerRes;
+      workerList.value = workerRes.map((e) => e.username).toList();
+    } catch (e) {
+      log('Error fetching workers: $e');
+    } finally {
+      isWorkerLoad.value = false;
+    }
   }
 
   Future<void> pickStartDate(BuildContext context) async {
@@ -139,6 +162,33 @@ class DashboardController extends GetxController {
     } catch (e) {
       dateTotalSurveyCount.value = 0;
       dateTotalAreaCount.value = 0;
+      log('Error in fetchDateSurveySummary: $e');
+    }
+  }
+
+  Future<void> fetchWorkerSurveySummary({String? workerId}) async {
+    try {
+      final surveys = await appRepo.getSurveyDataByCityDateWorker(
+        userId: '',
+        cityName: null,
+        startDate: null,
+        endDate: null,
+        workerId: workerId ?? '',
+      );
+
+      workerTotalSurveyCount.value = surveys.length;
+
+      int areaSum = 0;
+      for (final survey in surveys) {
+        for (final area in survey.area.values) {
+          areaSum += (area.totalArea).toInt();
+        }
+      }
+
+      workerTotalAreaCount.value = areaSum;
+    } catch (e) {
+      workerTotalAreaCount.value = 0;
+      workerTotalSurveyCount.value = 0;
       log('Error in fetchDateSurveySummary: $e');
     }
   }

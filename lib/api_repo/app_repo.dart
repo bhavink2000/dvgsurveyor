@@ -73,9 +73,14 @@ class AppRepo {
     String? cityName, // optional
     DateTime? startDate, // optional
     DateTime? endDate, // optional
+    String? workerId,
   }) async {
     try {
-      Query query = _surveyCollection.where('userId', isEqualTo: userId);
+      Query query = _surveyCollection;
+
+      if (userId.isNotEmpty || userId != '') {
+        query = query.where('userId', isEqualTo: userId);
+      }
 
       if (cityName != null && cityName.isNotEmpty) {
         query = query.where('gamName', isEqualTo: cityName);
@@ -91,6 +96,10 @@ class AppRepo {
         final adjustedEnd = endDate.add(const Duration(days: 1));
         query = query.where('createdAt',
             isLessThan: Timestamp.fromDate(adjustedEnd));
+      }
+
+      if (workerId != null) {
+        query = query.where('userId', isEqualTo: workerId);
       }
 
       query = query.orderBy('createdAt', descending: true);
