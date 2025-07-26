@@ -42,7 +42,11 @@ class SurveyScreenController extends GetxController {
     isSurveyLoad.value = true;
     try {
       final response = await authRepo.getSurveyData(
-          userId: userId ?? '');
+        userId: (SessionManager.getUser()?.role == 'Worker'
+                ? SessionManager.getUser()?.id
+                : userId) ??
+            '',
+      );
       surveyData.value = response;
       isSurveyLoad.value = false;
     } catch (e) {
