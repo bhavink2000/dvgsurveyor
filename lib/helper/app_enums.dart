@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-enum RoleEnum { admin, worker }
+enum RoleEnum { admin, worker, govt }
 
 extension RoleEnumExtension on RoleEnum {
   String get displayName {
@@ -9,6 +9,8 @@ extension RoleEnumExtension on RoleEnum {
         return 'Admin';
       case RoleEnum.worker:
         return 'Worker';
+      case RoleEnum.govt:
+        return 'Govt';  
     }
   }
 

@@ -306,4 +306,14 @@ class AuthRepo {
       return null;
     }
   }
+
+  Future<void> deleteUser({String? userId}) async {
+    try {
+      if (userId != null) {
+        await _userCollection.doc(userId).delete();
+      }
+    } catch (e) {
+      log('Error deleting user: $e');
+    }
+  }
 }
