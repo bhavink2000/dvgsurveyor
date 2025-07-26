@@ -5,6 +5,7 @@ import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_enums.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
+import 'package:dvgsurveyor/model/user_collection_model.dart';
 import 'package:dvgsurveyor/src/user_mangement/controller/user_mangement_screen_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -55,8 +56,7 @@ class UserMangementScreen extends GetWidget<UserMangementScreenController> {
           itemBuilder: (context, index) {
             var userData = controller.userList[index];
             return UserApprovalCard(
-              name: "${userData.firstName} ${userData.lastName}",
-              mobile: userData.mobileNumber,
+              userData: userData,
               initialRole:
                   RoleEnumExtension.fromString(userData.role ?? 'Worker'),
               initialExcel: userData.isExcelDownload ?? false,
@@ -64,11 +64,13 @@ class UserMangementScreen extends GetWidget<UserMangementScreenController> {
               initialDelete: userData.isDelete ?? false,
               isApproved: userData.isApproved ?? false,
               isSaving: controller.isSavingMap[userData.id] ?? false,
+              isActive: userData.isActive ?? false,
               onSave: ({
                 required RoleEnum selectedRole,
                 required bool isExcel,
                 required bool isEdit,
                 required bool isDelete,
+                required bool isActive,
               }) {
                 final userDetails = userData.copyWith(
                   role: selectedRole.displayName,
@@ -76,6 +78,7 @@ class UserMangementScreen extends GetWidget<UserMangementScreenController> {
                   isEditable: isEdit,
                   isDelete: isDelete,
                   isApproved: true,
+                  isActive: isActive,
                 );
                 controller.updateUser(userData: userDetails);
                 log('Saving User ${userData.id}');
@@ -89,26 +92,26 @@ class UserMangementScreen extends GetWidget<UserMangementScreenController> {
   }
 }
 
-class UserApprovalCard extends StatefulWidget {
-  final String name;
-  final String mobile;
+class UserApprovalCard extends GetWidget<UserMangementScreenController> {
+  UserCollectionModel userData;
   final RoleEnum? initialRole;
   final bool initialExcel;
   final bool initialEdit;
   final bool initialDelete;
   final bool isApproved;
   final bool isSaving;
+  final bool isActive;
   final void Function({
     required RoleEnum selectedRole,
     required bool isExcel,
     required bool isEdit,
     required bool isDelete,
+    required bool isActive,
   }) onSave;
 
-  const UserApprovalCard({
+  UserApprovalCard({
     super.key,
-    required this.name,
-    required this.mobile,
+    required this.userData,
     required this.initialRole,
     required this.initialExcel,
     required this.initialEdit,
@@ -116,215 +119,284 @@ class UserApprovalCard extends StatefulWidget {
     required this.onSave,
     required this.isApproved,
     required this.isSaving,
-  });
-
-  @override
-  State<UserApprovalCard> createState() => _UserApprovalCardState();
-}
-
-class _UserApprovalCardState extends State<UserApprovalCard> {
-  late RoleEnum? selectedRole;
-  late bool isExcel;
-  late bool isEdit;
-  late bool isDelete;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedRole = widget.initialRole;
-    isExcel = widget.initialExcel;
-    isEdit = widget.initialEdit;
-    isDelete = widget.initialDelete;
+    required this.isActive,
+  }) {
+    final cardController =
+        Get.put(UserMangementScreenController(), tag: userData.id);
+    cardController.initialize(
+      initialRole: initialRole,
+      initialExcel: initialExcel,
+      initialEdit: initialEdit,
+      initialDelete: initialDelete,
+      initialActive: isActive,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final c = Get.find<UserMangementScreenController>(tag: userData.id);
+
     return Container(
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppColors.offWhite,
-        border: Border.all(color: AppColors.tealDark, width: 1),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
       ),
-      margin: const EdgeInsets.only(bottom: 12),
       child: Card(
-        elevation: 4,
-        margin: EdgeInsets.zero,
-        shadowColor: AppColors.tealExtraLight,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
-              child: Row(
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              /// Header Row
+              Row(
                 children: [
                   CircleAvatar(
                     backgroundColor: AppColors.tealPrimary,
-                    radius: 20,
+                    radius: 22,
                     child: Text(
-                      widget.name.characters.first.toUpperCase(),
-                      style: AppFonts.text16(context)
-                          .copyWith(color: Colors.white),
+                      '${userData.firstName} ${userData.lastName}'
+                          .characters
+                          .first
+                          .toUpperCase(),
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(widget.name, style: AppFonts.text16(context)),
-                      Text(widget.mobile,
-                          style: AppFonts.text14(context).copyWith(
-                            color: AppColors.darkGrey,
-                            fontSize: 12,
-                          )),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${userData.firstName} ${userData.lastName}',
+                            style: AppFonts.text16(context).copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.tealDark)),
+                        Text(userData.mobileNumber,
+                            style: AppFonts.text14(context).copyWith(
+                                color: AppColors.darkGrey, fontSize: 12)),
+                      ],
+                    ),
                   ),
-                  Spacer(),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: widget.isApproved == false
-                          ? AppColors.coralAccent.withValues(alpha: 0.5)
-                          : AppColors.tealPrimary.withValues(alpha: 0.5),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    child: Text(
-                      widget.isApproved == false ? 'Pending' : 'Approved',
-                      style: AppFonts.text14(context).copyWith(
-                        fontSize: 12,
-                        color: AppColors.offWhite,
-                      ),
-                    ),
-                  )
+                  _statusChip(context),
                 ],
               ),
-            ),
-            const Divider(thickness: 1),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Role", style: TextStyle(fontSize: 12)),
-                      const SizedBox(height: 4),
-                      SizedBox(
-                        width: 90,
-                        height: 34,
-                        child: DropdownButtonFormField<RoleEnum>(
-                          value: selectedRole,
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            contentPadding:
-                                const EdgeInsets.symmetric(horizontal: 8),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: Colors.teal),
-                            ),
-                          ),
-                          items: RoleEnum.values
-                              .map((role) => DropdownMenuItem(
-                                    value: role,
-                                    child: Text(role.displayName,
-                                        style: const TextStyle(fontSize: 12)),
-                                  ))
-                              .toList(),
-                          onChanged: (val) =>
-                              setState(() => selectedRole = val),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 12),
-                  _buildMiniSwitch(
-                      "Excel", isExcel, (v) => setState(() => isExcel = v)),
-                  const SizedBox(width: 8),
-                  _buildMiniSwitch(
-                      "Edit", isEdit, (v) => setState(() => isEdit = v)),
-                  const SizedBox(width: 8),
-                  _buildMiniSwitch(
-                      "Delete", isDelete, (v) => setState(() => isDelete = v)),
-                  const Spacer(),
-                ],
+              Divider(
+                color: AppColors.tealLight,
+                thickness: 0.7,
+                height: 24,
               ),
-            ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(bottom: Radius.circular(16)),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: widget.isSaving
-                      ? null
-                      : () {
-                          if (selectedRole == null) {
-                            AppSnackbar.showSnackbar(
-                                message: 'Please select a role');
-                            return;
-                          }
-                          widget.onSave(
-                            selectedRole: selectedRole!,
-                            isExcel: isExcel,
-                            isEdit: isEdit,
-                            isDelete: isDelete,
-                          );
-                        },
-                  icon: widget.isSaving
-                      ? const SizedBox.shrink()
-                      : const Icon(Icons.save),
-                  label: widget.isSaving
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(widget.isApproved == false ? "Approved" : "Save"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.tealPrimary,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(50),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(bottom: Radius.circular(16)),
-                    ),
-                  ),
-                ),
+              _roleAndCredentials(context, c, userData: userData),
+              const SizedBox(height: 10),
+              _switchesRow(context, c),
+              const SizedBox(height: 12),
+              _actionButtons(
+                context,
+                c,
+                userData: userData,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Reusable mini switch
+  Widget _statusChip(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isApproved ? Colors.green.shade400 : Colors.red.shade300,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        isApproved ? "Approved" : "Pending",
+        style: AppFonts.text14(context)
+            .copyWith(color: Colors.white, fontSize: 12),
+      ),
+    );
+  }
+
+  Widget _roleAndCredentials(
+      BuildContext context, UserMangementScreenController c,
+      {UserCollectionModel? userData}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        /// Role Dropdown
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Role", style: TextStyle(fontSize: 12)),
+            const SizedBox(height: 4),
+            Obx(() => SizedBox(
+                  width: 100,
+                  height: 36,
+                  child: DropdownButtonFormField<RoleEnum>(
+                    value: c.selectedRole.value,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: AppColors.tealExtraLight.withOpacity(0.15),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    items: RoleEnum.values
+                        .map((role) => DropdownMenuItem(
+                              value: role,
+                              child: Text(role.displayName,
+                                  style: const TextStyle(fontSize: 12)),
+                            ))
+                        .toList(),
+                    onChanged: (val) => c.selectedRole.value = val,
+                  ),
+                )),
+          ],
+        ),
+
+        _infoColumn("Username", "${userData?.username}", context),
+        _infoColumn("Password", "${userData?.password}", context),
+      ],
+    );
+  }
+
+  Widget _switchesRow(BuildContext context, UserMangementScreenController c) {
+    return Obx(() => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildMiniSwitch(
+                "Active", c.isActive.value, (v) => c.isActive.value = v),
+            _buildMiniSwitch(
+                "Excel", c.isExcel.value, (v) => c.isExcel.value = v),
+            _buildMiniSwitch("Edit", c.isEdit.value, (v) => c.isEdit.value = v),
+            _buildMiniSwitch(
+                "Delete", c.isDelete.value, (v) => c.isDelete.value = v),
+          ],
+        ));
+  }
+
+  Widget _actionButtons(
+    BuildContext context,
+    UserMangementScreenController c, {
+    UserCollectionModel? userData,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildActionButton(
+          label: "Edit",
+          icon: Icons.edit_rounded,
+          onPressed: () {
+            c.openEditSheet(
+              context: context,
+              user: userData,
+            );
+          },
+          isLoading: isSaving,
+        ),
+        _buildActionButton(
+          label: isApproved ? "Save" : "Approve",
+          icon: Icons.done_rounded,
+          onPressed: isSaving
+              ? null
+              : () {
+                  if (c.selectedRole.value == null) {
+                    AppSnackbar.showSnackbar(message: 'Please select a role');
+                    return;
+                  }
+                  onSave(
+                    selectedRole: c.selectedRole.value!,
+                    isExcel: c.isExcel.value,
+                    isEdit: c.isEdit.value,
+                    isDelete: c.isDelete.value,
+                    isActive: c.isActive.value,
+                  );
+                },
+          isLoading: isSaving,
+        ),
+        _buildActionButton(
+          label: "Delete",
+          icon: Icons.delete_rounded,
+          onPressed: isSaving
+              ? null
+              : () {
+                  c.deleteUser(userId: userData!.id);
+                },
+          isLoading: isSaving,
+        ),
+      ],
+    );
+  }
+
   Widget _buildMiniSwitch(String label, bool value, Function(bool) onChanged) {
     return Column(
       children: [
-        Text(label, style: AppFonts.text14(context).copyWith(fontSize: 12.sp)),
+        Text(label, style: const TextStyle(fontSize: 12)),
         Transform.scale(
-          scale: 0.65,
+          scale: 0.7,
           child: Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.tealDark,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            activeColor: AppColors.tealPrimary,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _infoColumn(String label, String value, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: AppFonts.text14(context).copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.tealDark,
+            )),
+        Text(value,
+            style: AppFonts.text14(context).copyWith(
+              fontSize: 10,
+              color: Colors.grey,
+            )),
+      ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback? onPressed,
+    bool isLoading = false,
+  }) {
+    return SizedBox(
+      width: 75.w,
+      height: 35,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.tealPrimary,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          elevation: 3,
+        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(label,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+      ),
     );
   }
 }
