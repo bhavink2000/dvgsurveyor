@@ -64,8 +64,8 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
           ),
 
           // ───── Menu Items ─────
-          SizedBox(height: controller.userData?.role != 'Worker' ? 16.h : 0.h),
-          controller.userData?.role != 'Worker'
+          SizedBox(height: controller.userData?.role == 'Admin' ? 16.h : 0.h),
+          controller.userData?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.supervisor_account,
                   title: AppConst.userManagement,
@@ -74,7 +74,7 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
                 )
               : SizedBox(),
 
-          controller.userData?.role != 'Worker'
+          controller.userData?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.category_rounded,
                   title: AppConst.propertType,
@@ -82,7 +82,7 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
                   context: context,
                 )
               : SizedBox(),
-          controller.userData?.role != 'Worker'
+          controller.userData?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.description_rounded,
                   title: AppConst.propertyDesc,
@@ -90,7 +90,7 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
                   context: context,
                 )
               : SizedBox(),
-          controller.userData?.role != 'Worker'
+          controller.userData?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.location_city_rounded,
                   title: AppConst.cityManagement,
@@ -104,6 +104,14 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
             onTap: () => Get.toNamed(AppRoutes.surveyScreen),
             context: context,
           ),
+          controller.userData?.role == 'Admin'
+              ? _buildDrawerItem(
+                  icon: Icons.archive_rounded,
+                  title: AppConst.archiveSurvey,
+                  onTap: () => Get.toNamed(AppRoutes.archiveSurveyScreen),
+                  context: context,
+                )
+              : SizedBox(),
           const Spacer(),
           Divider(thickness: 1, indent: 16.w, endIndent: 16.w),
           _buildDrawerItem(
