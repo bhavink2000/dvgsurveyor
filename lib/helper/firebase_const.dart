@@ -5,4 +5,5 @@ class FirebaseConst {
   static const String propertyType = 'propertyType';
   static const String propertyDescription = 'propertyDescription';
   static const String gamNameCollection = 'gamName';
+  static const String archiveSurveyCollection = 'archiveSurveys';
 }
