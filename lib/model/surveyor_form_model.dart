@@ -189,6 +189,7 @@ class SurveyModel {
   final bool? isFormEdit;
   final String? surveyNumber;
   final String? remarks;
+  final String? isDabaan;
 
   SurveyModel({
     required this.userId,
@@ -216,6 +217,7 @@ class SurveyModel {
     this.isFormEdit = false,
     this.surveyNumber,
     this.remarks,
+    this.isDabaan = 'ના',
   });
 
   factory SurveyModel.fromFirebase(DocumentSnapshot json) {
@@ -256,6 +258,7 @@ class SurveyModel {
       isFormEdit: data['isFormEdit'] ?? false,
       surveyNumber: data['surveyNumber'] ?? '',
       remarks: data['remarks'] ?? '',
+      isDabaan: data['isDabaan'] ?? '',
     );
   }
 
@@ -288,6 +291,7 @@ class SurveyModel {
         'isFormEdit': isFormEdit,
         'surveyNumber': surveyNumber,
         'remarks': remarks,
+        'isDabaan': isDabaan,
       };
 
   SurveyModel copyWith({
@@ -316,6 +320,7 @@ class SurveyModel {
     bool? isFormEdit,
     String? surveyNumber,
     String? remarks,
+    String? isDabaan,
   }) {
     return SurveyModel(
       userId: userId ?? this.userId,
@@ -343,6 +348,7 @@ class SurveyModel {
       isFormEdit: isFormEdit ?? this.isFormEdit,
       surveyNumber: surveyNumber ?? this.surveyNumber,
       remarks: remarks ?? this.remarks,
+      isDabaan: isDabaan ?? this.isDabaan,
     );
   }
 }
