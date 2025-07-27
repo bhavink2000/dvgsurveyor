@@ -7,6 +7,7 @@ import 'package:dvgsurveyor/helper/location_helper.dart';
 import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
 import 'package:dvgsurveyor/src/dashboard/dashboard_widget/city_wise_card.dart';
 import 'package:dvgsurveyor/src/dashboard/dashboard_widget/date_wise_card.dart';
+import 'package:dvgsurveyor/src/dashboard/dashboard_widget/worker_wise_card.dart';
 import 'package:dvgsurveyor/src/drawer_screen/drawer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -103,14 +104,20 @@ class DashboardScreen extends GetWidget<DashboardController> {
                   ),
                 ),
                 child: SafeArea(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(height: 16.h),
-                      CityWiseCard(),
-                      SizedBox(height: 12.h),
-                      DateWiseCard()
-                    ],
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 16.h),
+                        CityWiseCard(),
+                        SizedBox(height: 12.h),
+                        DateWiseCard(),
+                        SizedBox(height: 12.h),
+                        if (controller.userData?.role == 'Admin')
+                          WorkerWiseCard(),
+                        SizedBox(height: 75.h),
+                      ],
+                    ),
                   ),
                 ),
               ),
