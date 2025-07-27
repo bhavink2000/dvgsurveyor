@@ -18,6 +18,19 @@ class SurveyScreenController extends GetxController {
 
   UserCollectionModel? userData;
 
+  RxList<SurveyModel> filteredSurveys = <SurveyModel>[].obs;
+
+  RxString selectedGam = ''.obs;
+  RxString selectedPropertyType = ''.obs;
+  RxString selectedWorker = ''.obs;
+  RxString searchQuery = ''.obs;
+  final searchTextController = TextEditingController();
+
+
+  RxList<String> gamList = <String>[].obs;
+  RxList<String> propertyTypes = <String>[].obs;
+  RxList<String> workerList = <String>[].obs;
+
   @override
   void onInit() {
     fetchSurveyData();
@@ -36,9 +49,7 @@ class SurveyScreenController extends GetxController {
     userData = await AuthRepo.instance.getUser(userId: userData?.id);
   }
 
-  Future<void> fetchSurveyData({
-    String? userId,
-  }) async {
+  Future<void> fetchSurveyData({String? userId}) async {
     isSurveyLoad.value = true;
     try {
       final response = await authRepo.getSurveyData(
@@ -48,11 +59,90 @@ class SurveyScreenController extends GetxController {
             '',
       );
       surveyData.value = response;
+      filteredSurveys.value = response;
+
+      gamList.value = response
+          .map((e) => e.gamName ?? '')
+          .where((e) => e.isNotEmpty)
+          .toSet()
+          .toList();
+
+      propertyTypes.value = response
+          .map((e) => e.propertyType.values.first.propertyName ?? '')
+          .where((e) => e.isNotEmpty)
+          .toSet()
+          .toList();
+
+      workerList.value = response
+          .map((e) => e.userName)
+          .where((e) => e.isNotEmpty)
+          .toSet()
+          .toList();
+
       isSurveyLoad.value = false;
     } catch (e) {
       log('Log: get error in fetch survey data $e');
       isSurveyLoad.value = false;
     }
+  }
+
+  void applySearch([String? inputQuery]) {
+    if (inputQuery != null) searchQuery.value = inputQuery;
+
+    final query = searchQuery.value.toLowerCase();
+
+    filteredSurveys.value = surveyData.where((survey) {
+      final matchesText = [
+        survey.surveyNumber,
+        survey.ownerName,
+        survey.mobileNumber,
+        survey.userName,
+        survey.gamName,
+        survey.propertyType.values.first.propertyName,
+        survey.address,
+      ].any((field) => field?.toLowerCase().contains(query) ?? false);
+
+      final matchesGam =
+          selectedGam.value.isEmpty || survey.gamName == selectedGam.value;
+      final matchesPropType = selectedPropertyType.value.isEmpty ||
+          (survey.propertyType.values.first.propertyName ==
+              selectedPropertyType.value);
+
+      final matchesWorker = selectedWorker.value.isEmpty ||
+          survey.userName == selectedWorker.value;
+
+      return matchesText && matchesGam && matchesPropType && matchesWorker;
+    }).toList();
+  }
+
+  int get gamSurveyCount {
+    if (selectedGam.isEmpty) return 0;
+    return filteredSurveys.where((s) => s.gamName == selectedGam.value).length;
+  }
+
+  int get propertySurveyCount {
+    if (selectedPropertyType.isEmpty) return 0;
+    return filteredSurveys
+        .where((s) =>
+            s.propertyType.values.first.propertyName ==
+            selectedPropertyType.value)
+        .length;
+  }
+
+  int get workerSurveyCount {
+    if (selectedWorker.isEmpty) return 0;
+    return filteredSurveys
+        .where((s) => s.userName == selectedWorker.value)
+        .length;
+  }
+
+  void clearSearchFilters() {
+    searchQuery.value = '';
+    selectedGam.value = '';
+    selectedPropertyType.value = '';
+    selectedWorker.value = '';
+    searchTextController.clear();
+    applySearch();
   }
 
   Future<void> deleteSurvey({String? sId}) async {
