@@ -71,6 +71,8 @@ class SurveyorFormScreenController extends GetxController {
   RxBool isFormSubmit = false.obs;
   final RxBool isEditMode = false.obs;
 
+  RxBool isDabaan = false.obs;
+
   SurveyModel? survey;
   @override
   void onInit() {
@@ -282,6 +284,7 @@ class SurveyorFormScreenController extends GetxController {
         isFormEdit: isEdit,
         surveyNumber: surveyNumber.text.trim(),
         remarks: remarks.text.trim(),
+        isDabaan: isDabaan.value == true ? 'હા' : 'ના',
       );
 
       final result = await authRepo.saveSurveyForm(

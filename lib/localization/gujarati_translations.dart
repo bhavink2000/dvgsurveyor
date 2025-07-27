@@ -22,6 +22,7 @@ class GujaratiTranslations extends Translations {
           FormLabels.khulu: 'ખુલ્લુ',
           FormLabels.surveyNumber: 'સરવે નંબર',
           FormLabels.remarks: 'ટિપ્પણીઓ',
+          FormLabels.daban: 'દબાણ',
 
           // Optional: Additional translations (uncomment and use as needed)
           // 'propertyTypeResidential': 'રહેણાંક',
@@ -53,4 +54,5 @@ class FormLabels {
   static const String khulu = 'khulu';
   static const String surveyNumber = 'surveyNumber';
   static const String remarks = 'remarks';
+  static const String daban = 'daban';
 }

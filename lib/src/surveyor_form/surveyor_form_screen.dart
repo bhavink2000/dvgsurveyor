@@ -114,10 +114,34 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                 controller.constructionYear,
                 keyboardType: TextInputType.number,
               ),
-              buildInput(
-                FormLabels.totalFloors,
-                controller.totalFloors,
-                keyboardType: TextInputType.number,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 175.w,
+                    child: buildInput(
+                      FormLabels.totalFloors,
+                      controller.totalFloors,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('દબાણ', style: AppFonts.text16(context)),
+                      Obx(() => Transform.scale(
+                            scale: 0.8,
+                            child: Switch(
+                              value: controller.isDabaan.value,
+                              onChanged: (val) {
+                                controller.isDabaan.value = val;
+                              },
+                              activeColor: AppColors.tealPrimary,
+                            ),
+                          )),
+                    ],
+                  ),
+                ],
               ),
               buildInput(
                 FormLabels.remarks,
