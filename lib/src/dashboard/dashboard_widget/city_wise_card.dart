@@ -3,8 +3,10 @@
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_images_helper.dart';
+import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/model/gam_model.dart';
 import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
+import 'package:dvgsurveyor/utils/excel_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -175,6 +177,8 @@ class CityWiseCard extends GetWidget<DashboardController> {
               ),
 
               // Download Footer
+              // Obx(
+              //   () =>
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.tealPrimary,
@@ -184,8 +188,30 @@ class CityWiseCard extends GetWidget<DashboardController> {
                   ),
                 ),
                 child: InkWell(
-                  onTap: () {
-                    // handle download
+                  onTap: () async {
+                    if (controller.userData.value?.isExcelDownload == false) {
+                      AppSnackbar.showSnackbar(
+                        title: 'Download Disabled',
+                        message: 'Excel download is disabled for your account',
+                      );
+                      return;
+                    }
+                    if (controller.selectedGam.value != null) {
+                      if (controller.userData.value?.isExcelDownload == true) {
+                        final service = ExcelService();
+                        final List<Map<String, dynamic>> dataList = controller
+                            .filteredSurveys
+                            .map((e) => e.toJson())
+                            .toList();
+
+                        await service.generateAndSaveExcel(dataList);
+                      }
+                    } else {
+                      AppSnackbar.showSnackbar(
+                        title: 'City Not Selected',
+                        message: 'Please select a city to download data',
+                      );
+                    }
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -211,6 +237,7 @@ class CityWiseCard extends GetWidget<DashboardController> {
                   ),
                 ),
               ),
+              // ),
             ],
           ),
         ),

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:dvgsurveyor/api_repo/app_repo.dart';
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
 import 'package:dvgsurveyor/model/gam_model.dart';
+import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/user_collection_model.dart';
 import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ class DashboardController extends GetxController {
 
   DashboardController({required this.authRepo, required this.appRepo});
 
-  UserCollectionModel? userData;
+  Rx<UserCollectionModel?> userData = Rx<UserCollectionModel?>(null);
 
   RxBool isGamLoad = false.obs;
   RxList<GamModel> gamList = <GamModel>[].obs;
@@ -37,6 +38,8 @@ class DashboardController extends GetxController {
   final RxInt workerTotalSurveyCount = 0.obs;
   final RxInt workerTotalAreaCount = 0.obs;
 
+  RxList<SurveyModel> filteredSurveys = <SurveyModel>[].obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -57,8 +60,9 @@ class DashboardController extends GetxController {
   }
 
   Future<void> getUserDataFromStorage() async {
-    userData = SessionManager.getUser();
-    if (userData?.role == 'Admin') {
+    userData.value =
+        await AuthRepo.instance.getUser(userId: SessionManager.getUser()?.id);
+    if (userData.value?.role == 'Admin') {
       await getAllWorker();
     }
   }
@@ -115,8 +119,9 @@ class DashboardController extends GetxController {
 
   Future<void> fetchCitySurveySummary({String? userId}) async {
     try {
+      filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
-        userId: userId ?? userData!.id,
+        userId: userId ?? userData.value!.id,
         cityName:
             selectedGam.value!.name.isNotEmpty ? selectedGam.value?.name : null,
         startDate: null,
@@ -124,6 +129,7 @@ class DashboardController extends GetxController {
       );
 
       cityTotalSurveyCount.value = surveys.length;
+      filteredSurveys.value = surveys;
 
       int areaSum = 0;
       for (final survey in surveys) {
@@ -142,14 +148,16 @@ class DashboardController extends GetxController {
 
   Future<void> fetchDateSurveySummary({String? userId}) async {
     try {
+      filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
-        userId: userId ?? userData!.id,
+        userId: userId ?? userData.value!.id,
         cityName: null,
         startDate: selectedStartDate.value,
         endDate: selectedEndDate.value,
       );
 
       dateTotalSurveyCount.value = surveys.length;
+      filteredSurveys.value = surveys;
 
       int areaSum = 0;
       for (final survey in surveys) {
@@ -168,6 +176,7 @@ class DashboardController extends GetxController {
 
   Future<void> fetchWorkerSurveySummary({String? workerId}) async {
     try {
+      filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
         userId: '',
         cityName: null,
@@ -177,6 +186,7 @@ class DashboardController extends GetxController {
       );
 
       workerTotalSurveyCount.value = surveys.length;
+      filteredSurveys.value = surveys;
 
       int areaSum = 0;
       for (final survey in surveys) {

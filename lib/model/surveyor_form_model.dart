@@ -294,6 +294,84 @@ class SurveyModel {
         'isDabaan': isDabaan,
       };
 
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'userRole': userRole,
+      'userName': userName,
+      'id': id,
+      'ownerName': ownerName,
+      'oldHomeNumber': oldHomeNumber,
+      'index': index,
+      'newHomeNumber': newHomeNumber,
+      'rentPersonName': rentPersonName,
+      'address': address,
+      'propertyStayType': propertyStayType,
+      'propertyType':
+          propertyType.map((key, value) => MapEntry(key, value.toMap())),
+      'propertyDescription':
+          propertyDescription.map((key, value) => MapEntry(key, value.toMap())),
+      'mobileNumber': mobileNumber,
+      'waterPipeline': waterPipeline,
+      'banthkamYear': banthkamYear,
+      'totalFloors': totalFloors,
+      'area': area.map((key, value) => MapEntry(key, value.toMap())),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'gamName': gamName,
+      'locationMap':
+          locationMap.map((key, value) => MapEntry(key, value.toMap())),
+      'isFormEdit': isFormEdit,
+      'surveyNumber': surveyNumber,
+      'remarks': remarks,
+      'isDabaan': isDabaan,
+    };
+  }
+
+  factory SurveyModel.fromJson(Map<String, dynamic> json) {
+    return SurveyModel(
+      userId: json['userId'] ?? '',
+      userRole: json['userRole'] ?? '',
+      userName: json['userName'] ?? '',
+      id: json['id'] ?? '',
+      ownerName: json['ownerName'] ?? '',
+      oldHomeNumber: json['oldHomeNumber'] ?? '',
+      index: json['index'] ?? '',
+      newHomeNumber: json['newHomeNumber'] ?? '',
+      rentPersonName: json['rentPersonName'] ?? '',
+      address: json['address'] ?? '',
+      propertyStayType: json['propertyStayType'] ?? '',
+      propertyType: (json['propertyType'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, PropertyTypeItem.fromMap(value)),
+      ),
+      propertyDescription:
+          (json['propertyDescription'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, PropertyDescriptionItem.fromMap(value)),
+      ),
+      mobileNumber: json['mobileNumber'] ?? '',
+      waterPipeline: json['waterPipeline'] ?? '0',
+      banthkamYear: json['banthkamYear'] ?? '0',
+      totalFloors: json['totalFloors'] ?? '0',
+      area: (json['area'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, AreaDetail.fromMap(value)),
+      ),
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'])
+          : null,
+      gamName: json['gamName'] ?? '',
+      locationMap: (json['locationMap'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, LocationMap.fromMap(value)),
+      ),
+      isFormEdit: json['isFormEdit'] ?? false,
+      surveyNumber: json['surveyNumber'] ?? '',
+      remarks: json['remarks'] ?? '',
+      isDabaan: json['isDabaan'] ?? '',
+    );
+  }
+
   SurveyModel copyWith({
     String? userId,
     String? userRole,

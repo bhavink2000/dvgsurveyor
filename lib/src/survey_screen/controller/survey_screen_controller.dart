@@ -16,7 +16,7 @@ class SurveyScreenController extends GetxController {
   RxList<SurveyModel> surveyData = <SurveyModel>[].obs;
   RxBool isSurveyLoad = false.obs;
 
-  UserCollectionModel? userData;
+  Rx<UserCollectionModel?> userData = Rx<UserCollectionModel?>(null);
 
   RxList<SurveyModel> filteredSurveys = <SurveyModel>[].obs;
 
@@ -26,7 +26,6 @@ class SurveyScreenController extends GetxController {
   RxString searchQuery = ''.obs;
   final searchTextController = TextEditingController();
 
-
   RxList<String> gamList = <String>[].obs;
   RxList<String> propertyTypes = <String>[].obs;
   RxList<String> workerList = <String>[].obs;
@@ -34,19 +33,13 @@ class SurveyScreenController extends GetxController {
   @override
   void onInit() {
     fetchSurveyData();
-    getUserDataFromStorage();
-    Future.delayed(Duration(seconds: 1), () {
-      getUserDataFromFirebase();
-    });
+    getUserData();
     super.onInit();
   }
 
-  Future<void> getUserDataFromStorage() async {
-    userData = SessionManager.getUser();
-  }
-
-  Future<void> getUserDataFromFirebase() async {
-    userData = await AuthRepo.instance.getUser(userId: userData?.id);
+  Future<void> getUserData() async {
+    userData.value =
+        await AuthRepo.instance.getUser(userId: SessionManager.getUser()?.id);
   }
 
   Future<void> fetchSurveyData({String? userId}) async {

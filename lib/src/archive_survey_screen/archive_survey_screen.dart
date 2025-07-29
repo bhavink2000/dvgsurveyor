@@ -1,10 +1,10 @@
-import 'dart:ui';
-
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
+import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/model/gam_model.dart';
 import 'package:dvgsurveyor/src/archive_survey_screen/controller/archive_survey_controller.dart';
+import 'package:dvgsurveyor/utils/excel_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -267,7 +267,25 @@ class ArchiveSurveyScreen extends GetWidget<ArchiveSurveyController> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () {},
+                            onPressed: () async {
+                              if (controller.selectedCity.value.isNotEmpty) {
+                                if (controller.surveyData.isNotEmpty) {
+                                  final service = ExcelService();
+                                  final List<Map<String, dynamic>> dataList =
+                                      controller.surveyData
+                                          .map((e) => e.toJson())
+                                          .toList();
+
+                                  await service.generateAndSaveExcel(dataList);
+                                } else {
+                                  AppSnackbar.showSnackbar(
+                                    title: 'No Data',
+                                    message:
+                                        'No surveys available for ${selected.capitalizeFirst}',
+                                  );
+                                }
+                              }
+                            },
                             icon: Icon(
                               Icons.file_download,
                               color: AppColors.offWhite,
