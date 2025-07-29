@@ -2,7 +2,6 @@ import 'package:dvgsurveyor/common_widgets/survey_card_widget.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/src/survey_screen/controller/survey_screen_controller.dart';
-import 'package:dvgsurveyor/utils/excel_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -22,17 +21,6 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
           style: AppFonts.text20(context).copyWith(
             color: AppColors.offWhite,
           ),
-          actions: [
-            IconButton(
-                onPressed: () async {
-                  final service = ExcelService();
-                  final List<Map<String, dynamic>> dataList =
-                      controller.surveyData.map((e) => e.toJson()).toList();
-
-                  await service.generateAndSaveExcel(dataList);
-                },
-                icon: Icon(Icons.download)),
-          ],
         ),
       ),
       body: Column(

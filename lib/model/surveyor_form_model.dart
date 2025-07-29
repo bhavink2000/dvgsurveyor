@@ -316,8 +316,15 @@ class SurveyModel {
       'banthkamYear': banthkamYear,
       'totalFloors': totalFloors,
       'area': area.map((key, value) => MapEntry(key, value.toMap())),
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'gamName': gamName,
+      'locationMap':
+          locationMap.map((key, value) => MapEntry(key, value.toMap())),
+      'isFormEdit': isFormEdit,
+      'surveyNumber': surveyNumber,
+      'remarks': remarks,
+      'isDabaan': isDabaan,
     };
   }
 
@@ -354,6 +361,14 @@ class SurveyModel {
       updatedAt: json['updatedAt'] != null
           ? DateTime.tryParse(json['updatedAt'])
           : null,
+      gamName: json['gamName'] ?? '',
+      locationMap: (json['locationMap'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(key, LocationMap.fromMap(value)),
+      ),
+      isFormEdit: json['isFormEdit'] ?? false,
+      surveyNumber: json['surveyNumber'] ?? '',
+      remarks: json['remarks'] ?? '',
+      isDabaan: json['isDabaan'] ?? '',
     );
   }
 
