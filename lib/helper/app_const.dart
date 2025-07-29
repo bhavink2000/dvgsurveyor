@@ -60,6 +60,11 @@ class AppConst {
   static const String areYouSureToDeleteSurvey =
       'Are you sure you want to delete this Survey?';
 
-      static const String areYouSureToDeleteUser =
+  static const String areYouSureToDeleteUser =
       'Are you sure you want to delete this user?';
+
+  static const String archiveSurvey = 'Archive Survey';
+  static const String areYouSureToArchiveSurvey =
+      'Are you sure you want to archive this Surveys?';
+  static const String archive = 'Archive';
 }

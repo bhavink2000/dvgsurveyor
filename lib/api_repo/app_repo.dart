@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/helper/firebase_const.dart';
 import 'package:dvgsurveyor/model/gam_model.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
+import 'package:intl/intl.dart';
 
 class AppRepo {
   AppRepo._();
@@ -113,6 +114,98 @@ class AppRepo {
     } catch (e) {
       log('Log: get error in getSurveyData $e');
       return [];
+    }
+  }
+
+  Future<List<SurveyModel>> getSurveyByCityWiseData(
+      {required String cityName}) async {
+    try {
+      final querySnap;
+      if (cityName != '' || cityName.isNotEmpty) {
+        querySnap = await _surveyCollection
+            .where('gamName', isEqualTo: cityName)
+            .orderBy('createdAt', descending: true)
+            .get();
+      } else {
+        querySnap = await _surveyCollection
+            .orderBy('createdAt', descending: true)
+            .get();
+      }
+
+      return querySnap.docs
+          .map((doc) => doc.data())
+          .whereType<SurveyModel>()
+          .toList();
+    } catch (e) {
+      log('Log: get error in get survey data $e');
+      return [];
+    }
+  }
+
+  Future<void> archiveSurveysByCity({
+    required String cityName,
+    required List<SurveyModel> surveys,
+    required String archivedBy,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+
+    final formattedDate = DateFormat('ddMMyyyy').format(DateTime.now());
+    final archiveDocId = "${cityName.toLowerCase()}$formattedDate";
+
+    final archiveDocRef = firestore
+        .collection(FirebaseConst.archiveSurveyCollection)
+        .doc(archiveDocId);
+    final archiveSurveysCollection = archiveDocRef
+        .collection(FirebaseConst.surveyCollection)
+        .withConverter<SurveyModel>(
+          fromFirestore: (snapshot, _) => SurveyModel.fromFirebase(snapshot),
+          toFirestore: (model, _) => model.toFirebase(),
+        );
+
+    try {
+      // Step 1: Archive all surveys
+      WriteBatch batch = firestore.batch();
+      int counter = 0;
+
+      for (final survey in surveys) {
+        final archiveDoc = archiveSurveysCollection.doc(survey.id);
+        batch.set(archiveDoc, survey);
+        counter++;
+
+        // Commit every 450 writes (safe margin under 500)
+        if (counter % 450 == 0) {
+          await batch.commit();
+          batch = firestore.batch();
+        }
+      }
+      await batch.commit();
+
+      // Step 2: Save metadata
+      await archiveDocRef.set({
+        'archivedBy': archivedBy,
+        'archivedOn': FieldValue.serverTimestamp(),
+        'totalSurveys': surveys.length,
+        'city': cityName,
+      });
+
+      // Step 3: Delete original data
+      WriteBatch deleteBatch = firestore.batch();
+      counter = 0;
+      for (final survey in surveys) {
+        final originalDoc =
+            firestore.collection(FirebaseConst.surveyCollection).doc(survey.id);
+        deleteBatch.delete(originalDoc);
+        counter++;
+
+        if (counter % 450 == 0) {
+          await deleteBatch.commit();
+          deleteBatch = firestore.batch();
+        }
+      }
+      await deleteBatch.commit();
+    } catch (e, st) {
+      log('Error archiving surveys for $cityName: $e\n$st');
+      throw Exception('Failed to archive surveys. Please try again later.');
     }
   }
 }

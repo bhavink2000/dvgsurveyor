@@ -1,3 +1,5 @@
+import 'package:dvgsurveyor/src/archive_survey_screen/archive_survey_screen.dart';
+import 'package:dvgsurveyor/src/archive_survey_screen/binding/archive_survey_binding.dart';
 import 'package:dvgsurveyor/src/city_screen/binding/city_screen_binding.dart';
 import 'package:dvgsurveyor/src/city_screen/city_screen.dart';
 import 'package:dvgsurveyor/src/dashboard/binding/dashboard_binding.dart';
@@ -38,6 +40,7 @@ class AppRoutes {
   static const String propertyTypeScreen = '/property_screen';
   static const String propertyDescScreen = '/property_desc_screen';
   static const String cityScreen = '/city_screen';
+  static const String archiveSurveyScreen = '/archive_survey_screen';
 
   static List<GetPage> pages = [
     GetPage(
@@ -155,6 +158,16 @@ class AppRoutes {
       page: () => const CityScreen(),
       bindings: [
         CityScreenBinding(),
+      ],
+      transition: Transition.fadeIn,
+      transitionDuration: 500.milliseconds,
+      curve: Curves.easeIn,
+    ),
+    GetPage(
+      name: archiveSurveyScreen,
+      page: () => const ArchiveSurveyScreen(),
+      bindings: [
+        ArchiveSurveyBinding(),
       ],
       transition: Transition.fadeIn,
       transitionDuration: 500.milliseconds,
