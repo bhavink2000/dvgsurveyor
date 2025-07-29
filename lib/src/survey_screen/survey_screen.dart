@@ -38,8 +38,8 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
                           var survey = controller.filteredSurveys[index];
                           return SurveyCardWidget(
                             data: survey,
-                            isEditSurvey: controller.userData?.isEditable,
-                            isDeleteSUrvey: controller.userData?.isDelete,
+                            isEditSurvey: controller.userData.value?.isEditable,
+                            isDeleteSUrvey: controller.userData.value?.isDelete,
                             surveyCon: controller,
                           );
                         },
@@ -103,8 +103,8 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
                       ),
                     ),
                   ),
-                  if (controller.userData?.role == 'Admin') SizedBox(width: 8),
-                  if (controller.userData?.role == 'Admin')
+                  if (controller.userData.value?.role == 'Admin') SizedBox(width: 8),
+                  if (controller.userData.value?.role == 'Admin')
                     TextButton(
                       onPressed: controller.clearSearchFilters,
                       child: Text(
@@ -140,7 +140,7 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
                       controller.propertyTypes,
                       controller.selectedPropertyType,
                     ),
-                    if (controller.userData?.role == 'Admin')
+                    if (controller.userData.value?.role == 'Admin')
                       _buildDropdown(
                         getFilterLabel(
                             'Worker',
@@ -149,7 +149,7 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
                         controller.workerList,
                         controller.selectedWorker,
                       ),
-                    if (controller.userData?.role == 'Worker')
+                    if (controller.userData.value?.role == 'Worker')
                       SizedBox(
                         height: 30.h,
                         child: TextButton(

@@ -9,24 +9,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DrawerScreenController extends GetxController {
-  UserCollectionModel? userData;
+  Rx<UserCollectionModel?> userData = Rx<UserCollectionModel?>(null);
 
   @override
   void onInit() {
-    getUserDataFromStorage();
-    Future.delayed(Duration(seconds: 1), () {
-      getUserDataFromFirebase();
-    });
+    getUserData();
 
     super.onInit();
   }
 
-  Future<void> getUserDataFromStorage() async {
-    userData = SessionManager.getUser();
-  }
-
-  Future<void> getUserDataFromFirebase() async {
-    userData = await AuthRepo.instance.getUser(userId: userData?.id);
+  Future<void> getUserData() async {
+    userData.value =
+        await AuthRepo.instance.getUser(userId: SessionManager.getUser()?.id);
   }
 
   Future<void> logout() async {

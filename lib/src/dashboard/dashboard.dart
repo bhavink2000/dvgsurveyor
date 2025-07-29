@@ -4,6 +4,7 @@ import 'package:dvgsurveyor/helper/app_const.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/helper/location_helper.dart';
+import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
 import 'package:dvgsurveyor/src/dashboard/dashboard_widget/city_wise_card.dart';
 import 'package:dvgsurveyor/src/dashboard/dashboard_widget/date_wise_card.dart';
@@ -71,7 +72,7 @@ class DashboardScreen extends GetWidget<DashboardController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Welcome, ${controller.userData?.firstName ?? ''}',
+                    'Welcome, ${SessionManager.getUser()?.firstName ?? ''}',
                     style: AppFonts.text20(context).copyWith(
                       color: AppColors.offWhite,
                       fontWeight: FontWeight.bold,
@@ -113,8 +114,11 @@ class DashboardScreen extends GetWidget<DashboardController> {
                         SizedBox(height: 12.h),
                         DateWiseCard(),
                         SizedBox(height: 12.h),
-                        if (controller.userData?.role == 'Admin')
-                          WorkerWiseCard(),
+                        Obx(() => controller.userData.value?.role == 'Admin'
+                            ? WorkerWiseCard()
+                            : Container()),
+                        // if (controller.userData.value?.role == 'Admin')
+                        //   WorkerWiseCard(),
                         SizedBox(height: 75.h),
                       ],
                     ),

@@ -44,7 +44,7 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    controller.userData?.username.toUpperCase() ??
+                    controller.userData.value?.username.toUpperCase() ??
                         AppConst.userNm,
                     style: AppFonts.text16(context).copyWith(
                       color: AppColors.offWhite,
@@ -52,7 +52,7 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
                     ),
                   ),
                   Text(
-                    controller.userData?.role ?? AppConst.user,
+                    controller.userData.value?.role ?? AppConst.user,
                     style: AppFonts.text14(context).copyWith(
                       color: AppColors.offWhite.withOpacity(0.9),
                       fontSize: 12,
@@ -64,8 +64,8 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
           ),
 
           // ───── Menu Items ─────
-          SizedBox(height: controller.userData?.role == 'Admin' ? 16.h : 0.h),
-          controller.userData?.role == 'Admin'
+          SizedBox(height: controller.userData.value?.role == 'Admin' ? 16.h : 0.h),
+          controller.userData.value?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.supervisor_account,
                   title: AppConst.userManagement,
@@ -74,7 +74,7 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
                 )
               : SizedBox(),
 
-          controller.userData?.role == 'Admin'
+          controller.userData.value?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.category_rounded,
                   title: AppConst.propertType,
@@ -82,7 +82,7 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
                   context: context,
                 )
               : SizedBox(),
-          controller.userData?.role == 'Admin'
+          controller.userData.value?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.description_rounded,
                   title: AppConst.propertyDesc,
@@ -90,7 +90,7 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
                   context: context,
                 )
               : SizedBox(),
-          controller.userData?.role == 'Admin'
+          controller.userData.value?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.location_city_rounded,
                   title: AppConst.cityManagement,
@@ -104,7 +104,7 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
             onTap: () => Get.toNamed(AppRoutes.surveyScreen),
             context: context,
           ),
-          controller.userData?.role == 'Admin'
+          controller.userData.value?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.archive_rounded,
                   title: AppConst.archiveSurvey,
