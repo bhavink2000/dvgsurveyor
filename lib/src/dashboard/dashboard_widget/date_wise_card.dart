@@ -3,7 +3,9 @@
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_images_helper.dart';
+import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
+import 'package:dvgsurveyor/utils/excel_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -169,80 +171,107 @@ class DateWiseCard extends GetWidget<DashboardController> {
                     ),
                   ),
                   const Spacer(),
-                  Obx(()=>Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildStatLabel(
-                        context,
-                        'Total Survey',
-                      ),
-                      Text('${controller.dateTotalSurveyCount}',
-                          style: AppFonts.text20(context).copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.teal.shade700,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 2,
-                                color: Colors.teal.shade100,
-                              )
-                            ],
-                          )),
-                      const SizedBox(height: 12),
-                      _buildStatLabel(context, 'Total Area'),
-                      Text('${controller.dateTotalAreaCount} sq.mt',
-                          style: AppFonts.text20(context).copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.teal.shade700,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 2,
-                                color: Colors.teal.shade100,
-                              )
-                            ],
-                          )),
-                    ],
-                  )),
+                  Obx(() => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildStatLabel(
+                            context,
+                            'Total Survey',
+                          ),
+                          Text('${controller.dateTotalSurveyCount}',
+                              style: AppFonts.text20(context).copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal.shade700,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 2,
+                                    color: Colors.teal.shade100,
+                                  )
+                                ],
+                              )),
+                          const SizedBox(height: 12),
+                          _buildStatLabel(context, 'Total Area'),
+                          Text('${controller.dateTotalAreaCount} sq.mt',
+                              style: AppFonts.text20(context).copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal.shade700,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 2,
+                                    color: Colors.teal.shade100,
+                                  )
+                                ],
+                              )),
+                        ],
+                      )),
                 ],
               ),
             ),
 
             // Download Footer
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.tealPrimary,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
+            // Obx(
+            //   () => 
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.tealPrimary,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
                 ),
-              ),
-              child: InkWell(
-                onTap: () {
-                  // handle download
-                },
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Download Excel',
-                        style: AppFonts.text16(context).copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                child: InkWell(
+                  onTap: () async {
+                    if (controller.userData.value?.isExcelDownload == false) {
+                      AppSnackbar.showSnackbar(
+                        title: 'Download Disabled',
+                        message: 'Excel download is disabled for your account',
+                      );
+                      return;
+                    }
+                    if (controller.selectedStartDate.value != null &&
+                        controller.selectedEndDate.value != null) {
+                      if (controller.userData.value?.isExcelDownload == true) {
+                        final service = ExcelService();
+                        final List<Map<String, dynamic>> dataList = controller
+                            .filteredSurveys
+                            .map((e) => e.toJson())
+                            .toList();
+
+                        await service.generateAndSaveExcel(dataList);
+                      }
+                    }
+                    else{
+                      AppSnackbar.showSnackbar(
+                        title: 'Date Range Missing',
+                        message: 'Please select both start and end dates',
+                      );
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Download Excel',
+                          style: AppFonts.text16(context).copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Image.asset(
-                        AppImages.excelDownload,
-                        width: 34,
-                        height: 34,
-                      ),
-                    ],
+                        const SizedBox(width: 10),
+                        Image.asset(
+                          AppImages.excelDownload,
+                          width: 34,
+                          height: 34,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
+            // ),
           ],
         ),
       ),
