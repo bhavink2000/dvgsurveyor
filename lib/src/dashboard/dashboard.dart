@@ -32,6 +32,13 @@ class DashboardScreen extends GetWidget<DashboardController> {
             );
             return;
           }
+          if (controller.userData.value?.role == 'Govt') {
+            AppSnackbar.showSnackbar(
+              title: 'Access Denied',
+              message: 'You do not have permission to access this feature.',
+            );
+            return;
+          }
 
           Get.toNamed(AppRoutes.surveyorFormScreen);
         },

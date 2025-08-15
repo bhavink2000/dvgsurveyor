@@ -79,31 +79,36 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
               // Row 1: Search bar + Clear text button
               Row(
                 children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 35.h,
-                      child: TextField(
-                        controller: controller.searchTextController,
-                        decoration: InputDecoration(
-                          hintText:
-                              'Search by survey number, owner, mobile ...',
-                          hintStyle: AppFonts.text14(context).copyWith(
-                            color: AppColors.almostBlack.withOpacity(0.5),
-                            fontSize: 12,
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                  controller.userData.value?.role == 'Govt'
+                      ? SizedBox.shrink()
+                      : Expanded(
+                          child: SizedBox(
+                            height: 35.h,
+                            child: TextField(
+                              controller: controller.searchTextController,
+                              decoration: InputDecoration(
+                                hintText:
+                                    'Search by survey number, owner, mobile ...',
+                                hintStyle: AppFonts.text14(context).copyWith(
+                                  color: AppColors.almostBlack.withOpacity(0.5),
+                                  fontSize: 12,
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey[100],
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 8),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              onChanged: (value) =>
+                                  controller.applySearch(value),
+                            ),
                           ),
                         ),
-                        onChanged: (value) => controller.applySearch(value),
-                      ),
-                    ),
-                  ),
-                  if (controller.userData.value?.role == 'Admin') SizedBox(width: 8),
+                  if (controller.userData.value?.role == 'Admin')
+                    SizedBox(width: 8),
                   if (controller.userData.value?.role == 'Admin')
                     TextButton(
                       onPressed: controller.clearSearchFilters,
@@ -132,14 +137,15 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
                       controller.gamList,
                       controller.selectedGam,
                     ),
-                    _buildDropdown(
-                      getFilterLabel(
-                          'Property',
-                          controller.selectedPropertyType.value,
-                          controller.propertySurveyCount),
-                      controller.propertyTypes,
-                      controller.selectedPropertyType,
-                    ),
+                    if (controller.userData.value?.role != 'Govt')
+                      _buildDropdown(
+                        getFilterLabel(
+                            'Property',
+                            controller.selectedPropertyType.value,
+                            controller.propertySurveyCount),
+                        controller.propertyTypes,
+                        controller.selectedPropertyType,
+                      ),
                     if (controller.userData.value?.role == 'Admin')
                       _buildDropdown(
                         getFilterLabel(
@@ -149,7 +155,8 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
                         controller.workerList,
                         controller.selectedWorker,
                       ),
-                    if (controller.userData.value?.role == 'Worker')
+                    if (controller.userData.value?.role == 'Worker' ||
+                        controller.userData.value?.role == 'Govt')
                       SizedBox(
                         height: 30.h,
                         child: TextButton(
