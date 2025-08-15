@@ -87,7 +87,8 @@ class SurveyorFormScreenController extends GetxController {
     fetchData();
   }
 
-  void prefillForm(SurveyModel survey) {
+  void prefillForm(SurveyModel survey) async {
+    surveyNumber.text = survey.surveyNumber ?? '';
     ownerName.text = survey.ownerName;
     junagharNumber.text = survey.oldHomeNumber;
     kabjedarName.text = survey.rentPersonName;
@@ -106,6 +107,8 @@ class SurveyorFormScreenController extends GetxController {
     propertyType.text = survey.propertyType.values.first.propertyName ?? '';
     propertyDescription.text =
         survey.propertyDescription.values.first.propertyDes ?? '';
+    // Load property descriptions for the selected type
+    await getPropertyDescription();
 
     // Area
     areaData.clear();
@@ -147,10 +150,12 @@ class SurveyorFormScreenController extends GetxController {
   Future<void> getPropertyDescription() async {
     if (selectedPropertyType.value == null) return;
 
-    isPropertyDesLoad.value = true;
-    selectedPropertyDescription.value = null;
-    propertyDescription.clear();
-    propertyDesData.clear();
+    if (isEditMode.value != true) {
+      isPropertyDesLoad.value = true;
+      selectedPropertyDescription.value = null;
+      propertyDescription.clear();
+      propertyDesData.clear();
+    }
 
     try {
       final data = await authRepo.getPropertyDescription(
