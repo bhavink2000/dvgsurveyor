@@ -102,6 +102,14 @@ class LoginController extends GetxController {
         return;
       }
 
+      if (user.isActive == false) {
+        AppSnackbar.showSnackbar(
+          title: 'Account Inactive',
+          message: 'Your account is inactive. Please contact support.',
+        );
+        return;
+      }
+
       // Hide keyboard
       FocusManager.instance.primaryFocus?.unfocus();
 
