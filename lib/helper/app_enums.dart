@@ -47,7 +47,7 @@ enum FloorType {
   first,
   second,
   third,
-  basementOne,
+  basement,
 }
 
 extension FloorTypeExt on FloorType {
@@ -61,8 +61,8 @@ extension FloorTypeExt on FloorType {
         return 'Second';
       case FloorType.third:
         return 'Third';
-      case FloorType.basementOne:
-        return 'Basement One';
+      case FloorType.basement:
+        return 'Basement';
     }
   }
 }

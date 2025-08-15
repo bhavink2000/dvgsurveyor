@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
@@ -10,7 +11,10 @@ import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/usage_model.dart';
 import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:location/location.dart';
 
 class SurveyorFormScreenController extends GetxController {
   final AuthRepo authRepo = AuthRepo();
@@ -65,7 +69,7 @@ class SurveyorFormScreenController extends GetxController {
     'first',
     'second',
     'Third',
-    'basementOne',
+    'basement',
   ];
 
   RxBool isFormSubmit = false.obs;
@@ -74,6 +78,19 @@ class SurveyorFormScreenController extends GetxController {
   RxBool isDabaan = false.obs;
 
   SurveyModel? survey;
+
+  final MapController mapController = MapController();
+  var selectedLocation = LatLng(0, 0).obs;
+  var satelliteMode = false.obs;
+
+  var locationMap = {}.obs;
+  LocationData? location;
+  var currentLocation = LatLng(0, 0).obs; // ADDED
+  var workerPicked = false.obs; // ADDED
+  // internal
+  StreamSubscription<MapEvent>? mapEventSub;
+  var hooksAttached = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -87,7 +104,8 @@ class SurveyorFormScreenController extends GetxController {
     fetchData();
   }
 
-  void prefillForm(SurveyModel survey) {
+  void prefillForm(SurveyModel survey) async {
+    surveyNumber.text = survey.surveyNumber ?? '';
     ownerName.text = survey.ownerName;
     junagharNumber.text = survey.oldHomeNumber;
     kabjedarName.text = survey.rentPersonName;
@@ -106,6 +124,8 @@ class SurveyorFormScreenController extends GetxController {
     propertyType.text = survey.propertyType.values.first.propertyName ?? '';
     propertyDescription.text =
         survey.propertyDescription.values.first.propertyDes ?? '';
+    // Load property descriptions for the selected type
+    await getPropertyDescription();
 
     // Area
     areaData.clear();
@@ -116,6 +136,8 @@ class SurveyorFormScreenController extends GetxController {
     //if (isEditMode.value == true) return;
     await getUsageType();
     await getPropertyType();
+    location = await LocationHelper().getCurrentPosition();
+    currentLocation.value = LatLng(location!.latitude!, location!.longitude!);
   }
 
   Future<void> getUsageType() async {
@@ -147,10 +169,12 @@ class SurveyorFormScreenController extends GetxController {
   Future<void> getPropertyDescription() async {
     if (selectedPropertyType.value == null) return;
 
-    isPropertyDesLoad.value = true;
-    selectedPropertyDescription.value = null;
-    propertyDescription.clear();
-    propertyDesData.clear();
+    if (isEditMode.value != true) {
+      isPropertyDesLoad.value = true;
+      selectedPropertyDescription.value = null;
+      propertyDescription.clear();
+      propertyDesData.clear();
+    }
 
     try {
       final data = await authRepo.getPropertyDescription(
@@ -231,7 +255,7 @@ class SurveyorFormScreenController extends GetxController {
 
     try {
       final user = SessionManager.getUser();
-      final location = await LocationHelper().getCurrentPosition();
+
       final now = DateTime.now();
 
       final bool isEdit = isEditMode.value;
@@ -277,8 +301,10 @@ class SurveyorFormScreenController extends GetxController {
         gamName: user?.gamName ?? '',
         locationMap: {
           'loc': LocationMap(
-            lag: location.latitude.toString(),
-            lug: location.longitude.toString(),
+            lag:
+                locationMap['lat']?.toString() ?? location!.latitude.toString(),
+            lug: locationMap['lng']?.toString() ??
+                location!.longitude.toString(),
           )
         },
         isFormEdit: isEdit,
@@ -308,6 +334,7 @@ class SurveyorFormScreenController extends GetxController {
 
   @override
   void onClose() {
+    mapEventSub?.cancel();
     for (var c in [
       ownerName,
       junagharNumber,

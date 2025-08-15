@@ -181,6 +181,14 @@ class SurveyCardWidget extends StatelessWidget {
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
                   onPressed: () async {
+                    if (surveyCon?.userData.value?.role == 'Govt') {
+                      AppSnackbar.showSnackbar(
+                        title: 'Access Denied',
+                        message:
+                            'You do not have permission to access this feature.',
+                      );
+                      return;
+                    }
                     if (isEditSurvey == false) {
                       AppSnackbar.showSnackbar(
                         title: 'Opps!',
@@ -189,6 +197,7 @@ class SurveyCardWidget extends StatelessWidget {
                       );
                       return;
                     }
+
                     Get.toNamed(
                       AppRoutes.surveyorFormScreen,
                       arguments: {
@@ -212,6 +221,14 @@ class SurveyCardWidget extends StatelessWidget {
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
                   onPressed: () {
+                    if (surveyCon?.userData.value?.role == 'Govt') {
+                      AppSnackbar.showSnackbar(
+                        title: 'Access Denied',
+                        message:
+                            'You do not have permission to access this feature.',
+                      );
+                      return;
+                    }
                     if (isDeleteSUrvey == false) {
                       AppSnackbar.showSnackbar(
                         title: 'Opps!',
@@ -220,6 +237,7 @@ class SurveyCardWidget extends StatelessWidget {
                       );
                       return;
                     }
+
                     surveyCon?.deleteSurvey(sId: data.id);
                   },
                   icon: Icon(

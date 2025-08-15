@@ -20,7 +20,7 @@ class GujaratiTranslations extends Translations {
           FormLabels.patara: 'પતરા',
           FormLabels.nadiya: 'નળીયા',
           FormLabels.khulu: 'ખુલ્લુ',
-          FormLabels.surveyNumber: 'સરવે નંબર',
+          FormLabels.surveyNumber: 'સર્વે નંબર',
           FormLabels.remarks: 'ટિપ્પણીઓ',
           FormLabels.daban: 'દબાણ',
 
