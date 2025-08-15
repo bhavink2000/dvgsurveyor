@@ -9,6 +9,7 @@ import 'package:dvgsurveyor/model/property_type_model.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/usage_model.dart';
 import 'package:dvgsurveyor/src/surveyor_form/controller/surveyor_form_screen_controller.dart';
+import 'package:dvgsurveyor/src/surveyor_form/widgets/location_pick_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -143,12 +144,30 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                   ),
                 ],
               ),
-              buildInput(
-                FormLabels.remarks,
-                controller.remarks,
-                validator: (value) {
-                  return null;
-                },
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 175.w,
+                    child: buildInput(
+                      FormLabels.remarks,
+                      controller.remarks,
+                      validator: (value) {
+                        return null;
+                      },
+                    ),
+                  ),
+                  ElevatedButton(
+                    child: Text(
+                      "Pick Location",
+                      style: AppFonts.text14(context)
+                          .copyWith(fontSize: 12, color: AppColors.offWhite),
+                    ),
+                    onPressed: () {
+                      Get.to(() => LocationPickerScreen());
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Obx(() => Column(
