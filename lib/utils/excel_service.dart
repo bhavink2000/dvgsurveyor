@@ -31,7 +31,7 @@ class ExcelService {
       TextCellValue(''),
       TextCellValue('ઉપયોગ'),
       TextCellValue('વિસ્તાર'),
-      TextCellValue('સરવે નંબર / પ્લોટ નંબર'),
+      TextCellValue('સર્વે નંબર / પ્લોટ નંબર'),
       TextCellValue('મોબાઇલ નંબર'),
       TextCellValue('દબાણ'),
       TextCellValue('નળ'),
