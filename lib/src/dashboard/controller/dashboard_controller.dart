@@ -150,7 +150,7 @@ class DashboardController extends GetxController {
     try {
       filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
-        userId: userId ?? userData.value!.id,
+        userId: userData.value?.role == 'Admin' ? '' : userData.value!.id,
         cityName: null,
         startDate: selectedStartDate.value,
         endDate: selectedEndDate.value,
