@@ -144,7 +144,7 @@ class ExcelService {
 // --- Main loop (drop this where you append Excel rows) ---
     int counter = 1;
 
-    for (var data in dataList) {
+    for (var data in dataList.reversed) {
       final areaMap = (data['area'] is Map)
           ? Map<String, dynamic>.from(data['area'])
           : <String, dynamic>{};
