@@ -189,6 +189,32 @@ class SurveyCardWidget extends StatelessWidget {
                       );
                       return;
                     }
+
+                    Get.toNamed(
+                      AppRoutes.locationViewScreen,
+                      arguments: {
+                        'surveyData': data,
+                      },
+                    );
+                  },
+                  icon: Icon(
+                    Icons.location_on_rounded,
+                    size: 20,
+                    color: AppColors.tealDark,
+                  ),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  onPressed: () async {
+                    if (surveyCon?.userData.value?.role == 'Govt') {
+                      AppSnackbar.showSnackbar(
+                        title: 'Access Denied',
+                        message:
+                            'You do not have permission to access this feature.',
+                      );
+                      return;
+                    }
                     if (isEditSurvey == false) {
                       AppSnackbar.showSnackbar(
                         title: 'Opps!',

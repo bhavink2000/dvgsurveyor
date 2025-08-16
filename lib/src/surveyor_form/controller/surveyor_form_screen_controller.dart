@@ -326,7 +326,7 @@ class SurveyorFormScreenController extends GetxController {
         AppSnackbar.showErrorSnackbar(message: 'Failed to submit form');
       }
     } catch (e) {
-      AppSnackbar.showErrorSnackbar(message: 'Error: ${e.toString()}');
+      //AppSnackbar.showErrorSnackbar(message: 'Error: ${e.toString()}');
     } finally {
       isFormSubmit.value = false;
     }

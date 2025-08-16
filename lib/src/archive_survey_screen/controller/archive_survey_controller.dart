@@ -175,7 +175,7 @@ class ArchiveSurveyController extends GetxController {
           message: 'Archived ${citySurveys.length} surveys from "$city".');
     } catch (e) {
       log('Archive error: $e');
-      AppSnackbar.showErrorSnackbar(message: e.toString());
+      //AppSnackbar.showErrorSnackbar(message: e.toString());
     } finally {
       isLoading.value = false;
     }
