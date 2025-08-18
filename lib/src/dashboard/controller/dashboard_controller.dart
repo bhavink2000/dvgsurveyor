@@ -121,7 +121,7 @@ class DashboardController extends GetxController {
     try {
       filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
-        userId: userId ?? userData.value!.id,
+        userId: userData.value?.role == 'Admin' ? '' : userData.value!.id,
         cityName:
             selectedGam.value!.name.isNotEmpty ? selectedGam.value?.name : null,
         startDate: null,
@@ -150,7 +150,7 @@ class DashboardController extends GetxController {
     try {
       filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
-        userId: userId ?? userData.value!.id,
+        userId: userData.value?.role == 'Admin' ? '' : userData.value!.id,
         cityName: null,
         startDate: selectedStartDate.value,
         endDate: selectedEndDate.value,
@@ -179,7 +179,7 @@ class DashboardController extends GetxController {
       filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
         userId: '',
-        cityName: null,
+        cityName: userData.value?.gamName,
         startDate: null,
         endDate: null,
         workerId: workerId ?? '',

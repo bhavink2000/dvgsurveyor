@@ -264,6 +264,7 @@ class LocationPickerScreen extends GetWidget<SurveyorFormScreenController> {
                               controller.selectedLocation.value = loc;
                               controller.workerPicked.value = true;
 
+                              // save picked location into locationMap
                               controller.locationMap['loc'] = LocationMap(
                                 lag: loc.latitude.toString(),
                                 lug: loc.longitude.toString(),

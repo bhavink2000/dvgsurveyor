@@ -83,7 +83,7 @@ class SurveyorFormScreenController extends GetxController {
   var selectedLocation = LatLng(0, 0).obs;
   var satelliteMode = false.obs;
 
-  var locationMap = {}.obs;
+  var locationMap = <String, LocationMap>{}.obs;
   LocationData? location;
   var currentLocation = LatLng(0, 0).obs; // ADDED
   var workerPicked = false.obs; // ADDED
@@ -300,12 +300,11 @@ class SurveyorFormScreenController extends GetxController {
         updatedAt: now,
         gamName: user?.gamName ?? '',
         locationMap: {
-          'loc': LocationMap(
-            lag:
-                locationMap['lat']?.toString() ?? location!.latitude.toString(),
-            lug: locationMap['lng']?.toString() ??
-                location!.longitude.toString(),
-          )
+          'loc': locationMap['loc'] ??
+              LocationMap(
+                lag: location?.latitude?.toString() ?? '0',
+                lug: location?.longitude?.toString() ?? '0',
+              )
         },
         isFormEdit: isEdit,
         surveyNumber: surveyNumber.text.trim(),
@@ -326,7 +325,7 @@ class SurveyorFormScreenController extends GetxController {
         AppSnackbar.showErrorSnackbar(message: 'Failed to submit form');
       }
     } catch (e) {
-      AppSnackbar.showErrorSnackbar(message: 'Error: ${e.toString()}');
+      //AppSnackbar.showErrorSnackbar(message: 'Error: ${e.toString()}');
     } finally {
       isFormSubmit.value = false;
     }

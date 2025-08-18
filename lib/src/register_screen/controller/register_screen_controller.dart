@@ -119,7 +119,7 @@ class RegisterController extends GetxController {
         AppSnackbar.showErrorSnackbar(message: 'Registration failed');
       }
     } catch (e) {
-      AppSnackbar.showErrorSnackbar(message: 'An error occurred: $e');
+      //AppSnackbar.showErrorSnackbar(message: 'An error occurred: $e');
     } finally {
       isLoading.value = false;
     }

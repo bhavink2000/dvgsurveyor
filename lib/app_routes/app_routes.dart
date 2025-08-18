@@ -18,6 +18,7 @@ import 'package:dvgsurveyor/src/splash_screen/binding/splash_screen_binding.dart
 import 'package:dvgsurveyor/src/splash_screen/splash_screen.dart';
 import 'package:dvgsurveyor/src/survey_screen/binding/survey_screen_binding.dart';
 import 'package:dvgsurveyor/src/survey_screen/survey_screen.dart';
+import 'package:dvgsurveyor/src/survey_screen/widget/location_view_widget.dart';
 import 'package:dvgsurveyor/src/surveyor_form/binding/surveyor_form_screen_binding.dart';
 import 'package:dvgsurveyor/src/surveyor_form/surveyor_form_screen.dart';
 import 'package:dvgsurveyor/src/user_mangement/binding/user_mangement_screen_binding.dart';
@@ -41,6 +42,7 @@ class AppRoutes {
   static const String propertyDescScreen = '/property_desc_screen';
   static const String cityScreen = '/city_screen';
   static const String archiveSurveyScreen = '/archive_survey_screen';
+  static const String locationViewScreen = '/location_view_screen';
 
   static List<GetPage> pages = [
     GetPage(
@@ -168,6 +170,16 @@ class AppRoutes {
       page: () => const ArchiveSurveyScreen(),
       bindings: [
         ArchiveSurveyBinding(),
+      ],
+      transition: Transition.fadeIn,
+      transitionDuration: 500.milliseconds,
+      curve: Curves.easeIn,
+    ),
+    GetPage(
+      name: locationViewScreen,
+      page: () => const LocationViewWidget(),
+      bindings: [
+        SurveyScreenBinding(),
       ],
       transition: Transition.fadeIn,
       transitionDuration: 500.milliseconds,

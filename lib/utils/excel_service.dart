@@ -144,7 +144,7 @@ class ExcelService {
 // --- Main loop (drop this where you append Excel rows) ---
     int counter = 1;
 
-    for (var data in dataList) {
+    for (var data in dataList.reversed) {
       final areaMap = (data['area'] is Map)
           ? Map<String, dynamic>.from(data['area'])
           : <String, dynamic>{};
@@ -203,10 +203,10 @@ class ExcelService {
       }
 
       // Property type (unchanged)
-      final propertyTypeMap = data['propertyType'] ?? {};
-      final propertyTypeKey =
-          propertyTypeMap.keys.isNotEmpty ? propertyTypeMap.keys.first : null;
-      final propertyType = propertyTypeMap[propertyTypeKey] ?? {};
+      final propertyTypeDescMap = data['propertyDescription'] ?? {};
+      final propertyTypeDescKey =
+          propertyTypeDescMap.keys.isNotEmpty ? propertyTypeDescMap.keys.first : null;
+      final propertyType = propertyTypeDescMap[propertyTypeDescKey] ?? {};
 
       // water pipeline total
       int waterPipelineTotal = 0;
@@ -234,7 +234,7 @@ class ExcelService {
         IntCellValue(gfNadiyaPataraCount), // Ground nadiya+patara (count)
         IntCellValue(ffSlabPapdaCount), // FF/SF/... slab+papda (count) — 100
         IntCellValue(ffNadiyaPataraCount), // FF/SF/... nadiya+patara (count)
-        TextCellValue(propertyType['propertyName'] ?? ''), // ઉપયોગ
+        TextCellValue(propertyType['propertyDes'] ?? ''), // ઉપયોગ
         TextCellValue(data['surveyNumber'] ?? ''), // સર્વે નંબર / પ્લોટ નંબર
         TextCellValue(data['address'] ?? ''), // વિસ્તાર
         TextCellValue(data['mobileNumber'] ?? ''), // મોબાઇલ નંબર
