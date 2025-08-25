@@ -190,6 +190,7 @@ class SurveyModel {
   final String? surveyNumber;
   final String? remarks;
   final String? isDabaan;
+  final String? signature; // base64 encoded signature
 
   SurveyModel({
     required this.userId,
@@ -218,6 +219,7 @@ class SurveyModel {
     this.surveyNumber,
     this.remarks,
     this.isDabaan = 'ના',
+    this.signature,
   });
 
   factory SurveyModel.fromFirebase(DocumentSnapshot json) {
@@ -259,6 +261,7 @@ class SurveyModel {
       surveyNumber: data['surveyNumber'] ?? '',
       remarks: data['remarks'] ?? '',
       isDabaan: data['isDabaan'] ?? '',
+      signature: data["signature"],
     );
   }
 
@@ -292,6 +295,7 @@ class SurveyModel {
         'surveyNumber': surveyNumber,
         'remarks': remarks,
         'isDabaan': isDabaan,
+        "signature": signature,
       };
 
   Map<String, dynamic> toJson() {
@@ -325,6 +329,7 @@ class SurveyModel {
       'surveyNumber': surveyNumber,
       'remarks': remarks,
       'isDabaan': isDabaan,
+      "signature": signature,
     };
   }
 
@@ -369,6 +374,7 @@ class SurveyModel {
       surveyNumber: json['surveyNumber'] ?? '',
       remarks: json['remarks'] ?? '',
       isDabaan: json['isDabaan'] ?? '',
+      signature: json["signature"],
     );
   }
 
