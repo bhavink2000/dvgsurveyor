@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:signature/signature.dart';
 
 class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
   const SurveyorFormScreen({super.key});
@@ -170,6 +171,39 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                 ],
               ),
               const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 20),
+                  Text(
+                    "Signature",
+                    style: AppFonts.text16(context)
+                        .copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    height: 150,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Signature(
+                      controller: controller.signatureController,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => controller.signatureController.clear(),
+                        child: Text("Clear"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
               Obx(() => Column(
                     children: [
                       Container(

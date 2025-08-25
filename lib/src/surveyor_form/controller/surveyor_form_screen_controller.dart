@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
 import 'package:dvgsurveyor/app_routes/app_routes.dart';
@@ -15,6 +17,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
+import 'package:signature/signature.dart';
 
 class SurveyorFormScreenController extends GetxController {
   final AuthRepo authRepo = AuthRepo();
@@ -103,6 +106,13 @@ class SurveyorFormScreenController extends GetxController {
     }
     fetchData();
   }
+
+  // signature controller
+  final SignatureController signatureController = SignatureController(
+    penStrokeWidth: 2,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.white,
+  );
 
   void prefillForm(SurveyModel survey) async {
     surveyNumber.text = survey.surveyNumber ?? '';
@@ -265,6 +275,8 @@ class SurveyorFormScreenController extends GetxController {
           ? (survey?.index ?? '')
           : (await authRepo.getSurveyData(userId: user?.id ?? '')).length + 1;
 
+      Uint8List? signatureBytes = await signatureController.toPngBytes();
+
       final surveyData = SurveyModel(
         id: id,
         userId: user?.id ?? '',
@@ -310,6 +322,7 @@ class SurveyorFormScreenController extends GetxController {
         surveyNumber: surveyNumber.text.trim(),
         remarks: remarks.text.trim(),
         isDabaan: isDabaan.value == true ? 'હા' : 'ના',
+        signature: signatureBytes != null ? base64Encode(signatureBytes) : null,
       );
 
       final result = await authRepo.saveSurveyForm(
@@ -334,6 +347,7 @@ class SurveyorFormScreenController extends GetxController {
   @override
   void onClose() {
     mapEventSub?.cancel();
+    signatureController.dispose();
     for (var c in [
       ownerName,
       junagharNumber,

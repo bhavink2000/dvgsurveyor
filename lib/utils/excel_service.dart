@@ -1,8 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
-import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' hide Column, Row;
 
 class ExcelService {
   Future<void> generateAndSaveExcel(List<Map<String, dynamic>> dataList) async {
@@ -15,77 +16,83 @@ class ExcelService {
       }
     }
 
-    var excel = Excel.createExcel();
-    Sheet sheet = excel['Sheet1'];
+    final Workbook workbook = Workbook();
+    final Worksheet sheet = workbook.worksheets[0];
 
-    // Define center alignment style
-    final centerStyle = CellStyle(
-      horizontalAlign: HorizontalAlign.Center,
-      verticalAlign: VerticalAlign.Center,
-    );
+    // Center alignment style
+    final Style centerStyle = workbook.styles.add('centerStyle');
+    centerStyle.hAlign = HAlignType.center;
+    centerStyle.vAlign = VAlignType.center;
 
-    // Helper function to append and center style
-    void appendCenteredRow(List<CellValue> values) {
-      sheet.appendRow(values);
-      final rowIndex = sheet.maxRows - 1; // last row index
-      for (var col = 0; col < values.length; col++) {
-        final cell = sheet.cell(
-            CellIndex.indexByColumnRow(columnIndex: col, rowIndex: rowIndex));
+    int currentRow = 1;
+
+    // Helper: append a row with center style
+    void appendCenteredRow(List<dynamic> values) {
+      for (int col = 0; col < values.length; col++) {
+        final cell = sheet.getRangeByIndex(currentRow, col + 1);
+        if (values[col] is int) {
+          cell.setNumber((values[col] as int).toDouble());
+        } else if (values[col] is double) {
+          cell.setNumber(values[col]);
+        } else {
+          cell.setText(values[col]?.toString() ?? '');
+        }
         cell.cellStyle = centerStyle;
       }
+      currentRow++;
     }
 
     // Row 1: Main headers
     appendCenteredRow([
-      TextCellValue('ક્રમ નંબર'),
-      TextCellValue('જૂના ઘર નંબર'),
-      TextCellValue('મુળ માલિકનું નામ'),
-      TextCellValue('કબજેદારનું નામ'),
-      TextCellValue('ક્ષેત્રફળ (ચો.મી.)'),
-      TextCellValue('ગ્રાઉન્ડ ફ્લોર'),
-      TextCellValue(''),
-      TextCellValue(''),
-      TextCellValue('FF/SF/...'),
-      TextCellValue(''),
-      TextCellValue('ઉપયોગ'),
-      TextCellValue('સર્વે નંબર / પ્લોટ નંબર'),
-      TextCellValue('વિસ્તાર'),
-      TextCellValue('મોબાઇલ નંબર'),
-      TextCellValue('દબાણ'),
-      TextCellValue('નળ'),
+      'ક્રમ નંબર',
+      'જૂના ઘર નંબર',
+      'મુળ માલિકનું નામ',
+      'કબજેદારનું નામ',
+      'ક્ષેત્રફળ (ચો.મી.)',
+      'ગ્રાઉન્ડ ફ્લોર',
+      '',
+      '',
+      'FF/SF/...',
+      '',
+      'ઉપયોગ',
+      'સર્વે નંબર / પ્લોટ નંબર',
+      'વિસ્તાર',
+      'મોબાઇલ નંબર',
+      'દબાણ',
+      'નળ',
+      'Signature',
     ]);
 
-    // Row 2: Sub-headers
+    // Row 2: Sub headers
     appendCenteredRow([
-      TextCellValue(''),
-      TextCellValue(''),
-      TextCellValue(''),
-      TextCellValue(''),
-      TextCellValue(''),
-      TextCellValue('ખુલ્લું'),
-      TextCellValue('સ્લેબ તથા પાપડા'),
-      TextCellValue('નળીયા તથા પતરા'),
-      TextCellValue('સ્લેબ તથા પાપડા'),
-      TextCellValue('નળીયા તથા પતરા'),
-      TextCellValue(''),
-      TextCellValue(''),
-      TextCellValue(''),
-      TextCellValue(''),
-      TextCellValue(''),
-      TextCellValue(''),
+      '',
+      '',
+      '',
+      '',
+      '',
+      'ખુલ્લું',
+      'સ્લેબ તથા પાપડા',
+      'નળીયા તથા પતરા',
+      'સ્લેબ તથા પાપડા',
+      'નળીયા તથા પતરા',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
     ]);
-// Merge headers
-    sheet.merge(CellIndex.indexByString("F1"),
-        CellIndex.indexByString("H1")); // Ground Floor
-    sheet.merge(CellIndex.indexByString("I1"),
-        CellIndex.indexByString("J1")); // FF/SF/...
 
-    // Helpers (place above your loop)
+    // Merge headers
+    sheet.getRangeByName("F1:H1").merge();
+    sheet.getRangeByName("I1:J1").merge();
+
+    // === Helper functions ===
     int sumCounts(dynamic node) {
       if (node == null) return 0;
       int total = 0;
       if (node is Map) {
-        // Prefer counts inside items[]
         if (node['items'] is List) {
           for (var it in node['items']) {
             if (it is Map) {
@@ -99,7 +106,6 @@ class ExcelService {
           }
           if (total > 0) return total;
         }
-        // fallback to node-level totalCount
         if (node['totalCount'] != null) {
           final tc = node['totalCount'];
           if (tc is num) return tc.toInt();
@@ -113,7 +119,6 @@ class ExcelService {
       if (node == null) return 0.0;
       double total = 0.0;
       if (node is Map) {
-        // If items[] exist sum their totalArea or compute from count*length*width
         if (node['items'] is List) {
           for (var it in node['items']) {
             if (it is Map) {
@@ -133,7 +138,6 @@ class ExcelService {
             }
           }
         }
-        // If node has an explicit totalArea at node-level, prefer that (useful when items empty)
         if (node['totalArea'] is num) {
           return (node['totalArea'] as num).toDouble();
         }
@@ -141,74 +145,55 @@ class ExcelService {
       return total;
     }
 
-// --- Main loop (drop this where you append Excel rows) ---
+    // === Main loop ===
     int counter = 1;
-
     for (var data in dataList.reversed) {
       final areaMap = (data['area'] is Map)
           ? Map<String, dynamic>.from(data['area'])
           : <String, dynamic>{};
 
-      // Ground floor
       final ground = (areaMap['Ground'] is Map)
           ? Map<String, dynamic>.from(areaMap['Ground'])
           : <String, dynamic>{};
 
-      // Ground counts (what you expect to show in Excel for counts)
       final int gfOpenCount = sumCounts(ground['open']);
-      final int gfSlabCount = sumCounts(ground['slab']);
-      final int gfPapdaCount = sumCounts(ground['papda']);
-      final int gfSlabPapdaCount = gfSlabCount + gfPapdaCount;
-      final int gfNadiyaCount = sumCounts(ground['nadiya']);
-      final int gfPataraCount = sumCounts(ground['patara']);
-      final int gfNadiyaPataraCount = gfNadiyaCount + gfPataraCount;
+      final int gfSlabPapdaCount =
+          sumCounts(ground['slab']) + sumCounts(ground['papda']);
+      final int gfNadiyaPataraCount =
+          sumCounts(ground['nadiya']) + sumCounts(ground['patara']);
 
-      // Ground areas (for total-area calculation)
-      final double gfOpenArea = sumAreas(ground['open']);
-      final double gfSlabPapdaArea =
-          sumAreas(ground['slab']) + sumAreas(ground['papda']);
-      final double gfNadiyaPataraArea =
-          sumAreas(ground['nadiya']) + sumAreas(ground['patara']);
-      final double groundTotalArea =
-          gfOpenArea + gfSlabPapdaArea + gfNadiyaPataraArea;
+      final double groundTotalArea = sumAreas(ground['open']) +
+          sumAreas(ground['slab']) +
+          sumAreas(ground['papda']) +
+          sumAreas(ground['nadiya']) +
+          sumAreas(ground['patara']);
 
-      // Upper floors: sum counts and areas for all non-Ground keys
       double upperTotalArea = 0.0;
       int ffSlabPapdaCount = 0;
       int ffNadiyaPataraCount = 0;
-      double ffSlabPapdaArea = 0.0;
-      double ffNadiyaPataraArea = 0.0;
 
       final upperFloorKeys =
           areaMap.keys.where((k) => k != 'Ground' && areaMap[k] is Map);
       for (final key in upperFloorKeys) {
         final floor = Map<String, dynamic>.from(areaMap[key] ?? {});
-        // area sum for the floor (open + slab + papda + nadiya + patara)
         upperTotalArea += sumAreas(floor['open']) +
             sumAreas(floor['slab']) +
             sumAreas(floor['papda']) +
             sumAreas(floor['nadiya']) +
             sumAreas(floor['patara']);
 
-        // counts and area for slab+papda
         ffSlabPapdaCount +=
             sumCounts(floor['slab']) + sumCounts(floor['papda']);
-        ffSlabPapdaArea += sumAreas(floor['slab']) + sumAreas(floor['papda']);
-
-        // counts and area for nadiya+patara
         ffNadiyaPataraCount +=
             sumCounts(floor['nadiya']) + sumCounts(floor['patara']);
-        ffNadiyaPataraArea +=
-            sumAreas(floor['nadiya']) + sumAreas(floor['patara']);
       }
 
-      // Property type (unchanged)
       final propertyTypeDescMap = data['propertyDescription'] ?? {};
-      final propertyTypeDescKey =
-          propertyTypeDescMap.keys.isNotEmpty ? propertyTypeDescMap.keys.first : null;
+      final propertyTypeDescKey = propertyTypeDescMap.keys.isNotEmpty
+          ? propertyTypeDescMap.keys.first
+          : null;
       final propertyType = propertyTypeDescMap[propertyTypeDescKey] ?? {};
 
-      // water pipeline total
       int waterPipelineTotal = 0;
       if (data['waterPipeline'] is List) {
         for (var item in data['waterPipeline']) {
@@ -219,46 +204,110 @@ class ExcelService {
             int.tryParse(data['waterPipeline']?.toString() ?? '0') ?? 0;
       }
 
-      // final total area (Ground totalArea + Upper floors totalArea)
       final double totalArea = groundTotalArea + upperTotalArea;
 
-      // Append row (columns match your requested order)
+      // Append row (without signature first)
       appendCenteredRow([
-        IntCellValue(counter), // ક્રમ નંબર
-        TextCellValue(data['oldHomeNumber'] ?? ''), // જૂના ઘર નંબર
-        TextCellValue(data['ownerName'] ?? ''), // મુળ માલિકનું નામ
-        TextCellValue(data['rentPersonName'] ?? ''), // કબજેદારનું નામ
-        DoubleCellValue(totalArea), // ક્ષેત્રફળ (ચો.મી.) — area sum (170)
-        IntCellValue(gfOpenCount), // Ground open (count) — 10
-        IntCellValue(gfSlabPapdaCount), // Ground slab+papda (count) — 50
-        IntCellValue(gfNadiyaPataraCount), // Ground nadiya+patara (count)
-        IntCellValue(ffSlabPapdaCount), // FF/SF/... slab+papda (count) — 100
-        IntCellValue(ffNadiyaPataraCount), // FF/SF/... nadiya+patara (count)
-        TextCellValue(propertyType['propertyDes'] ?? ''), // ઉપયોગ
-        TextCellValue(data['surveyNumber'] ?? ''), // સર્વે નંબર / પ્લોટ નંબર
-        TextCellValue(data['address'] ?? ''), // વિસ્તાર
-        TextCellValue(data['mobileNumber'] ?? ''), // મોબાઇલ નંબર
-        TextCellValue(data['isDabaan']?.toString() ?? ''), // દબાણ
-        IntCellValue(waterPipelineTotal), // નળ
+        counter,
+        data['oldHomeNumber'] ?? '',
+        data['ownerName'] ?? '',
+        data['rentPersonName'] ?? '',
+        totalArea,
+        gfOpenCount,
+        gfSlabPapdaCount,
+        gfNadiyaPataraCount,
+        ffSlabPapdaCount,
+        ffNadiyaPataraCount,
+        propertyType['propertyDes'] ?? '',
+        data['surveyNumber'] ?? '',
+        data['address'] ?? '',
+        data['mobileNumber'] ?? '',
+        data['isDabaan']?.toString() ?? '',
+        waterPipelineTotal,
+        '', // signature cell placeholder
       ]);
+
+      // Add signature image if available
+      String? signatureBase64 = data['signature'];
+      if (signatureBase64 != null && signatureBase64.isNotEmpty) {
+        try {
+          Uint8List signatureBytes = base64Decode(signatureBase64);
+          final Picture picture = sheet.pictures.addBase64(
+            currentRow - 1,
+            17, // Signature column
+            base64Encode(signatureBytes),
+          );
+          picture.height = 40;
+          picture.width = 100;
+        } catch (e) {
+          debugPrint("Signature decode error: $e");
+        }
+      }
 
       counter++;
     }
 
-    // Save Excel
-    final bytes = excel.encode();
+    // === Formatting ===
+
+    // Header style
+    final Style headerStyle = workbook.styles.add('headerStyle');
+    headerStyle.bold = true;
+    headerStyle.hAlign = HAlignType.center;
+    headerStyle.vAlign = VAlignType.center;
+    headerStyle.borders.all.lineStyle = LineStyle.thin;
+    headerStyle.fontSize = 12;
+    headerStyle.wrapText = true;
+    sheet.getRangeByName("A1:Q2").cellStyle = headerStyle;
+
+    // Auto fit columns
+    for (int i = 1; i <= 17; i++) {
+      sheet.autoFitColumn(i);
+    }
+
+    // Custom widths
+    sheet.setColumnWidthInPixels(1, 60); // Sr No
+    sheet.setColumnWidthInPixels(2, 80); // Old home no
+    sheet.setColumnWidthInPixels(3, 120); // Owner name
+    sheet.setColumnWidthInPixels(4, 120); // Tenant name
+    sheet.setColumnWidthInPixels(5, 90); // Area
+    sheet.setColumnWidthInPixels(12, 120); // Survey No
+    sheet.setColumnWidthInPixels(13, 150); // Address
+    sheet.setColumnWidthInPixels(14, 120); // Mobile
+    sheet.setColumnWidthInPixels(17, 100); // Signature
+
+    // Apply borders to all used cells
+    final usedRange = sheet.getRangeByIndex(1, 1, currentRow, 17);
+    usedRange.cellStyle.borders.all.lineStyle = LineStyle.thin;
+
+    // Wrap text for address & property description
+    sheet.getRangeByName("K1:M$currentRow").cellStyle.wrapText = true;
+
+    // Adjust row heights
+    for (int row = 3; row < currentRow; row++) {
+      sheet.setRowHeightInPixels(row, 50);
+    }
+
+    // Freeze the top two header rows
+    sheet.getRangeByName('A3').freezePanes();
+
+// Optionally, also freeze first column along with two header rows
+// sheet.getRangeByName('B3').freezePanes();
+
+    // === Save Excel ===
+    final List<int> bytes = workbook.saveAsStream();
+    workbook.dispose();
+
     final downloads = Directory('/storage/emulated/0/Download');
     if (!await downloads.exists()) return;
 
-    // Save Excel with dynamic name
     final now = DateTime.now();
     final formattedDate =
         "${now.day.toString().padLeft(2, '0')}_${now.month.toString().padLeft(2, '0')}_${now.year}_${now.hour.toString().padLeft(2, '0')}_${now.minute.toString().padLeft(2, '0')}";
 
     final fileName = "DVG_Survey_$formattedDate.xlsx";
-
     final file = File('${downloads.path}/$fileName');
-    await file.writeAsBytes(bytes!, flush: true);
+    await file.writeAsBytes(bytes, flush: true);
+
     AppSnackbar.showSnackbar(
       title: 'Excel Exported',
       message: 'Survey data has been exported to ${file.path}',
