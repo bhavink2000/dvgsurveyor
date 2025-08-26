@@ -108,11 +108,13 @@ class SurveyorFormScreenController extends GetxController {
   }
 
   // signature controller
-  final SignatureController signatureController = SignatureController(
+  final signatureController = SignatureController(
     penStrokeWidth: 2,
     penColor: Colors.black,
     exportBackgroundColor: Colors.white,
   );
+
+  final isEditingSignature = false.obs;
 
   void prefillForm(SurveyModel survey) async {
     surveyNumber.text = survey.surveyNumber ?? '';
@@ -134,6 +136,9 @@ class SurveyorFormScreenController extends GetxController {
     propertyType.text = survey.propertyType.values.first.propertyName ?? '';
     propertyDescription.text =
         survey.propertyDescription.values.first.propertyDes ?? '';
+
+    isDabaan.value = survey.isDabaan == 'હા' ? true : false;
+
     // Load property descriptions for the selected type
     await getPropertyDescription();
 

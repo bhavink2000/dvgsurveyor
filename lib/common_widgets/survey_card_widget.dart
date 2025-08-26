@@ -151,19 +151,19 @@ class SurveyCardWidget extends StatelessWidget {
                 _infoColumn(
                   context,
                   'Total Area',
-                  totalArea.toString(),
+                  totalArea.toStringAsFixed(3),
                   isArea: true,
                 ),
                 _infoColumn(
                   context,
                   'Construcated Area',
-                  constructedArea.toString(),
+                  constructedArea.toStringAsFixed(3),
                   isArea: true,
                 ),
                 _infoColumn(
                   context,
                   'Open Area',
-                  openArea.toString(),
+                  openArea.toStringAsFixed(3),
                   isArea: true,
                 ),
               ],
