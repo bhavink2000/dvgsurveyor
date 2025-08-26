@@ -30,13 +30,14 @@ class ExcelService {
     void appendCenteredRow(List<dynamic> values) {
       for (int col = 0; col < values.length; col++) {
         final cell = sheet.getRangeByIndex(currentRow, col + 1);
-        if (values[col] is int) {
-          cell.setNumber((values[col] as int).toDouble());
-        } else if (values[col] is double) {
-          cell.setNumber(values[col]);
+
+        // Always treat formatted numbers as text
+        if (values[col] != null) {
+          cell.setText(values[col].toString());
         } else {
-          cell.setText(values[col]?.toString() ?? '');
+          cell.setText('');
         }
+
         cell.cellStyle = centerStyle;
       }
       currentRow++;
@@ -89,18 +90,18 @@ class ExcelService {
     sheet.getRangeByName("I1:J1").merge();
 
     // === Helper functions ===
-    int sumCounts(dynamic node) {
-      if (node == null) return 0;
-      int total = 0;
+    double sumCounts(dynamic node) {
+      if (node == null) return 0.0;
+      double total = 0.0;
       if (node is Map) {
         if (node['items'] is List) {
           for (var it in node['items']) {
             if (it is Map) {
               final c = it['count'];
               if (c is num) {
-                total += c.toInt();
+                total += c.toDouble();
               } else {
-                total += int.tryParse(c?.toString() ?? '0') ?? 0;
+                total += double.tryParse(c?.toString() ?? '0') ?? 0.0;
               }
             }
           }
@@ -108,11 +109,11 @@ class ExcelService {
         }
         if (node['totalCount'] != null) {
           final tc = node['totalCount'];
-          if (tc is num) return tc.toInt();
-          return int.tryParse(tc?.toString() ?? '0') ?? 0;
+          if (tc is num) return tc.toDouble();
+          return double.tryParse(tc?.toString() ?? '0') ?? 0.0;
         }
       }
-      return 0;
+      return total;
     }
 
     double sumAreas(dynamic node) {
@@ -156,10 +157,10 @@ class ExcelService {
           ? Map<String, dynamic>.from(areaMap['Ground'])
           : <String, dynamic>{};
 
-      final int gfOpenCount = sumCounts(ground['open']);
-      final int gfSlabPapdaCount =
+      final double gfOpenCount = sumCounts(ground['open']);
+      final double gfSlabPapdaCount =
           sumCounts(ground['slab']) + sumCounts(ground['papda']);
-      final int gfNadiyaPataraCount =
+      final double gfNadiyaPataraCount =
           sumCounts(ground['nadiya']) + sumCounts(ground['patara']);
 
       final double groundTotalArea = sumAreas(ground['open']) +
@@ -169,11 +170,20 @@ class ExcelService {
           sumAreas(ground['patara']);
 
       double upperTotalArea = 0.0;
-      int ffSlabPapdaCount = 0;
-      int ffNadiyaPataraCount = 0;
+      double ffSlabPapdaCount = 0.0;
+      double ffNadiyaPataraCount = 0.0;
 
       final upperFloorKeys =
           areaMap.keys.where((k) => k != 'Ground' && areaMap[k] is Map);
+      String formatNumber(num value) {
+        if (value == 0) return "0";
+        double rounded = double.parse(value.toStringAsFixed(2));
+        if (rounded % 1 == 0) {
+          return rounded.toInt().toString();
+        }
+        return rounded.toStringAsFixed(2);
+      }
+
       for (final key in upperFloorKeys) {
         final floor = Map<String, dynamic>.from(areaMap[key] ?? {});
         upperTotalArea += sumAreas(floor['open']) +
@@ -212,12 +222,12 @@ class ExcelService {
         data['oldHomeNumber'] ?? '',
         data['ownerName'] ?? '',
         data['rentPersonName'] ?? '',
-        totalArea,
-        gfOpenCount,
-        gfSlabPapdaCount,
-        gfNadiyaPataraCount,
-        ffSlabPapdaCount,
-        ffNadiyaPataraCount,
+        formatNumber(totalArea),
+        formatNumber(gfOpenCount),
+        formatNumber(gfSlabPapdaCount),
+        formatNumber(gfNadiyaPataraCount),
+        formatNumber(ffSlabPapdaCount),
+        formatNumber(ffNadiyaPataraCount),
         propertyType['propertyDes'] ?? '',
         data['surveyNumber'] ?? '',
         data['address'] ?? '',

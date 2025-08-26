@@ -27,21 +27,34 @@ class SurveyCardWidget extends StatelessWidget {
     final area = data.area;
     final propertyTypeName =
         data.propertyType.values.map((e) => e.propertyName ?? '-').join(', ');
+
     final propertyDescriptionName = data.propertyDescription.values
         .map((e) => e.propertyDes ?? '-')
         .join(', ');
+    final groundDetail = area['Ground']; // <-- pick only Ground
 
-    final totalArea =
-        area.values.fold<double>(0, (sum, detail) => sum + detail.totalArea);
-    final constructedArea = area.values.fold<double>(0, (sum, detail) {
-      return sum +
-          detail.slab.totalCount +
-          detail.papda.totalCount +
-          detail.patara.totalCount +
-          detail.nadiya.totalCount;
-    });
-    final openArea = area.values
-        .fold<double>(0, (sum, detail) => sum + detail.open.totalCount);
+    final totalArea = groundDetail?.totalArea ?? 0;
+
+    final constructedArea = groundDetail == null
+        ? 0
+        : groundDetail.slab.totalCount +
+            groundDetail.papda.totalCount +
+            groundDetail.patara.totalCount +
+            groundDetail.nadiya.totalCount;
+
+    final openArea = groundDetail?.open.totalCount ?? 0;
+
+    // final totalArea =
+    //     area.values.fold<double>(0, (sum, detail) => sum + detail.totalArea);
+    // final constructedArea = area.values.fold<double>(0, (sum, detail) {
+    //   return sum +
+    //       detail.slab.totalCount +
+    //       detail.papda.totalCount +
+    //       detail.patara.totalCount +
+    //       detail.nadiya.totalCount;
+    // });
+    // final openArea = area.values
+    //     .fold<double>(0, (sum, detail) => sum + detail.open.totalCount);
 
     return Card(
       color: Colors.grey[50],
