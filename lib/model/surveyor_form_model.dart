@@ -191,6 +191,7 @@ class SurveyModel {
   final String? remarks;
   final String? isDabaan;
   final String? signature; // base64 encoded signature
+  final bool? isOffProperty;
 
   SurveyModel({
     required this.userId,
@@ -220,6 +221,7 @@ class SurveyModel {
     this.remarks,
     this.isDabaan = 'ના',
     this.signature,
+    this.isOffProperty = false,
   });
 
   factory SurveyModel.fromFirebase(DocumentSnapshot json) {
@@ -262,6 +264,7 @@ class SurveyModel {
       remarks: data['remarks'] ?? '',
       isDabaan: data['isDabaan'] ?? '',
       signature: data["signature"],
+      isOffProperty: data['isOffProperty'] ?? false,
     );
   }
 
@@ -296,6 +299,7 @@ class SurveyModel {
         'remarks': remarks,
         'isDabaan': isDabaan,
         "signature": signature,
+        "isOffProperty": isOffProperty,
       };
 
   Map<String, dynamic> toJson() {
@@ -330,6 +334,7 @@ class SurveyModel {
       'remarks': remarks,
       'isDabaan': isDabaan,
       "signature": signature,
+      "isOffProperty": isOffProperty,
     };
   }
 
@@ -375,6 +380,7 @@ class SurveyModel {
       remarks: json['remarks'] ?? '',
       isDabaan: json['isDabaan'] ?? '',
       signature: json["signature"],
+      isOffProperty: json['isOffProperty'] ?? false,
     );
   }
 
@@ -405,6 +411,8 @@ class SurveyModel {
     String? surveyNumber,
     String? remarks,
     String? isDabaan,
+    String? signature,
+    bool? isOffProperty,
   }) {
     return SurveyModel(
       userId: userId ?? this.userId,
@@ -433,6 +441,8 @@ class SurveyModel {
       surveyNumber: surveyNumber ?? this.surveyNumber,
       remarks: remarks ?? this.remarks,
       isDabaan: isDabaan ?? this.isDabaan,
+      signature: signature ?? this.signature,
+      isOffProperty: isOffProperty ?? this.isOffProperty,
     );
   }
 }

@@ -94,6 +94,8 @@ class SurveyorFormScreenController extends GetxController {
   StreamSubscription<MapEvent>? mapEventSub;
   var hooksAttached = false.obs;
 
+  RxBool isOffProperty = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -117,6 +119,15 @@ class SurveyorFormScreenController extends GetxController {
   final isEditingSignature = false.obs;
 
   void prefillForm(SurveyModel survey) async {
+    isOffProperty.value = survey.isOffProperty ?? false;
+    if (isOffProperty == true) {
+      surveyNumber.text = survey.surveyNumber ?? '';
+      ownerName.text = survey.ownerName;
+      junagharNumber.text = survey.oldHomeNumber;
+      address.text = survey.address;
+      mobileNumber.text = survey.mobileNumber;
+      return;
+    }
     surveyNumber.text = survey.surveyNumber ?? '';
     ownerName.text = survey.ownerName;
     junagharNumber.text = survey.oldHomeNumber;
@@ -344,6 +355,77 @@ class SurveyorFormScreenController extends GetxController {
       }
     } catch (e) {
       //AppSnackbar.showErrorSnackbar(message: 'Error: ${e.toString()}');
+    } finally {
+      isFormSubmit.value = false;
+    }
+  }
+
+  Future<void> closePropertySubmit() async {
+    try {
+      isFormSubmit.value = true;
+
+      final user = SessionManager.getUser();
+
+      final now = DateTime.now();
+
+      final bool isEdit = isEditMode.value;
+      final id =
+          isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
+      final newIndex = isEdit
+          ? (survey?.index ?? '')
+          : (await authRepo.getSurveyData(userId: user?.id ?? '')).length + 1;
+
+      final surveyData = SurveyModel(
+        id: id,
+        userId: user?.id ?? '',
+        userRole: user?.role ?? '',
+        userName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
+        surveyNumber: surveyNumber.text.trim(),
+        ownerName: ownerName.text.trim(),
+        oldHomeNumber: junagharNumber.text.trim(),
+        index: isEdit ? (survey?.index ?? '') : newIndex.toString(),
+        mobileNumber: mobileNumber.text.trim(),
+        address: address.text.trim(),
+        createdAt: isEdit ? survey?.createdAt : now,
+        remarks: remarks.text.trim(),
+        updatedAt: now,
+        isFormEdit: isEdit,
+        gamName: user?.gamName ?? '',
+        locationMap: {
+          'loc': locationMap['loc'] ??
+              LocationMap(
+                lag: location?.latitude?.toString() ?? '0',
+                lug: location?.longitude?.toString() ?? '0',
+              )
+        },
+        newHomeNumber: '',
+        rentPersonName: '',
+        propertyStayType: '',
+        propertyType: {},
+        propertyDescription: {},
+        waterPipeline: '',
+        banthkamYear: '',
+        totalFloors: '',
+        area: {},
+        isOffProperty: true,
+        isDabaan: 'ના',
+        signature: null,
+      );
+
+      final result = await authRepo.saveSurveyForm(
+        surveyData: surveyData,
+        isEditData: isEdit,
+      );
+
+      if (result != null) {
+        AppSnackbar.showSnackbar(title: 'Success', message: 'Form Submitted');
+        await Future.delayed(const Duration(seconds: 1));
+        Get.offNamedUntil(AppRoutes.dashScreen, (route) => false);
+      } else {
+        AppSnackbar.showErrorSnackbar(message: 'Failed to submit form');
+      }
+    } catch (e, s) {
+      log('closePropertySubmit Error: $e', stackTrace: s);
     } finally {
       isFormSubmit.value = false;
     }
