@@ -23,6 +23,8 @@ class GujaratiTranslations extends Translations {
           FormLabels.surveyNumber: 'સર્વે નંબર',
           FormLabels.remarks: 'ટિપ્પણીઓ',
           FormLabels.daban: 'દબાણ',
+          FormLabels.rcNumber: 'આર.સી. નંબર',
+          FormLabels.ecNumber: 'ઇસી. નંબર',
 
           // Optional: Additional translations (uncomment and use as needed)
           // 'propertyTypeResidential': 'રહેણાંક',
@@ -55,4 +57,6 @@ class FormLabels {
   static const String surveyNumber = 'surveyNumber';
   static const String remarks = 'remarks';
   static const String daban = 'daban';
+  static const String rcNumber = 'rcNumber';
+  static const String ecNumber = 'ecNumber';
 }

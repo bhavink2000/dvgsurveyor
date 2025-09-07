@@ -40,6 +40,32 @@ class SurveyorFormScreenController extends GetxController {
   final newFloorController = TextEditingController();
   final surveyNumber = TextEditingController();
   final remarks = TextEditingController();
+  final ecNumber = TextEditingController();
+
+  RxBool isNonResedential = false.obs;
+
+  var rcNumberControllers = <Map<String, TextEditingController>>[].obs;
+
+  void addRcNumberField({String contractorName = '', String rcNumber = ''}) {
+    rcNumberControllers.add({
+      "contractorName": TextEditingController(text: contractorName),
+      "rcNumber": TextEditingController(text: rcNumber),
+    });
+  }
+
+  void removeRcNumberField(int index) {
+    if (rcNumberControllers.length > 1) {
+      rcNumberControllers.removeAt(index);
+    }
+  }
+
+  List<RcNumberItem> get rcNumbers => rcNumberControllers
+      .map((map) => RcNumberItem(
+            contractorName: map["contractorName"]!.text.trim(),
+            rcNumber: map["rcNumber"]!.text.trim(),
+          ))
+      .where((e) => e.contractorName.isNotEmpty || e.rcNumber.isNotEmpty)
+      .toList();
 
   // Dropdown Selections
   RxnString selectedUsageId = RxnString();
@@ -94,6 +120,8 @@ class SurveyorFormScreenController extends GetxController {
   StreamSubscription<MapEvent>? mapEventSub;
   var hooksAttached = false.obs;
 
+  RxBool isOffProperty = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -105,6 +133,7 @@ class SurveyorFormScreenController extends GetxController {
       prefillForm(survey!);
     }
     fetchData();
+    addRcNumberField(); // add at least one by default
   }
 
   // signature controller
@@ -117,6 +146,16 @@ class SurveyorFormScreenController extends GetxController {
   final isEditingSignature = false.obs;
 
   void prefillForm(SurveyModel survey) async {
+    isOffProperty.value = survey.isOffProperty;
+    isNonResedential.value = survey.isNonResidential;
+    if (isOffProperty.value == true) {
+      surveyNumber.text = survey.surveyNumber ?? '';
+      ownerName.text = survey.ownerName;
+      junagharNumber.text = survey.oldHomeNumber;
+      address.text = survey.address;
+      mobileNumber.text = survey.mobileNumber;
+      return;
+    }
     surveyNumber.text = survey.surveyNumber ?? '';
     ownerName.text = survey.ownerName;
     junagharNumber.text = survey.oldHomeNumber;
@@ -138,6 +177,22 @@ class SurveyorFormScreenController extends GetxController {
         survey.propertyDescription.values.first.propertyDes ?? '';
 
     isDabaan.value = survey.isDabaan == 'હા' ? true : false;
+
+    if (isNonResedential.value == true) {
+      ecNumber.text = survey.ecNumber ?? '';
+      if (survey.rcNumber != null && survey.rcNumber!.isNotEmpty) {
+        rcNumberControllers.clear();
+        for (var item in survey.rcNumber!) {
+          addRcNumberField(
+            contractorName: item.contractorName,
+            rcNumber: item.rcNumber,
+          );
+        }
+      } else {
+        rcNumberControllers.clear();
+        addRcNumberField();
+      }
+    }
 
     // Load property descriptions for the selected type
     await getPropertyDescription();
@@ -328,6 +383,10 @@ class SurveyorFormScreenController extends GetxController {
         remarks: remarks.text.trim(),
         isDabaan: isDabaan.value == true ? 'હા' : 'ના',
         signature: signatureBytes != null ? base64Encode(signatureBytes) : null,
+
+        isNonResidential: isNonResedential.value,
+        rcNumber: rcNumbers, // List<String>
+        ecNumber: ecNumber.text.trim(),
       );
 
       final result = await authRepo.saveSurveyForm(
@@ -344,6 +403,77 @@ class SurveyorFormScreenController extends GetxController {
       }
     } catch (e) {
       //AppSnackbar.showErrorSnackbar(message: 'Error: ${e.toString()}');
+    } finally {
+      isFormSubmit.value = false;
+    }
+  }
+
+  Future<void> closePropertySubmit() async {
+    try {
+      isFormSubmit.value = true;
+
+      final user = SessionManager.getUser();
+
+      final now = DateTime.now();
+
+      final bool isEdit = isEditMode.value;
+      final id =
+          isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
+      final newIndex = isEdit
+          ? (survey?.index ?? '')
+          : (await authRepo.getSurveyData(userId: user?.id ?? '')).length + 1;
+
+      final surveyData = SurveyModel(
+        id: id,
+        userId: user?.id ?? '',
+        userRole: user?.role ?? '',
+        userName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
+        surveyNumber: surveyNumber.text.trim(),
+        ownerName: ownerName.text.trim(),
+        oldHomeNumber: junagharNumber.text.trim(),
+        index: isEdit ? (survey?.index ?? '') : newIndex.toString(),
+        mobileNumber: mobileNumber.text.trim(),
+        address: address.text.trim(),
+        createdAt: isEdit ? survey?.createdAt : now,
+        remarks: remarks.text.trim(),
+        updatedAt: now,
+        isFormEdit: isEdit,
+        gamName: user?.gamName ?? '',
+        locationMap: {
+          'loc': locationMap['loc'] ??
+              LocationMap(
+                lag: location?.latitude?.toString() ?? '0',
+                lug: location?.longitude?.toString() ?? '0',
+              )
+        },
+        newHomeNumber: '',
+        rentPersonName: '',
+        propertyStayType: '',
+        propertyType: {},
+        propertyDescription: {},
+        waterPipeline: '',
+        banthkamYear: '',
+        totalFloors: '',
+        area: {},
+        isOffProperty: true,
+        isDabaan: 'ના',
+        signature: null,
+      );
+
+      final result = await authRepo.saveSurveyForm(
+        surveyData: surveyData,
+        isEditData: isEdit,
+      );
+
+      if (result != null) {
+        AppSnackbar.showSnackbar(title: 'Success', message: 'Form Submitted');
+        await Future.delayed(const Duration(seconds: 1));
+        Get.offNamedUntil(AppRoutes.dashScreen, (route) => false);
+      } else {
+        AppSnackbar.showErrorSnackbar(message: 'Failed to submit form');
+      }
+    } catch (e, s) {
+      log('closePropertySubmit Error: $e', stackTrace: s);
     } finally {
       isFormSubmit.value = false;
     }

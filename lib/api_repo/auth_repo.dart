@@ -55,7 +55,7 @@ class AuthRepo {
           .collection(FirebaseConst.surveyCollection)
           .withConverter<SurveyModel>(
             fromFirestore: (snapshot, _) => SurveyModel.fromFirebase(snapshot),
-            toFirestore: (model, _) => model.toFirebase(),
+            toFirestore: (model, _) => model.toJson(),
           );
 
   /// Get user by username+password OR mobile number
@@ -212,7 +212,7 @@ class AuthRepo {
       final docRef = _surveyCollection.doc(surveyData.id);
 
       if (isEditData == true) {
-        await docRef.update(surveyData.toFirebase()); // Convert model to Map
+        await docRef.update(surveyData.toJson()); // Convert model to Map
       } else {
         await docRef.set(surveyData);
       }

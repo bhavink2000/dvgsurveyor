@@ -12,6 +12,7 @@ import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/usage_model.dart';
 import 'package:dvgsurveyor/src/surveyor_form/controller/surveyor_form_screen_controller.dart';
 import 'package:dvgsurveyor/src/surveyor_form/widgets/location_pick_widget.dart';
+import 'package:dvgsurveyor/src/surveyor_form/widgets/off_property_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -40,105 +41,29 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
           padding: EdgeInsets.only(left: 16.w, right: 16.w),
           child: Column(
             children: [
-              buildInput(
-                FormLabels.surveyNumber,
-                controller.surveyNumber,
-                validator: (value) {
-                  return null;
-                },
-              ),
-              buildInput(
-                FormLabels.ownerName,
-                controller.ownerName,
-              ),
-              buildInput(
-                FormLabels.junagharNumber,
-                controller.junagharNumber,
-                keyboardType: TextInputType.number,
-              ),
-              buildInput(
-                FormLabels.kabjedarName,
-                controller.kabjedarName,
-              ),
-              buildInput(
-                FormLabels.address,
-                controller.address,
-              ),
-              Obx(() {
-                return LabeledDropdownRow<UsageTypeModel>(
-                  label: FormLabels.usageType.tr,
-                  controller: controller.usageType,
-                  selectedId: controller.selectedUsageId.value,
-                  items: controller.usageData,
-                  isLoading: controller.isUsageLoad.value,
-                  onChanged: (val) => controller.selectedUsageId.value = val,
-                );
-              }),
-              buildInput(
-                FormLabels.mobileNumber,
-                controller.mobileNumber,
-                keyboardType: TextInputType.number,
-              ),
-              Obx(() {
-                return LabeledDropdownRow<PropertyTypeModel>(
-                  label: FormLabels.propertyType.tr,
-                  controller: controller.propertyType,
-                  selectedId: controller.selectedPropertyType.value,
-                  items: controller.propertyData,
-                  isLoading: controller.isPropertyTypeLoad.value,
-                  onChanged: (val) {
-                    controller.selectedPropertyType.value = val;
-                    controller.selectedPropertyDescription.value = null;
-                    controller.propertyDescription.clear();
-                    controller.propertyDesData.clear();
-
-                    controller.getPropertyDescription();
-                  },
-                );
-              }),
-              Obx(() {
-                return LabeledDropdownRow<PropertyDescriptionModel>(
-                  label: FormLabels.propertyDescription.tr,
-                  controller: controller.propertyDescription,
-                  selectedId: controller.selectedPropertyDescription.value,
-                  items: controller.propertyDesData,
-                  isLoading: controller.isPropertyDesLoad.value,
-                  onChanged: (val) {
-                    controller.selectedPropertyDescription.value = val;
-                  },
-                );
-              }),
-              buildInput(
-                FormLabels.waterConnectionNumber,
-                controller.waterConnectionNumber,
-                keyboardType: TextInputType.number,
-              ),
-              buildInput(
-                FormLabels.constructionYear,
-                controller.constructionYear,
-                keyboardType: TextInputType.number,
-              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
                     width: 175.w,
                     child: buildInput(
-                      FormLabels.totalFloors,
-                      controller.totalFloors,
-                      keyboardType: TextInputType.number,
+                      FormLabels.surveyNumber,
+                      controller.surveyNumber,
+                      validator: (value) {
+                        return null;
+                      },
                     ),
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('દબાણ', style: AppFonts.text16(context)),
+                      Text('બંધ મિલકત', style: AppFonts.text16(context)),
                       Obx(() => Transform.scale(
                             scale: 0.8,
                             child: Switch(
-                              value: controller.isDabaan.value,
+                              value: controller.isOffProperty.value,
                               onChanged: (val) {
-                                controller.isDabaan.value = val;
+                                controller.isOffProperty.value = val;
                               },
                               activeColor: AppColors.tealPrimary,
                             ),
@@ -147,446 +72,740 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: 175.w,
-                    child: buildInput(
-                      FormLabels.remarks,
-                      controller.remarks,
-                      validator: (value) {
-                        return null;
-                      },
-                    ),
-                  ),
-                  ElevatedButton(
-                    child: Text(
-                      "Pick Location",
-                      style: AppFonts.text14(context)
-                          .copyWith(fontSize: 12, color: AppColors.offWhite),
-                    ),
-                    onPressed: () {
-                      Get.to(() => LocationPickerScreen());
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  Text(
-                    "Signature",
-                    style: AppFonts.text16(context)
-                        .copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Obx(() {
-                    final oldSignature = controller.survey?.signature;
-                    final isEditingSignature =
-                        controller.isEditingSignature.value;
-
-                    return Column(
-                      children: [
-                        Container(
-                          height: 180,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: Colors.grey.shade400, width: 1.2),
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.white,
-                          ),
-                          child: oldSignature != null &&
-                                  oldSignature.isNotEmpty &&
-                                  !isEditingSignature
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Image.memory(
-                                        base64Decode(oldSignature)),
-                                  ),
-                                )
-                              : Signature(
-                                  controller: controller.signatureController,
-                                  backgroundColor: Colors.white,
-                                ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        // Buttons row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+              Obx(
+                () {
+                  return controller.isOffProperty.value
+                      ? OffPropertyWidget()
+                      : Column(
                           children: [
-                            if (oldSignature != null && oldSignature.isNotEmpty)
-                              TextButton(
-                                onPressed: () {
-                                  controller.isEditingSignature.value = true;
-                                  controller.signatureController.clear();
+                            buildInput(
+                              FormLabels.ownerName,
+                              controller.ownerName,
+                            ),
+                            buildInput(
+                              FormLabels.junagharNumber,
+                              controller.junagharNumber,
+                              keyboardType: TextInputType.number,
+                            ),
+                            buildInput(
+                              FormLabels.kabjedarName,
+                              controller.kabjedarName,
+                            ),
+                            buildInput(
+                              FormLabels.address,
+                              controller.address,
+                            ),
+                            Obx(() {
+                              return LabeledDropdownRow<UsageTypeModel>(
+                                label: FormLabels.usageType.tr,
+                                controller: controller.usageType,
+                                selectedId: controller.selectedUsageId.value,
+                                items: controller.usageData,
+                                isLoading: controller.isUsageLoad.value,
+                                onChanged: (val) =>
+                                    controller.selectedUsageId.value = val,
+                              );
+                            }),
+                            buildInput(
+                              FormLabels.mobileNumber,
+                              controller.mobileNumber,
+                              keyboardType: TextInputType.number,
+                            ),
+                            Obx(() {
+                              return LabeledDropdownRow<PropertyTypeModel>(
+                                label: FormLabels.propertyType.tr,
+                                controller: controller.propertyType,
+                                selectedId:
+                                    controller.selectedPropertyType.value,
+                                items: controller.propertyData,
+                                isLoading: controller.isPropertyTypeLoad.value,
+                                onChanged: (val) {
+                                  controller.selectedPropertyType.value = val;
+                                  if (val == 'nonResidential') {
+                                    controller.isNonResedential.value = true;
+                                  } else {
+                                    controller.rcNumbers.clear();
+                                    controller.ecNumber.text = '';
+                                    controller.isNonResedential.value = false;
+                                  }
+                                  controller.selectedPropertyDescription.value =
+                                      null;
+                                  controller.propertyDescription.clear();
+                                  controller.propertyDesData.clear();
+
+                                  controller.getPropertyDescription();
                                 },
-                                child: Text('Edit'),
-                              ),
+                              );
+                            }),
+                            Obx(() {
+                              return controller.isNonResedential.value
+                                  ? Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 4.h),
+                                        buildInput(
+                                          FormLabels.ecNumber,
+                                          controller.ecNumber,
+                                          keyboardType: TextInputType.text,
+                                        ),
+                                        SizedBox(height: 8.h),
 
-                            //if (isEditingSignature)
-                            TextButton(
-                              onPressed: () {
-                                controller.signatureController.clear();
-                              },
-                              child: Text('Clear'),
+                                        // Dynamic RC Number fields
+                                        Column(
+                                          children: List.generate(
+                                            controller
+                                                .rcNumberControllers.length,
+                                            (index) {
+                                              final map = controller
+                                                  .rcNumberControllers[index];
+                                              return Padding(
+                                                padding: EdgeInsets.only(
+                                                    bottom: 8.h),
+                                                child: Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: buildInput(
+                                                        "Contractor Nm",
+                                                        map["contractorName"]!,
+                                                        keyboardType:
+                                                            TextInputType.text,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 8.w),
+                                                    Expanded(
+                                                      child: buildInput(
+                                                        "RC No",
+                                                        map["rcNumber"]!,
+                                                        keyboardType:
+                                                            TextInputType.text,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 8.w),
+                                                    if (controller
+                                                            .rcNumberControllers
+                                                            .length >
+                                                        1)
+                                                      IconButton(
+                                                        icon: Icon(
+                                                            Icons.remove_circle,
+                                                            color: Colors.red),
+                                                        onPressed: () => controller
+                                                            .removeRcNumberField(
+                                                                index),
+                                                      ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+
+                                        // Add More button
+                                        Align(
+                                          alignment: Alignment.bottomRight,
+                                          child: TextButton.icon(
+                                            onPressed:
+                                                controller.addRcNumberField,
+                                            icon: Icon(Icons.add,
+                                                color: Colors.green),
+                                            label: Text("Add More"),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : SizedBox.shrink();
+                            }),
+                            Obx(() {
+                              return LabeledDropdownRow<
+                                  PropertyDescriptionModel>(
+                                label: FormLabels.propertyDescription.tr,
+                                controller: controller.propertyDescription,
+                                selectedId: controller
+                                    .selectedPropertyDescription.value,
+                                items: controller.propertyDesData,
+                                isLoading: controller.isPropertyDesLoad.value,
+                                onChanged: (val) {
+                                  controller.selectedPropertyDescription.value =
+                                      val;
+                                },
+                              );
+                            }),
+                            buildInput(
+                              FormLabels.waterConnectionNumber,
+                              controller.waterConnectionNumber,
+                              keyboardType: TextInputType.number,
                             ),
-                          ],
-                        ),
-                      ],
-                    );
-                  }),
-                ],
-              ),
-              SizedBox(height: 16),
-              Obx(() => Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: AppColors.tealDark,
-                        ),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Row(
-                          children: [
-                            Text(
-                              'Add Area',
-                              style: AppFonts.text16(context).copyWith(
-                                color: AppColors.offWhite,
-                              ),
+                            buildInput(
+                              FormLabels.constructionYear,
+                              controller.constructionYear,
+                              keyboardType: TextInputType.number,
                             ),
-                            Spacer(),
-                            SizedBox(
-                              width: 145.w,
-                              height: 30.h,
-                              child: DropdownButtonFormField<String>(
-                                value: controller.baseFloors.contains(
-                                        controller.selectedBaseFloor.value)
-                                    ? controller.selectedBaseFloor.value
-                                    : null,
-                                hint: Text(
-                                  "Select Floor",
-                                  style: AppFonts.text14(context),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 175.w,
+                                  child: buildInput(
+                                    FormLabels.totalFloors,
+                                    controller.totalFloors,
+                                    keyboardType: TextInputType.number,
+                                  ),
                                 ),
-                                items: controller.baseFloors
-                                    .toSet()
-                                    .map((floor) => DropdownMenuItem(
-                                          value: floor.capitalizeFirst,
-                                          child: Text(
-                                            floor.capitalizeFirst!,
-                                            style: AppFonts.text14(context)
-                                                .copyWith(
-                                              color: AppColors.almostBlack,
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('દબાણ',
+                                        style: AppFonts.text16(context)),
+                                    Obx(() => Transform.scale(
+                                          scale: 0.8,
+                                          child: Switch(
+                                            value: controller.isDabaan.value,
+                                            onChanged: (val) {
+                                              controller.isDabaan.value = val;
+                                            },
+                                            activeColor: AppColors.tealPrimary,
+                                          ),
+                                        )),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 175.w,
+                                  child: buildInput(
+                                    FormLabels.remarks,
+                                    controller.remarks,
+                                    validator: (value) {
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  child: Text(
+                                    "Pick Location",
+                                    style: AppFonts.text14(context).copyWith(
+                                        fontSize: 12,
+                                        color: AppColors.offWhite),
+                                  ),
+                                  onPressed: () {
+                                    Get.to(() => LocationPickerScreen());
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 20),
+                                Text(
+                                  "Signature",
+                                  style: AppFonts.text16(context)
+                                      .copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                const SizedBox(height: 8),
+                                Obx(() {
+                                  final oldSignature =
+                                      controller.survey?.signature;
+                                  final isEditingSignature =
+                                      controller.isEditingSignature.value;
+
+                                  return Column(
+                                    children: [
+                                      Container(
+                                        height: 180,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.grey.shade400,
+                                              width: 1.2),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          color: Colors.white,
+                                        ),
+                                        child: oldSignature != null &&
+                                                oldSignature.isNotEmpty &&
+                                                !isEditingSignature
+                                            ? Center(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Image.memory(
+                                                      base64Decode(
+                                                          oldSignature)),
+                                                ),
+                                              )
+                                            : Signature(
+                                                controller: controller
+                                                    .signatureController,
+                                                backgroundColor: Colors.white,
+                                              ),
+                                      ),
+
+                                      const SizedBox(height: 8),
+
+                                      // Buttons row
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          if (oldSignature != null &&
+                                              oldSignature.isNotEmpty)
+                                            TextButton(
+                                              onPressed: () {
+                                                controller.isEditingSignature
+                                                    .value = true;
+                                                controller.signatureController
+                                                    .clear();
+                                              },
+                                              child: Text('Edit'),
+                                            ),
+
+                                          //if (isEditingSignature)
+                                          TextButton(
+                                            onPressed: () {
+                                              controller.signatureController
+                                                  .clear();
+                                            },
+                                            child: Text('Clear'),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              ],
+                            ),
+                            SizedBox(height: 16),
+                            Obx(
+                              () => Column(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      color: AppColors.tealDark,
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'Add Area',
+                                          style:
+                                              AppFonts.text16(context).copyWith(
+                                            color: AppColors.offWhite,
+                                          ),
+                                        ),
+                                        Spacer(),
+                                        SizedBox(
+                                          width: 145.w,
+                                          height: 30.h,
+                                          child:
+                                              DropdownButtonFormField<String>(
+                                            value: controller.baseFloors
+                                                    .contains(controller
+                                                        .selectedBaseFloor
+                                                        .value)
+                                                ? controller
+                                                    .selectedBaseFloor.value
+                                                : null,
+                                            hint: Text(
+                                              "Select Floor",
+                                              style: AppFonts.text14(context),
+                                            ),
+                                            items: controller.baseFloors
+                                                .toSet()
+                                                .map((floor) =>
+                                                    DropdownMenuItem(
+                                                      value:
+                                                          floor.capitalizeFirst,
+                                                      child: Text(
+                                                        floor.capitalizeFirst!,
+                                                        style: AppFonts.text14(
+                                                                context)
+                                                            .copyWith(
+                                                          color: AppColors
+                                                              .almostBlack,
+                                                        ),
+                                                      ),
+                                                    ))
+                                                .toList(),
+                                            onChanged: (value) {
+                                              controller.selectedBaseFloor
+                                                  .value = value!;
+                                            },
+                                            isExpanded: true,
+                                            decoration: InputDecoration(
+                                              contentPadding:
+                                                  const EdgeInsets.only(
+                                                      left: 8),
+                                              filled: true,
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                borderSide: const BorderSide(
+                                                    color: Colors.grey),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                borderSide: const BorderSide(
+                                                    color: Colors.white),
+                                              ),
                                             ),
                                           ),
-                                        ))
-                                    .toList(),
-                                onChanged: (value) {
-                                  controller.selectedBaseFloor.value = value!;
-                                },
-                                isExpanded: true,
-                                decoration: InputDecoration(
-                                  contentPadding:
-                                      const EdgeInsets.only(left: 8),
-                                  filled: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide:
-                                        const BorderSide(color: Colors.grey),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide:
-                                        const BorderSide(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: AppColors.offWhite,
-                              ),
-                              height: 35,
-                              width: 35,
-                              child: IconButton(
-                                  onPressed: () {
-                                    if (controller
-                                        .selectedBaseFloor.value.isNotEmpty) {
-                                      controller.addNewFloorBasedOn(
-                                          controller.selectedBaseFloor.value);
-                                    } else {
-                                      AppSnackbar.showErrorSnackbar(
-                                        message: "Please select a floor to add",
-                                      );
-                                    }
-                                  },
-                                  icon: Icon(
-                                    Icons.add,
-                                    color: AppColors.tealDark,
-                                    size: 20,
-                                  )),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-                      ListView(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        children: controller.areaData.entries.map((entry) {
-                          final floor = entry.key;
-                          final floorArea = entry.value;
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: AppColors.tealDark,
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Theme(
-                                data: Theme.of(context).copyWith(
-                                  dividerColor: Colors.transparent,
-                                ),
-                                child: ExpansionTile(
-                                  title: RichText(
-                                    text: TextSpan(
-                                      style: AppFonts.text16(context).copyWith(
-                                        color: AppColors.almostBlack,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      children: [
-                                        TextSpan(text: floor.toUpperCase()),
-                                        TextSpan(
-                                          text:
-                                              '  (${floorArea.totalArea.toStringAsFixed(2)} sq.mt)',
-                                          style:
-                                              AppFonts.text14(context).copyWith(
-                                            fontSize: 11,
-                                            color: AppColors.darkGrey,
-                                            fontWeight: FontWeight.w400,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            color: AppColors.offWhite,
                                           ),
+                                          height: 35,
+                                          width: 35,
+                                          child: IconButton(
+                                              onPressed: () {
+                                                if (controller.selectedBaseFloor
+                                                    .value.isNotEmpty) {
+                                                  controller.addNewFloorBasedOn(
+                                                      controller
+                                                          .selectedBaseFloor
+                                                          .value);
+                                                } else {
+                                                  AppSnackbar.showErrorSnackbar(
+                                                    message:
+                                                        "Please select a floor to add",
+                                                  );
+                                                }
+                                              },
+                                              icon: Icon(
+                                                Icons.add,
+                                                color: AppColors.tealDark,
+                                                size: 20,
+                                              )),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons
-                                          .expand_more), // This replaces default arrow
-                                      const SizedBox(width: 8),
-                                      InkWell(
-                                        onTap: () =>
-                                            controller.removeFloor(floor),
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(4.0),
-                                          child: Icon(
-                                            Icons.delete_forever,
-                                            color: AppColors.coralAccent,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  children: controller.categories.map((cat) {
-                                    final category =
-                                        controller.getCategory(floorArea, cat);
-                                    final items = category?.items ?? [];
+                                  SizedBox(height: 16.h),
+                                  ListView(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    children: controller.areaData.entries
+                                        .map((entry) {
+                                      final floor = entry.key;
+                                      final floorArea = entry.value;
 
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text.rich(
-                                                TextSpan(
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 12),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: AppColors.tealDark,
+                                              width: 1,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Theme(
+                                            data: Theme.of(context).copyWith(
+                                              dividerColor: Colors.transparent,
+                                            ),
+                                            child: ExpansionTile(
+                                              title: RichText(
+                                                text: TextSpan(
+                                                  style:
+                                                      AppFonts.text16(context)
+                                                          .copyWith(
+                                                    color:
+                                                        AppColors.almostBlack,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                                   children: [
                                                     TextSpan(
-                                                      text:
-                                                          '${cat.capitalizeFirst ?? ''} ',
-                                                      style: AppFonts.text16(
-                                                              context)
-                                                          .copyWith(
-                                                        color:
-                                                            AppColors.tealDark,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
-                                                    ),
+                                                        text: floor
+                                                            .toUpperCase()),
                                                     TextSpan(
                                                       text:
-                                                          '(${(floorArea.categoriesMap[cat]?.totalCount ?? 0).toStringAsFixed(2)})',
+                                                          '  (${floorArea.totalArea.toStringAsFixed(2)} sq.mt)',
                                                       style: AppFonts.text14(
                                                               context)
                                                           .copyWith(
+                                                        fontSize: 11,
                                                         color:
                                                             AppColors.darkGrey,
                                                         fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 12,
+                                                            FontWeight.w400,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                              Spacer(),
-                                              Align(
-                                                alignment: Alignment.centerLeft,
-                                                child: TextButton.icon(
-                                                  onPressed: () => controller
-                                                      .addItem(floor, cat),
-                                                  icon: const Icon(Icons.add,
-                                                      size: 18),
-                                                  label: Text(
-                                                    'Add',
-                                                    style:
-                                                        AppFonts.text14(context)
-                                                            .copyWith(
-                                                      color:
-                                                          AppColors.tealPrimary,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          ...List.generate(items.length, (i) {
-                                            final item = items[i];
-                                            final total =
-                                                item.length * item.width;
-
-                                            return Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 4.0),
-                                              child: Row(
+                                              trailing: Row(
+                                                mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  _numField(
-                                                    context: context,
-                                                    label: 'Length',
-                                                    initialValue:
-                                                        item.length.toString(),
-                                                    onChanged: (val) =>
-                                                        controller.updateItem(
-                                                      floor,
-                                                      cat,
-                                                      i,
-                                                      AreaItem(
-                                                        length: double.tryParse(
-                                                                val) ??
-                                                            0,
-                                                        width: item.width,
-                                                        //count: item.count,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  _numField(
-                                                    context: context,
-                                                    label: 'Width',
-                                                    initialValue:
-                                                        item.width.toString(),
-                                                    onChanged: (val) =>
-                                                        controller.updateItem(
-                                                      floor,
-                                                      cat,
-                                                      i,
-                                                      AreaItem(
-                                                        length: item.length,
-                                                        width: double.tryParse(
-                                                                val) ??
-                                                            0,
-                                                        //count: item.count,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Expanded(
+                                                  const Icon(Icons
+                                                      .expand_more), // This replaces default arrow
+                                                  const SizedBox(width: 8),
+                                                  InkWell(
+                                                    onTap: () => controller
+                                                        .removeFloor(floor),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
                                                     child: Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 4),
-                                                      child: Text(
-                                                        'Count: ${total.toStringAsFixed(2)}',
-                                                        style: AppFonts.text14(
-                                                                context)
-                                                            .copyWith(
-                                                          fontSize: 12,
-                                                        ),
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              4.0),
+                                                      child: Icon(
+                                                        Icons.delete_forever,
+                                                        color: AppColors
+                                                            .coralAccent,
+                                                        size: 20,
                                                       ),
                                                     ),
-                                                  ),
-                                                  IconButton(
-                                                    icon: Icon(
-                                                      Icons.delete_rounded,
-                                                      color:
-                                                          AppColors.coralAccent,
-                                                    ),
-                                                    onPressed: () =>
-                                                        controller.removeItem(
-                                                            floor, cat, i),
                                                   ),
                                                 ],
                                               ),
-                                            );
-                                          }),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
+                                              children: controller.categories
+                                                  .map((cat) {
+                                                final category =
+                                                    controller.getCategory(
+                                                        floorArea, cat);
+                                                final items =
+                                                    category?.items ?? [];
+
+                                                return Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal: 12,
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      '${cat.capitalizeFirst ?? ''} ',
+                                                                  style: AppFonts
+                                                                          .text16(
+                                                                              context)
+                                                                      .copyWith(
+                                                                    color: AppColors
+                                                                        .tealDark,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                  ),
+                                                                ),
+                                                                TextSpan(
+                                                                  text:
+                                                                      '(${(floorArea.categoriesMap[cat]?.totalCount ?? 0).toStringAsFixed(2)})',
+                                                                  style: AppFonts
+                                                                          .text14(
+                                                                              context)
+                                                                      .copyWith(
+                                                                    color: AppColors
+                                                                        .darkGrey,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                    fontSize:
+                                                                        12,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          Spacer(),
+                                                          Align(
+                                                            alignment: Alignment
+                                                                .centerLeft,
+                                                            child:
+                                                                TextButton.icon(
+                                                              onPressed: () =>
+                                                                  controller
+                                                                      .addItem(
+                                                                          floor,
+                                                                          cat),
+                                                              icon: const Icon(
+                                                                  Icons.add,
+                                                                  size: 18),
+                                                              label: Text(
+                                                                'Add',
+                                                                style: AppFonts
+                                                                        .text14(
+                                                                            context)
+                                                                    .copyWith(
+                                                                  color: AppColors
+                                                                      .tealPrimary,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(height: 8),
+                                                      ...List.generate(
+                                                          items.length, (i) {
+                                                        final item = items[i];
+                                                        final total =
+                                                            item.length *
+                                                                item.width;
+
+                                                        return Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  bottom: 4.0),
+                                                          child: Row(
+                                                            children: [
+                                                              _numField(
+                                                                context:
+                                                                    context,
+                                                                label: 'Length',
+                                                                initialValue: item
+                                                                    .length
+                                                                    .toString(),
+                                                                onChanged: (val) =>
+                                                                    controller
+                                                                        .updateItem(
+                                                                  floor,
+                                                                  cat,
+                                                                  i,
+                                                                  AreaItem(
+                                                                    length:
+                                                                        double.tryParse(val) ??
+                                                                            0,
+                                                                    width: item
+                                                                        .width,
+                                                                    //count: item.count,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              _numField(
+                                                                context:
+                                                                    context,
+                                                                label: 'Width',
+                                                                initialValue: item
+                                                                    .width
+                                                                    .toString(),
+                                                                onChanged: (val) =>
+                                                                    controller
+                                                                        .updateItem(
+                                                                  floor,
+                                                                  cat,
+                                                                  i,
+                                                                  AreaItem(
+                                                                    length: item
+                                                                        .length,
+                                                                    width: double.tryParse(
+                                                                            val) ??
+                                                                        0,
+                                                                    //count: item.count,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Expanded(
+                                                                child: Padding(
+                                                                  padding: const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          4),
+                                                                  child: Text(
+                                                                    'Count: ${total.toStringAsFixed(2)}',
+                                                                    style: AppFonts.text14(
+                                                                            context)
+                                                                        .copyWith(
+                                                                      fontSize:
+                                                                          12,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              IconButton(
+                                                                icon: Icon(
+                                                                  Icons
+                                                                      .delete_rounded,
+                                                                  color: AppColors
+                                                                      .coralAccent,
+                                                                ),
+                                                                onPressed: () =>
+                                                                    controller
+                                                                        .removeItem(
+                                                                            floor,
+                                                                            cat,
+                                                                            i),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      }),
+                                                    ],
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
                               ),
                             ),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  )),
-              Obx(() => ElevatedButton(
-                    onPressed: controller.submitForm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.tealDark,
-                    ),
-                    child: controller.isFormSubmit.value
-                        ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: AppColors.offWhite,
-                              strokeWidth: 2,
+                            Obx(
+                              () => ElevatedButton(
+                                onPressed: controller.submitForm,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.tealDark,
+                                ),
+                                child: controller.isFormSubmit.value
+                                    ? SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.offWhite,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text(
+                                        controller.isEditMode.value == true
+                                            ? 'Update'
+                                            : 'Submit',
+                                        style:
+                                            AppFonts.text16(context).copyWith(
+                                          color: AppColors.offWhite,
+                                        ),
+                                      ),
+                              ),
                             ),
-                          )
-                        : Text(
-                            controller.isEditMode.value == true
-                                ? 'Update'
-                                : 'Submit',
-                            style: AppFonts.text16(context).copyWith(
-                              color: AppColors.offWhite,
-                            ),
-                          ),
-                  )),
+                          ],
+                        );
+                },
+              ),
+              Obx(() => controller.isOffProperty.value
+                  ? SizedBox(
+                      height: 16.h,
+                    )
+                  : SizedBox.shrink()),
               SizedBox(height: 16.h),
             ],
           ),
