@@ -121,6 +121,13 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                                 isLoading: controller.isPropertyTypeLoad.value,
                                 onChanged: (val) {
                                   controller.selectedPropertyType.value = val;
+                                  if (val == 'nonResidential') {
+                                    controller.isNonResedential.value = true;
+                                  } else {
+                                    controller.rcNumbers.clear();
+                                    controller.ecNumber.text = '';
+                                    controller.isNonResedential.value = false;
+                                  }
                                   controller.selectedPropertyDescription.value =
                                       null;
                                   controller.propertyDescription.clear();
@@ -129,6 +136,85 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                                   controller.getPropertyDescription();
                                 },
                               );
+                            }),
+                            Obx(() {
+                              return controller.isNonResedential.value
+                                  ? Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 4.h),
+                                        buildInput(
+                                          FormLabels.ecNumber,
+                                          controller.ecNumber,
+                                          keyboardType: TextInputType.text,
+                                        ),
+                                        SizedBox(height: 8.h),
+
+                                        // Dynamic RC Number fields
+                                        Column(
+                                          children: List.generate(
+                                            controller
+                                                .rcNumberControllers.length,
+                                            (index) {
+                                              final map = controller
+                                                  .rcNumberControllers[index];
+                                              return Padding(
+                                                padding: EdgeInsets.only(
+                                                    bottom: 8.h),
+                                                child: Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: buildInput(
+                                                        "Contractor Nm",
+                                                        map["contractorName"]!,
+                                                        keyboardType:
+                                                            TextInputType.text,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 8.w),
+                                                    Expanded(
+                                                      child: buildInput(
+                                                        "RC No",
+                                                        map["rcNumber"]!,
+                                                        keyboardType:
+                                                            TextInputType.text,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 8.w),
+                                                    if (controller
+                                                            .rcNumberControllers
+                                                            .length >
+                                                        1)
+                                                      IconButton(
+                                                        icon: Icon(
+                                                            Icons.remove_circle,
+                                                            color: Colors.red),
+                                                        onPressed: () => controller
+                                                            .removeRcNumberField(
+                                                                index),
+                                                      ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+
+                                        // Add More button
+                                        Align(
+                                          alignment: Alignment.bottomRight,
+                                          child: TextButton.icon(
+                                            onPressed:
+                                                controller.addRcNumberField,
+                                            icon: Icon(Icons.add,
+                                                color: Colors.green),
+                                            label: Text("Add More"),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : SizedBox.shrink();
                             }),
                             Obx(() {
                               return LabeledDropdownRow<

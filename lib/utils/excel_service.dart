@@ -30,14 +30,11 @@ class ExcelService {
     void appendCenteredRow(List<dynamic> values) {
       for (int col = 0; col < values.length; col++) {
         final cell = sheet.getRangeByIndex(currentRow, col + 1);
-
-        // Always treat formatted numbers as text
         if (values[col] != null) {
           cell.setText(values[col].toString());
         } else {
           cell.setText('');
         }
-
         cell.cellStyle = centerStyle;
       }
       currentRow++;
@@ -61,6 +58,8 @@ class ExcelService {
       'મોબાઇલ નંબર',
       'દબાણ',
       'નળ',
+      'EC Number',
+      'RC Numbers',
       'Signature',
     ]);
 
@@ -76,6 +75,8 @@ class ExcelService {
       'નળીયા તથા પતરા',
       'સ્લેબ તથા પાપડા',
       'નળીયા તથા પતરા',
+      '',
+      '',
       '',
       '',
       '',
@@ -216,6 +217,20 @@ class ExcelService {
 
       final double totalArea = groundTotalArea + upperTotalArea;
 
+      // === EC Number ===
+      final ecNumber = data['ecNumber']?.toString() ?? '';
+
+      // === RC Numbers ===
+      String rcCombined = '';
+      if (data['rcNumber'] is List) {
+        final rcList = List<Map<String, dynamic>>.from(data['rcNumber']);
+        rcCombined = rcList
+            .map((e) =>
+                "${e['contractorName'] ?? ''} - RC.${e['rcNumber'] ?? ''}")
+            .where((s) => s.trim().isNotEmpty)
+            .join(', ');
+      }
+
       // Append row (without signature first)
       appendCenteredRow([
         counter,
@@ -234,6 +249,8 @@ class ExcelService {
         data['mobileNumber'] ?? '',
         data['isDabaan']?.toString() ?? '',
         waterPipelineTotal,
+        ecNumber,
+        rcCombined,
         '', // signature cell placeholder
       ]);
 
@@ -244,7 +261,7 @@ class ExcelService {
           Uint8List signatureBytes = base64Decode(signatureBase64);
           final Picture picture = sheet.pictures.addBase64(
             currentRow - 1,
-            17, // Signature column
+            19, // Signature column
             base64Encode(signatureBytes),
           );
           picture.height = 40;
@@ -258,8 +275,6 @@ class ExcelService {
     }
 
     // === Formatting ===
-
-    // Header style
     final Style headerStyle = workbook.styles.add('headerStyle');
     headerStyle.bold = true;
     headerStyle.hAlign = HAlignType.center;
@@ -267,10 +282,10 @@ class ExcelService {
     headerStyle.borders.all.lineStyle = LineStyle.thin;
     headerStyle.fontSize = 12;
     headerStyle.wrapText = true;
-    sheet.getRangeByName("A1:Q2").cellStyle = headerStyle;
+    sheet.getRangeByName("A1:S2").cellStyle = headerStyle;
 
     // Auto fit columns
-    for (int i = 1; i <= 17; i++) {
+    for (int i = 1; i <= 19; i++) {
       sheet.autoFitColumn(i);
     }
 
@@ -283,25 +298,25 @@ class ExcelService {
     sheet.setColumnWidthInPixels(12, 120); // Survey No
     sheet.setColumnWidthInPixels(13, 150); // Address
     sheet.setColumnWidthInPixels(14, 120); // Mobile
-    sheet.setColumnWidthInPixels(17, 100); // Signature
+    sheet.setColumnWidthInPixels(17, 120); // EC Number
+    sheet.setColumnWidthInPixels(18, 200); // RC Numbers
+    sheet.setColumnWidthInPixels(19, 100); // Signature
 
-    // Apply borders to all used cells
-    final usedRange = sheet.getRangeByIndex(1, 1, currentRow, 17);
+    // Apply borders
+    final usedRange = sheet.getRangeByIndex(1, 1, currentRow, 19);
     usedRange.cellStyle.borders.all.lineStyle = LineStyle.thin;
 
-    // Wrap text for address & property description
+    // Wrap text for address & RC numbers
     sheet.getRangeByName("K1:M$currentRow").cellStyle.wrapText = true;
+    sheet.getRangeByName("R1:S$currentRow").cellStyle.wrapText = true;
 
     // Adjust row heights
     for (int row = 3; row < currentRow; row++) {
       sheet.setRowHeightInPixels(row, 50);
     }
 
-    // Freeze the top two header rows
+    // Freeze headers
     sheet.getRangeByName('A3').freezePanes();
-
-// Optionally, also freeze first column along with two header rows
-// sheet.getRangeByName('B3').freezePanes();
 
     // === Save Excel ===
     final List<int> bytes = workbook.saveAsStream();

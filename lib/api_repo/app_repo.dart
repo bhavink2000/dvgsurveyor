@@ -24,7 +24,7 @@ class AppRepo {
           .collection(FirebaseConst.surveyCollection)
           .withConverter<SurveyModel>(
             fromFirestore: (snapshot, _) => SurveyModel.fromFirebase(snapshot),
-            toFirestore: (model, _) => model.toFirebase(),
+            toFirestore: (model, _) => model.toJson(),
           );
 
   Future<List<GamModel>> getGam() async {
@@ -159,7 +159,7 @@ class AppRepo {
         .collection(FirebaseConst.surveyCollection)
         .withConverter<SurveyModel>(
           fromFirestore: (snapshot, _) => SurveyModel.fromFirebase(snapshot),
-          toFirestore: (model, _) => model.toFirebase(),
+          toFirestore: (model, _) => model.toJson(),
         );
 
     try {

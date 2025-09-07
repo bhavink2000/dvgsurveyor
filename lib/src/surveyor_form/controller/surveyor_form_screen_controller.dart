@@ -40,6 +40,32 @@ class SurveyorFormScreenController extends GetxController {
   final newFloorController = TextEditingController();
   final surveyNumber = TextEditingController();
   final remarks = TextEditingController();
+  final ecNumber = TextEditingController();
+
+  RxBool isNonResedential = false.obs;
+
+  var rcNumberControllers = <Map<String, TextEditingController>>[].obs;
+
+  void addRcNumberField({String contractorName = '', String rcNumber = ''}) {
+    rcNumberControllers.add({
+      "contractorName": TextEditingController(text: contractorName),
+      "rcNumber": TextEditingController(text: rcNumber),
+    });
+  }
+
+  void removeRcNumberField(int index) {
+    if (rcNumberControllers.length > 1) {
+      rcNumberControllers.removeAt(index);
+    }
+  }
+
+  List<RcNumberItem> get rcNumbers => rcNumberControllers
+      .map((map) => RcNumberItem(
+            contractorName: map["contractorName"]!.text.trim(),
+            rcNumber: map["rcNumber"]!.text.trim(),
+          ))
+      .where((e) => e.contractorName.isNotEmpty || e.rcNumber.isNotEmpty)
+      .toList();
 
   // Dropdown Selections
   RxnString selectedUsageId = RxnString();
@@ -107,6 +133,7 @@ class SurveyorFormScreenController extends GetxController {
       prefillForm(survey!);
     }
     fetchData();
+    addRcNumberField(); // add at least one by default
   }
 
   // signature controller
@@ -119,8 +146,9 @@ class SurveyorFormScreenController extends GetxController {
   final isEditingSignature = false.obs;
 
   void prefillForm(SurveyModel survey) async {
-    isOffProperty.value = survey.isOffProperty ?? false;
-    if (isOffProperty == true) {
+    isOffProperty.value = survey.isOffProperty;
+    isNonResedential.value = survey.isNonResidential;
+    if (isOffProperty.value == true) {
       surveyNumber.text = survey.surveyNumber ?? '';
       ownerName.text = survey.ownerName;
       junagharNumber.text = survey.oldHomeNumber;
@@ -149,6 +177,22 @@ class SurveyorFormScreenController extends GetxController {
         survey.propertyDescription.values.first.propertyDes ?? '';
 
     isDabaan.value = survey.isDabaan == 'હા' ? true : false;
+
+    if (isNonResedential.value == true) {
+      ecNumber.text = survey.ecNumber ?? '';
+      if (survey.rcNumber != null && survey.rcNumber!.isNotEmpty) {
+        rcNumberControllers.clear();
+        for (var item in survey.rcNumber!) {
+          addRcNumberField(
+            contractorName: item.contractorName,
+            rcNumber: item.rcNumber,
+          );
+        }
+      } else {
+        rcNumberControllers.clear();
+        addRcNumberField();
+      }
+    }
 
     // Load property descriptions for the selected type
     await getPropertyDescription();
@@ -339,6 +383,10 @@ class SurveyorFormScreenController extends GetxController {
         remarks: remarks.text.trim(),
         isDabaan: isDabaan.value == true ? 'હા' : 'ના',
         signature: signatureBytes != null ? base64Encode(signatureBytes) : null,
+
+        isNonResidential: isNonResedential.value,
+        rcNumber: rcNumbers, // List<String>
+        ecNumber: ecNumber.text.trim(),
       );
 
       final result = await authRepo.saveSurveyForm(

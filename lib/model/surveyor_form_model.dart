@@ -163,6 +163,24 @@ class AreaDetail {
       );
 }
 
+T? asType<T>(dynamic value) => value is T ? value : null;
+String asString(dynamic value, [String fallback = '']) =>
+    value is String ? value : fallback;
+bool asBool(dynamic value, [bool fallback = false]) =>
+    value is bool ? value : fallback;
+List<String> asStringList(dynamic value) =>
+    (value as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+
+DateTime? asDate(dynamic value) {
+  if (value == null) return null;
+  if (value is Timestamp) return value.toDate();
+  if (value is String) return DateTime.tryParse(value);
+  return null;
+}
+
+/// ------------------
+/// Survey Model
+/// ------------------
 class SurveyModel {
   final String userId;
   final String userRole;
@@ -186,12 +204,15 @@ class SurveyModel {
   final DateTime? updatedAt;
   final String? gamName;
   final Map<String, LocationMap> locationMap;
-  final bool? isFormEdit;
+  final bool isFormEdit;
   final String? surveyNumber;
   final String? remarks;
   final String? isDabaan;
   final String? signature; // base64 encoded signature
-  final bool? isOffProperty;
+  final bool isOffProperty;
+  final bool isNonResidential;
+  final List<RcNumberItem>? rcNumber;
+  final String? ecNumber;
 
   SurveyModel({
     required this.userId,
@@ -212,8 +233,8 @@ class SurveyModel {
     required this.banthkamYear,
     required this.totalFloors,
     required this.area,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
     this.gamName,
     required this.locationMap,
     this.isFormEdit = false,
@@ -222,53 +243,63 @@ class SurveyModel {
     this.isDabaan = 'ના',
     this.signature,
     this.isOffProperty = false,
+    this.isNonResidential = false,
+    this.rcNumber,
+    this.ecNumber,
   });
 
+  /// ✅ From Firestore
   factory SurveyModel.fromFirebase(DocumentSnapshot json) {
     final data = json.data() as Map<String, dynamic>? ?? {};
+    return SurveyModel.fromJson(data);
+  }
 
+  /// ✅ From Map (handles both Firebase + JSON)
+  factory SurveyModel.fromJson(Map<String, dynamic> data) {
     return SurveyModel(
-      userId: data['userId'] ?? '',
-      userRole: data['userRole'] ?? '',
-      userName: data['userName'] ?? '',
-      id: data['id'] ?? '',
-      ownerName: data['ownerName'] ?? '',
-      oldHomeNumber: data['oldHomeNumber'] ?? '',
-      index: data['index'] ?? '',
-      newHomeNumber: data['newHomeNumber'] ?? '',
-      rentPersonName: data['rentPersonName'] ?? '',
-      address: data['address'] ?? '',
-      propertyStayType: data['propertyStayType'] ?? '',
-      propertyType: (data['propertyType'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, PropertyTypeItem.fromMap(value)),
-      ),
+      userId: asString(data['userId']),
+      userRole: asString(data['userRole']),
+      userName: asString(data['userName']),
+      id: asString(data['id']),
+      ownerName: asString(data['ownerName']),
+      oldHomeNumber: asString(data['oldHomeNumber']),
+      index: asString(data['index']),
+      newHomeNumber: asString(data['newHomeNumber']),
+      rentPersonName: asString(data['rentPersonName']),
+      address: asString(data['address']),
+      propertyStayType: asString(data['propertyStayType']),
+      propertyType: (data['propertyType'] as Map<String, dynamic>? ?? {})
+          .map((k, v) => MapEntry(k, PropertyTypeItem.fromMap(v))),
       propertyDescription:
-          (data['propertyDescription'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, PropertyDescriptionItem.fromMap(value)),
-      ),
-      mobileNumber: data['mobileNumber'] ?? '',
-      waterPipeline: data['waterPipeline'] ?? '0',
-      banthkamYear: data['banthkamYear'] ?? '0',
-      totalFloors: data['totalFloors'] ?? '0',
-      area: (data['area'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, AreaDetail.fromMap(value)),
-      ),
-      createdAt: data['createdAt']?.toDate(),
-      updatedAt: data['updatedAt']?.toDate(),
-      gamName: data['gamName'] ?? '',
-      locationMap: (data['locationMap'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, LocationMap.fromMap(value)),
-      ),
-      isFormEdit: data['isFormEdit'] ?? false,
-      surveyNumber: data['surveyNumber'] ?? '',
-      remarks: data['remarks'] ?? '',
-      isDabaan: data['isDabaan'] ?? '',
-      signature: data["signature"],
-      isOffProperty: data['isOffProperty'] ?? false,
+          (data['propertyDescription'] as Map<String, dynamic>? ?? {})
+              .map((k, v) => MapEntry(k, PropertyDescriptionItem.fromMap(v))),
+      mobileNumber: asString(data['mobileNumber']),
+      waterPipeline: asString(data['waterPipeline'], '0'),
+      banthkamYear: asString(data['banthkamYear'], '0'),
+      totalFloors: asString(data['totalFloors'], '0'),
+      area: (data['area'] as Map<String, dynamic>? ?? {})
+          .map((k, v) => MapEntry(k, AreaDetail.fromMap(v))),
+      createdAt: asDate(data['createdAt']),
+      updatedAt: asDate(data['updatedAt']),
+      gamName: asString(data['gamName']),
+      locationMap: (data['locationMap'] as Map<String, dynamic>? ?? {})
+          .map((k, v) => MapEntry(k, LocationMap.fromMap(v))),
+      isFormEdit: asBool(data['isFormEdit']),
+      surveyNumber: asString(data['surveyNumber']),
+      remarks: asString(data['remarks']),
+      isDabaan: asString(data['isDabaan']),
+      signature: asString(data['signature']),
+      isOffProperty: asBool(data['isOffProperty']),
+      isNonResidential: asBool(data['isNonResidential']),
+      rcNumber: (data['rcNumber'] as List<dynamic>?)
+          ?.map((e) => RcNumberItem.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+      ecNumber: asString(data['ecNumber']),
     );
   }
 
-  Map<String, dynamic> toFirebase() => {
+  /// ✅ To Map
+  Map<String, dynamic> toJson() => {
         'userId': userId,
         'userRole': userRole,
         'userName': userName,
@@ -280,110 +311,30 @@ class SurveyModel {
         'rentPersonName': rentPersonName,
         'address': address,
         'propertyStayType': propertyStayType,
-        'propertyType':
-            propertyType.map((key, value) => MapEntry(key, value.toMap())),
-        'propertyDescription': propertyDescription
-            .map((key, value) => MapEntry(key, value.toMap())),
+        'propertyType': propertyType.map((k, v) => MapEntry(k, v.toMap())),
+        'propertyDescription':
+            propertyDescription.map((k, v) => MapEntry(k, v.toMap())),
         'mobileNumber': mobileNumber,
         'waterPipeline': waterPipeline,
         'banthkamYear': banthkamYear,
         'totalFloors': totalFloors,
-        'area': area.map((key, value) => MapEntry(key, value.toMap())),
+        'area': area.map((k, v) => MapEntry(k, v.toMap())),
         'createdAt': createdAt,
         'updatedAt': updatedAt,
         'gamName': gamName,
-        'locationMap':
-            locationMap.map((key, value) => MapEntry(key, value.toMap())),
+        'locationMap': locationMap.map((k, v) => MapEntry(k, v.toMap())),
         'isFormEdit': isFormEdit,
         'surveyNumber': surveyNumber,
         'remarks': remarks,
         'isDabaan': isDabaan,
-        "signature": signature,
-        "isOffProperty": isOffProperty,
+        'signature': signature,
+        'isOffProperty': isOffProperty,
+        'isNonResidential': isNonResidential,
+        "rcNumber": rcNumber?.map((e) => e.toJson()).toList(),
+        'ecNumber': ecNumber,
       };
 
-  Map<String, dynamic> toJson() {
-    return {
-      'userId': userId,
-      'userRole': userRole,
-      'userName': userName,
-      'id': id,
-      'ownerName': ownerName,
-      'oldHomeNumber': oldHomeNumber,
-      'index': index,
-      'newHomeNumber': newHomeNumber,
-      'rentPersonName': rentPersonName,
-      'address': address,
-      'propertyStayType': propertyStayType,
-      'propertyType':
-          propertyType.map((key, value) => MapEntry(key, value.toMap())),
-      'propertyDescription':
-          propertyDescription.map((key, value) => MapEntry(key, value.toMap())),
-      'mobileNumber': mobileNumber,
-      'waterPipeline': waterPipeline,
-      'banthkamYear': banthkamYear,
-      'totalFloors': totalFloors,
-      'area': area.map((key, value) => MapEntry(key, value.toMap())),
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      'gamName': gamName,
-      'locationMap':
-          locationMap.map((key, value) => MapEntry(key, value.toMap())),
-      'isFormEdit': isFormEdit,
-      'surveyNumber': surveyNumber,
-      'remarks': remarks,
-      'isDabaan': isDabaan,
-      "signature": signature,
-      "isOffProperty": isOffProperty,
-    };
-  }
-
-  factory SurveyModel.fromJson(Map<String, dynamic> json) {
-    return SurveyModel(
-      userId: json['userId'] ?? '',
-      userRole: json['userRole'] ?? '',
-      userName: json['userName'] ?? '',
-      id: json['id'] ?? '',
-      ownerName: json['ownerName'] ?? '',
-      oldHomeNumber: json['oldHomeNumber'] ?? '',
-      index: json['index'] ?? '',
-      newHomeNumber: json['newHomeNumber'] ?? '',
-      rentPersonName: json['rentPersonName'] ?? '',
-      address: json['address'] ?? '',
-      propertyStayType: json['propertyStayType'] ?? '',
-      propertyType: (json['propertyType'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, PropertyTypeItem.fromMap(value)),
-      ),
-      propertyDescription:
-          (json['propertyDescription'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, PropertyDescriptionItem.fromMap(value)),
-      ),
-      mobileNumber: json['mobileNumber'] ?? '',
-      waterPipeline: json['waterPipeline'] ?? '0',
-      banthkamYear: json['banthkamYear'] ?? '0',
-      totalFloors: json['totalFloors'] ?? '0',
-      area: (json['area'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, AreaDetail.fromMap(value)),
-      ),
-      createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'])
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.tryParse(json['updatedAt'])
-          : null,
-      gamName: json['gamName'] ?? '',
-      locationMap: (json['locationMap'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, LocationMap.fromMap(value)),
-      ),
-      isFormEdit: json['isFormEdit'] ?? false,
-      surveyNumber: json['surveyNumber'] ?? '',
-      remarks: json['remarks'] ?? '',
-      isDabaan: json['isDabaan'] ?? '',
-      signature: json["signature"],
-      isOffProperty: json['isOffProperty'] ?? false,
-    );
-  }
-
+  /// ✅ CopyWith
   SurveyModel copyWith({
     String? userId,
     String? userRole,
@@ -403,8 +354,8 @@ class SurveyModel {
     String? banthkamYear,
     String? totalFloors,
     Map<String, AreaDetail>? area,
-    final DateTime? createdAt,
-    final DateTime? updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     String? gamName,
     Map<String, LocationMap>? locationMap,
     bool? isFormEdit,
@@ -413,6 +364,9 @@ class SurveyModel {
     String? isDabaan,
     String? signature,
     bool? isOffProperty,
+    bool? isNonResidential,
+    List<RcNumberItem>? rcNumber,
+    String? ecNumber,
   }) {
     return SurveyModel(
       userId: userId ?? this.userId,
@@ -443,7 +397,31 @@ class SurveyModel {
       isDabaan: isDabaan ?? this.isDabaan,
       signature: signature ?? this.signature,
       isOffProperty: isOffProperty ?? this.isOffProperty,
+      isNonResidential: isNonResidential ?? this.isNonResidential,
+      rcNumber: rcNumber ?? this.rcNumber,
+      ecNumber: ecNumber ?? this.ecNumber,
     );
+  }
+}
+
+class RcNumberItem {
+  final String contractorName;
+  final String rcNumber;
+
+  RcNumberItem({required this.contractorName, required this.rcNumber});
+
+  factory RcNumberItem.fromJson(Map<String, dynamic> json) {
+    return RcNumberItem(
+      contractorName: json['contractorName'] ?? '',
+      rcNumber: json['rcNumber'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "contractorName": contractorName,
+      "rcNumber": rcNumber,
+    };
   }
 }
 
