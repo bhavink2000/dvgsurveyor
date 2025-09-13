@@ -6,8 +6,12 @@ import 'package:dvgsurveyor/src/dashboard/binding/dashboard_binding.dart';
 import 'package:dvgsurveyor/src/dashboard/dashboard.dart';
 import 'package:dvgsurveyor/src/drawer_screen/binding/drawer_binding.dart';
 import 'package:dvgsurveyor/src/drawer_screen/drawer_screen.dart';
+import 'package:dvgsurveyor/src/excel_data_screen/binding/excel_pik_data_binding.dart';
+import 'package:dvgsurveyor/src/excel_data_screen/excel_pik_data_screen.dart';
 import 'package:dvgsurveyor/src/login_screen/binding/login_binding.dart';
 import 'package:dvgsurveyor/src/login_screen/login_screen.dart';
+import 'package:dvgsurveyor/src/pending_surveys_screen/binding/pending_survey_binding.dart';
+import 'package:dvgsurveyor/src/pending_surveys_screen/pending_survey_screen.dart';
 import 'package:dvgsurveyor/src/property_desc_screen/binding/property_desc_screen_binding.dart';
 import 'package:dvgsurveyor/src/property_desc_screen/property_desc_screen.dart';
 import 'package:dvgsurveyor/src/property_screen/binding/property_screen_binding.dart';
@@ -43,6 +47,8 @@ class AppRoutes {
   static const String cityScreen = '/city_screen';
   static const String archiveSurveyScreen = '/archive_survey_screen';
   static const String locationViewScreen = '/location_view_screen';
+  static const String excelDataPicScreen = '/excel_data_pic_screen';
+  static const String pendingSurveyScreen = '/pending_survey_screen';
 
   static List<GetPage> pages = [
     GetPage(
@@ -180,6 +186,26 @@ class AppRoutes {
       page: () => const LocationViewWidget(),
       bindings: [
         SurveyScreenBinding(),
+      ],
+      transition: Transition.fadeIn,
+      transitionDuration: 500.milliseconds,
+      curve: Curves.easeIn,
+    ),
+    GetPage(
+      name: excelDataPicScreen,
+      page: () => const ExcelPikDataScreen(),
+      bindings: [
+        ExcelPikDataBinding(),
+      ],
+      transition: Transition.fadeIn,
+      transitionDuration: 500.milliseconds,
+      curve: Curves.easeIn,
+    ),
+    GetPage(
+      name: pendingSurveyScreen,
+      page: () => const PendingSurveyScreen(),
+      bindings: [
+        PendingSurveyBinding(),
       ],
       transition: Transition.fadeIn,
       transitionDuration: 500.milliseconds,

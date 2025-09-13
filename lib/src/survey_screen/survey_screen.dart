@@ -109,18 +109,22 @@ class SurveyScreen extends GetWidget<SurveyScreenController> {
                         ),
                   if (controller.userData.value?.role == 'Admin')
                     SizedBox(width: 8),
-                  if (controller.userData.value?.role == 'Admin')
-                    TextButton(
-                      onPressed: controller.clearSearchFilters,
-                      child: Text(
-                        'Clear',
-                        style: AppFonts.text14(context).copyWith(
-                          color: Colors.teal.shade700,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
+                  //if (controller.userData.value?.role == 'Admin')
+                  Obx(() {
+                    return controller.userData.value?.role == 'Admin'
+                        ? TextButton(
+                            onPressed: controller.clearSearchFilters,
+                            child: Text(
+                              'Clear',
+                              style: AppFonts.text14(context).copyWith(
+                                color: Colors.teal.shade700,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                              ),
+                            ),
+                          )
+                        : SizedBox.shrink();
+                  }),
                 ],
               ),
               SizedBox(height: 12),

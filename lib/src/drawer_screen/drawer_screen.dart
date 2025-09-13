@@ -64,7 +64,8 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
           ),
 
           // ───── Menu Items ─────
-          SizedBox(height: controller.userData.value?.role == 'Admin' ? 16.h : 0.h),
+          SizedBox(
+              height: controller.userData.value?.role == 'Admin' ? 16.h : 0.h),
           controller.userData.value?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.supervisor_account,
@@ -104,6 +105,20 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
             onTap: () => Get.toNamed(AppRoutes.surveyScreen),
             context: context,
           ),
+          _buildDrawerItem(
+            icon: Icons.pending_actions_rounded,
+            title: AppConst.pendingSurvey,
+            onTap: () => Get.toNamed(AppRoutes.pendingSurveyScreen),
+            context: context,
+          ),
+          controller.userData.value?.role == 'Admin'
+              ? _buildDrawerItem(
+                  icon: Icons.file_upload_rounded,
+                  title: AppConst.excelUpload,
+                  onTap: () => Get.toNamed(AppRoutes.excelDataPicScreen),
+                  context: context,
+                )
+              : SizedBox(),
           controller.userData.value?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.archive_rounded,

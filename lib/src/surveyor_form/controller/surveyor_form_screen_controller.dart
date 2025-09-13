@@ -103,6 +103,7 @@ class SurveyorFormScreenController extends GetxController {
 
   RxBool isFormSubmit = false.obs;
   final RxBool isEditMode = false.obs;
+  final RxBool isPendingMode = false.obs;
 
   RxBool isDabaan = false.obs;
 
@@ -129,6 +130,7 @@ class SurveyorFormScreenController extends GetxController {
     if (args != null && args['isEdit'] == true) {
       survey = args['surveyData'];
       isEditMode.value = args['isEdit'] ?? false;
+      isPendingMode.value = args['isPending'] ?? false;
 
       prefillForm(survey!);
     }
@@ -148,40 +150,54 @@ class SurveyorFormScreenController extends GetxController {
   void prefillForm(SurveyModel survey) async {
     isOffProperty.value = survey.isOffProperty;
     isNonResedential.value = survey.isNonResidential;
-    if (isOffProperty.value == true) {
-      surveyNumber.text = survey.surveyNumber ?? '';
-      ownerName.text = survey.ownerName;
-      junagharNumber.text = survey.oldHomeNumber;
-      address.text = survey.address;
-      mobileNumber.text = survey.mobileNumber;
-      return;
-    }
+
+    // ✅ Common fields
     surveyNumber.text = survey.surveyNumber ?? '';
     ownerName.text = survey.ownerName;
     junagharNumber.text = survey.oldHomeNumber;
-    kabjedarName.text = survey.rentPersonName;
     address.text = survey.address;
     mobileNumber.text = survey.mobileNumber;
+
+    if (isOffProperty.value == true) {
+      // Off property only needs a few fields
+      return;
+    }
+
+    // ✅ Extra fields for normal survey
+    kabjedarName.text = survey.rentPersonName;
     waterConnectionNumber.text = survey.waterPipeline;
     constructionYear.text = survey.banthkamYear;
     totalFloors.text = survey.totalFloors;
 
-    // Dropdown values
+    // ✅ Dropdown values (null + empty check)
     selectedUsageId.value = survey.propertyStayType;
     usageType.text = selectedUsageId.value ?? '';
-    selectedPropertyType.value = survey.propertyType.keys.first;
-    selectedPropertyDescription.value = survey.propertyDescription.keys.first;
 
-    propertyType.text = survey.propertyType.values.first.propertyName ?? '';
-    propertyDescription.text =
-        survey.propertyDescription.values.first.propertyDes ?? '';
+    if (survey.propertyType.isNotEmpty) {
+      selectedPropertyType.value = survey.propertyType.keys.first;
+      propertyType.text = survey.propertyType.values.first.propertyName ?? '';
+    } else {
+      selectedPropertyType.value = '';
+      propertyType.text = '';
+    }
 
-    isDabaan.value = survey.isDabaan == 'હા' ? true : false;
+    if (survey.propertyDescription.isNotEmpty) {
+      selectedPropertyDescription.value = survey.propertyDescription.keys.first;
+      propertyDescription.text =
+          survey.propertyDescription.values.first.propertyDes ?? '';
+    } else {
+      selectedPropertyDescription.value = '';
+      propertyDescription.text = '';
+    }
 
+    isDabaan.value = survey.isDabaan == 'હા';
+
+    // ✅ Non-residential specific
     if (isNonResedential.value == true) {
       ecNumber.text = survey.ecNumber ?? '';
+
+      rcNumberControllers.clear();
       if (survey.rcNumber != null && survey.rcNumber!.isNotEmpty) {
-        rcNumberControllers.clear();
         for (var item in survey.rcNumber!) {
           addRcNumberField(
             contractorName: item.contractorName,
@@ -189,17 +205,18 @@ class SurveyorFormScreenController extends GetxController {
           );
         }
       } else {
-        rcNumberControllers.clear();
-        addRcNumberField();
+        addRcNumberField(); // empty one
       }
     }
 
-    // Load property descriptions for the selected type
+    // ✅ Load property descriptions (after type selected)
     await getPropertyDescription();
 
-    // Area
+    // ✅ Area
     areaData.clear();
-    areaData.addAll(survey.area);
+    if (survey.area.isNotEmpty) {
+      areaData.addAll(survey.area);
+    }
   }
 
   Future<void> fetchData() async {
@@ -237,6 +254,7 @@ class SurveyorFormScreenController extends GetxController {
   }
 
   Future<void> getPropertyDescription() async {
+    isPropertyDesLoad.value = true;
     if (selectedPropertyType.value == null) return;
 
     if (isEditMode.value != true) {
@@ -331,7 +349,7 @@ class SurveyorFormScreenController extends GetxController {
       final bool isEdit = isEditMode.value;
       final id =
           isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
-      final newIndex = isEdit
+      final newIndex = isEdit && isPendingMode.value == false
           ? (survey?.index ?? '')
           : (await authRepo.getSurveyData(userId: user?.id ?? '')).length + 1;
 
@@ -344,9 +362,12 @@ class SurveyorFormScreenController extends GetxController {
         userName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
         ownerName: ownerName.text.trim(),
         oldHomeNumber: junagharNumber.text.trim(),
-        newHomeNumber:
-            isEdit ? (survey?.newHomeNumber ?? '') : newIndex.toString(),
-        index: isEdit ? (survey?.index ?? '') : newIndex.toString(),
+        newHomeNumber: isEdit && isPendingMode.value == false
+            ? (survey?.newHomeNumber ?? '')
+            : newIndex.toString(),
+        index: isEdit && isPendingMode.value == false
+            ? (survey?.index ?? '')
+            : newIndex.toString(),
         rentPersonName: kabjedarName.text.trim(),
         address: address.text.trim(),
         propertyStayType: selectedUsageId.value ?? '',
@@ -392,6 +413,7 @@ class SurveyorFormScreenController extends GetxController {
       final result = await authRepo.saveSurveyForm(
         surveyData: surveyData,
         isEditData: isEdit,
+        isPendingData: isPendingMode.value,
       );
 
       if (result != null) {
@@ -419,7 +441,7 @@ class SurveyorFormScreenController extends GetxController {
       final bool isEdit = isEditMode.value;
       final id =
           isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
-      final newIndex = isEdit
+      final newIndex = isEdit && isPendingMode.value == false
           ? (survey?.index ?? '')
           : (await authRepo.getSurveyData(userId: user?.id ?? '')).length + 1;
 
@@ -431,7 +453,9 @@ class SurveyorFormScreenController extends GetxController {
         surveyNumber: surveyNumber.text.trim(),
         ownerName: ownerName.text.trim(),
         oldHomeNumber: junagharNumber.text.trim(),
-        index: isEdit ? (survey?.index ?? '') : newIndex.toString(),
+        index: isEdit && isPendingMode.value == false
+            ? (survey?.index ?? '')
+            : newIndex.toString(),
         mobileNumber: mobileNumber.text.trim(),
         address: address.text.trim(),
         createdAt: isEdit ? survey?.createdAt : now,
@@ -463,6 +487,7 @@ class SurveyorFormScreenController extends GetxController {
       final result = await authRepo.saveSurveyForm(
         surveyData: surveyData,
         isEditData: isEdit,
+        isPendingData: isPendingMode.value,
       );
 
       if (result != null) {

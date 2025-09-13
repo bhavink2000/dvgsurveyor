@@ -31,10 +31,10 @@ class SurveyScreenController extends GetxController {
   RxList<String> workerList = <String>[].obs;
 
   @override
-  void onInit() {
-    fetchSurveyData();
-    getUserData();
+  void onInit() async {
     super.onInit();
+    await getUserData(); // ensure user data is loaded first
+    await fetchSurveyData(); // only then fetch survey data
   }
 
   Future<void> getUserData() async {
@@ -46,11 +46,11 @@ class SurveyScreenController extends GetxController {
     isSurveyLoad.value = true;
     try {
       final response = await authRepo.getSurveyData(
-        userId: (SessionManager.getUser()?.role == 'Worker'
-                ? SessionManager.getUser()?.id
-                : userId) ??
-            '',
+        userId:
+            (userData.value?.role == 'Worker' ? userData.value?.id : userId) ??
+                '',
       );
+
       surveyData.value = response;
       filteredSurveys.value = response;
 
@@ -61,7 +61,12 @@ class SurveyScreenController extends GetxController {
           .toList();
 
       propertyTypes.value = response
-          .map((e) => e.propertyType.values.first.propertyName ?? '')
+          .map((e) {
+            if (e.propertyType.isNotEmpty) {
+              return e.propertyType.values.first.propertyName ?? '';
+            }
+            return '';
+          })
           .where((e) => e.isNotEmpty)
           .toSet()
           .toList();
@@ -73,8 +78,8 @@ class SurveyScreenController extends GetxController {
           .toList();
 
       isSurveyLoad.value = false;
-    } catch (e) {
-      log('Log: get error in fetch survey data $e');
+    } catch (e, s) {
+      log('Log: get error in fetch survey data $e s-> $s');
       isSurveyLoad.value = false;
     }
   }
@@ -85,21 +90,25 @@ class SurveyScreenController extends GetxController {
     final query = searchQuery.value.toLowerCase();
 
     filteredSurveys.value = surveyData.where((survey) {
+      final propertyTypeName = survey.propertyType.isNotEmpty
+          ? survey.propertyType.values.first.propertyName ?? ''
+          : '';
+
       final matchesText = [
         survey.surveyNumber,
         survey.ownerName,
         survey.mobileNumber,
         survey.userName,
         survey.gamName,
-        survey.propertyType.values.first.propertyName,
+        propertyTypeName,
         survey.address,
       ].any((field) => field?.toLowerCase().contains(query) ?? false);
 
       final matchesGam =
           selectedGam.value.isEmpty || survey.gamName == selectedGam.value;
+
       final matchesPropType = selectedPropertyType.value.isEmpty ||
-          (survey.propertyType.values.first.propertyName ==
-              selectedPropertyType.value);
+          propertyTypeName == selectedPropertyType.value;
 
       final matchesWorker = selectedWorker.value.isEmpty ||
           survey.userName == selectedWorker.value;

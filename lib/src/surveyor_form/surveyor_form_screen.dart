@@ -298,89 +298,6 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 20),
-                                Text(
-                                  "Signature",
-                                  style: AppFonts.text16(context)
-                                      .copyWith(fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(height: 8),
-                                Obx(() {
-                                  final oldSignature =
-                                      controller.survey?.signature;
-                                  final isEditingSignature =
-                                      controller.isEditingSignature.value;
-
-                                  return Column(
-                                    children: [
-                                      Container(
-                                        height: 180,
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: Colors.grey.shade400,
-                                              width: 1.2),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          color: Colors.white,
-                                        ),
-                                        child: oldSignature != null &&
-                                                oldSignature.isNotEmpty &&
-                                                !isEditingSignature
-                                            ? Center(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      12.0),
-                                                  child: Image.memory(
-                                                      base64Decode(
-                                                          oldSignature)),
-                                                ),
-                                              )
-                                            : Signature(
-                                                controller: controller
-                                                    .signatureController,
-                                                backgroundColor: Colors.white,
-                                              ),
-                                      ),
-
-                                      const SizedBox(height: 8),
-
-                                      // Buttons row
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          if (oldSignature != null &&
-                                              oldSignature.isNotEmpty)
-                                            TextButton(
-                                              onPressed: () {
-                                                controller.isEditingSignature
-                                                    .value = true;
-                                                controller.signatureController
-                                                    .clear();
-                                              },
-                                              child: Text('Edit'),
-                                            ),
-
-                                          //if (isEditingSignature)
-                                          TextButton(
-                                            onPressed: () {
-                                              controller.signatureController
-                                                  .clear();
-                                            },
-                                            child: Text('Clear'),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                }),
-                              ],
-                            ),
-                            SizedBox(height: 16),
                             Obx(
                               () => Column(
                                 children: [
@@ -771,6 +688,89 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                                 ],
                               ),
                             ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 20),
+                                Text(
+                                  "Signature",
+                                  style: AppFonts.text16(context)
+                                      .copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                const SizedBox(height: 8),
+                                Obx(() {
+                                  final oldSignature =
+                                      controller.survey?.signature;
+                                  final isEditingSignature =
+                                      controller.isEditingSignature.value;
+
+                                  return Column(
+                                    children: [
+                                      Container(
+                                        height: 180,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.grey.shade400,
+                                              width: 1.2),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          color: Colors.white,
+                                        ),
+                                        child: oldSignature != null &&
+                                                oldSignature.isNotEmpty &&
+                                                !isEditingSignature
+                                            ? Center(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Image.memory(
+                                                      base64Decode(
+                                                          oldSignature)),
+                                                ),
+                                              )
+                                            : Signature(
+                                                controller: controller
+                                                    .signatureController,
+                                                backgroundColor: Colors.white,
+                                              ),
+                                      ),
+
+                                      const SizedBox(height: 8),
+
+                                      // Buttons row
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          if (oldSignature != null &&
+                                              oldSignature.isNotEmpty)
+                                            TextButton(
+                                              onPressed: () {
+                                                controller.isEditingSignature
+                                                    .value = true;
+                                                controller.signatureController
+                                                    .clear();
+                                              },
+                                              child: Text('Edit'),
+                                            ),
+
+                                          //if (isEditingSignature)
+                                          TextButton(
+                                            onPressed: () {
+                                              controller.signatureController
+                                                  .clear();
+                                            },
+                                            child: Text('Clear'),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              ],
+                            ),
+                            SizedBox(height: 16),
                             Obx(
                               () => ElevatedButton(
                                 onPressed: controller.submitForm,
