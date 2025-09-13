@@ -10,15 +10,13 @@ class ExcelPikDataScreen extends GetWidget<ExcelPikDataController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F4F6), // Light grey background
+      backgroundColor: const Color(0xFFF2F4F6),
       appBar: AppBar(
         iconTheme: IconThemeData(color: AppColors.offWhite),
         backgroundColor: AppColors.tealPrimary,
         title: Text(
-          'Excel Data',
-          style: AppFonts.text20(context).copyWith(
-            color: AppColors.offWhite,
-          ),
+          "Excel Data",
+          style: AppFonts.text20(context).copyWith(color: Colors.white),
         ),
         actions: [
           IconButton(
@@ -40,19 +38,22 @@ class ExcelPikDataScreen extends GetWidget<ExcelPikDataController> {
         }
 
         if (fileNames.isEmpty) {
-          return const Center(child: Text("No Excel loaded. Tap 📂 to pick."));
+          return const Center(
+            child: Text("📂 No Excel loaded. Tap the top-right icon."),
+          );
         }
 
         final currentIndex =
             controller.currentTab.value.clamp(0, fileNames.length - 1);
         final selectedFile = fileNames[currentIndex];
+        final rows = controller.allExcelData[selectedFile] ?? [];
 
         return Column(
           children: [
-            // 🔹 Tabs as chips
+            // 🔹 Tabs
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              padding: const EdgeInsets.all(8),
               child: Row(
                 children: fileNames.asMap().entries.map((entry) {
                   final index = entry.key;
@@ -65,11 +66,10 @@ class ExcelPikDataScreen extends GetWidget<ExcelPikDataController> {
                       label: Text(fileName),
                       labelStyle: TextStyle(
                         color: isSelected ? Colors.white : Colors.teal,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: FontWeight.bold,
                       ),
                       backgroundColor:
-                          isSelected ? Colors.teal : Colors.grey[200],
+                          isSelected ? Colors.teal : Colors.grey[300],
                       deleteIcon: const Icon(Icons.close, size: 18),
                       onPressed: () => controller.currentTab.value = index,
                       onDeleted: () => controller.deleteExcel(fileName),
@@ -79,14 +79,14 @@ class ExcelPikDataScreen extends GetWidget<ExcelPikDataController> {
               ),
             ),
 
-            // 🔹 Show Excel Rows
+            // 🔹 Minimal List
             Expanded(
               child: ListView.builder(
-                itemCount: controller.allExcelData[selectedFile]?.length ?? 0,
+                itemCount: rows.length,
                 itemBuilder: (context, index) {
-                  final row = controller.allExcelData[selectedFile]![index];
-                  final malikName = controller.getField(row, "ownerName");
-                  final kabjedarName = controller.getField(row, "occupantName");
+                  final row = rows[index];
+                  final owner = controller.getField(row, "ownerName");
+                  final occupant = controller.getField(row, "occupantName");
 
                   return Card(
                     margin:
@@ -97,13 +97,15 @@ class ExcelPikDataScreen extends GetWidget<ExcelPikDataController> {
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: Colors.teal,
-                        child: Text("${index + 1}",
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.white)),
+                        child: Text(
+                          "${index + 1}",
+                          style: const TextStyle(color: Colors.white),
+                        ),
                       ),
-                      title: Text(malikName.isNotEmpty ? malikName : "—"),
-                      subtitle:
-                          Text(kabjedarName.isNotEmpty ? kabjedarName : "—"),
+                      title: Text(owner.isNotEmpty ? owner : "—"),
+                      subtitle: Text(
+                        "કબજેદાર: ${occupant.isNotEmpty ? occupant : "—"}",
+                      ),
                     ),
                   );
                 },
@@ -112,6 +114,26 @@ class ExcelPikDataScreen extends GetWidget<ExcelPikDataController> {
           ],
         );
       }),
+
+      // 🔹 Floating Button for Upload Pending
+      floatingActionButton: Obx(() => FloatingActionButton.extended(
+            backgroundColor: AppColors.tealPrimary,
+            icon: controller.isLoading.value
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(Icons.cloud_upload, color: Colors.white),
+            label: const Text("Upload Pending",
+                style: TextStyle(color: Colors.white)),
+            onPressed: controller.isLoading.value
+                ? null
+                : () => controller.uploadAllFromCurrentTab(),
+          )),
     );
   }
 }
