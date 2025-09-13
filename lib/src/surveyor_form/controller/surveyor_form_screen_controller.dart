@@ -254,6 +254,7 @@ class SurveyorFormScreenController extends GetxController {
   }
 
   Future<void> getPropertyDescription() async {
+    isPropertyDesLoad.value = true;
     if (selectedPropertyType.value == null) return;
 
     if (isEditMode.value != true) {
@@ -440,7 +441,7 @@ class SurveyorFormScreenController extends GetxController {
       final bool isEdit = isEditMode.value;
       final id =
           isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
-      final newIndex = isEdit
+      final newIndex = isEdit && isPendingMode.value == false
           ? (survey?.index ?? '')
           : (await authRepo.getSurveyData(userId: user?.id ?? '')).length + 1;
 
@@ -452,7 +453,9 @@ class SurveyorFormScreenController extends GetxController {
         surveyNumber: surveyNumber.text.trim(),
         ownerName: ownerName.text.trim(),
         oldHomeNumber: junagharNumber.text.trim(),
-        index: isEdit ? (survey?.index ?? '') : newIndex.toString(),
+        index: isEdit && isPendingMode.value == false
+            ? (survey?.index ?? '')
+            : newIndex.toString(),
         mobileNumber: mobileNumber.text.trim(),
         address: address.text.trim(),
         createdAt: isEdit ? survey?.createdAt : now,
@@ -484,6 +487,7 @@ class SurveyorFormScreenController extends GetxController {
       final result = await authRepo.saveSurveyForm(
         surveyData: surveyData,
         isEditData: isEdit,
+        isPendingData: isPendingMode.value,
       );
 
       if (result != null) {

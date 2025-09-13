@@ -19,6 +19,9 @@ class PendingSurveyController extends GetxController {
   var isLoading = false.obs;
   var deletingIndex = (-1).obs; // 🔹 store index of item being deleted
 
+  RxString searchQuery = ''.obs;
+  final searchTextController = TextEditingController();
+
   @override
   void onInit() {
     super.onInit();
@@ -42,6 +45,7 @@ class PendingSurveyController extends GetxController {
       pendingSurveys.value = snapshot.docs
           .map((doc) => SurveyModel.fromJson(doc.data()).copyWith(id: doc.id))
           .toList();
+      filteredSurveys.value = pendingSurveys;
     } finally {
       isLoading.value = false;
     }
@@ -74,12 +78,31 @@ class PendingSurveyController extends GetxController {
             .doc(surveyId)
             .delete();
 
-        pendingSurveys.removeAt(index);
+        //pendingSurveys.removeAt(index);
+        filteredSurveys.removeAt(index);
         AppSnackbar.showSnackbar(
             message: "Survey deleted successfully", title: 'Deleted');
       } finally {
         deletingIndex.value = -1;
       }
     }
+  }
+
+  void applySearch([String? inputQuery]) {
+    if (inputQuery != null) searchQuery.value = inputQuery;
+
+    final query = searchQuery.value.toLowerCase();
+
+    filteredSurveys.value = pendingSurveys.where((survey) {
+      final matchesText = [
+        survey.surveyNumber,
+        survey.ownerName,
+        survey.mobileNumber,
+        survey.address,
+        survey.oldHomeNumber,
+      ].any((field) => field?.toLowerCase().contains(query) ?? false);
+
+      return matchesText;
+    }).toList();
   }
 }
