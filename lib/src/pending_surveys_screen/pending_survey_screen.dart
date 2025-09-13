@@ -165,34 +165,30 @@ class PendingSurveyScreen extends GetWidget<PendingSurveyController> {
               // Row 1: Search bar + Clear text button
               Row(
                 children: [
-                  controller.userData.value?.role == 'Govt'
-                      ? SizedBox.shrink()
-                      : Expanded(
-                          child: SizedBox(
-                            height: 35.h,
-                            child: TextField(
-                              controller: controller.searchTextController,
-                              decoration: InputDecoration(
-                                hintText:
-                                    'Search by survey number, owner, mobile ...',
-                                hintStyle: AppFonts.text14(context).copyWith(
-                                  color: AppColors.almostBlack.withOpacity(0.5),
-                                  fontSize: 12,
-                                ),
-                                filled: true,
-                                fillColor: Colors.grey[100],
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 8),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              onChanged: (value) =>
-                                  controller.applySearch(value),
-                            ),
+                  Expanded(
+                    child: SizedBox(
+                      height: 35.h,
+                      child: TextField(
+                        controller: controller.searchTextController,
+                        decoration: InputDecoration(
+                          hintText:
+                              'Search by survey number, owner, mobile ...',
+                          hintStyle: AppFonts.text14(context).copyWith(
+                            color: AppColors.almostBlack.withOpacity(0.5),
+                            fontSize: 12,
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
                           ),
                         ),
+                        onChanged: (value) => controller.applySearch(value),
+                      ),
+                    ),
+                  ),
                   // if (controller.userData.value?.role == 'Admin')
                   //   SizedBox(width: 8),
                   // if (controller.userData.value?.role == 'Admin')

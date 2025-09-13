@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location/location.dart';
-import 'package:dvgsurveyor/helper/location_helper.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 
 class LocationViewWidget extends StatefulWidget {
@@ -14,8 +12,7 @@ class LocationViewWidget extends StatefulWidget {
 }
 
 class _LocationViewWidgetState extends State<LocationViewWidget> {
-  final locationHelper = LocationHelper();
-  String _mapMode = "normal"; // default
+  String _mapMode = "satellite"; // default map
 
   /// Different map providers
   String _getMapUrl() {
@@ -35,66 +32,38 @@ class _LocationViewWidgetState extends State<LocationViewWidget> {
   Widget build(BuildContext context) {
     final SurveyModel survey = Get.arguments['surveyData'];
 
+    final loc = survey.locationMap?['loc'];
+    final surveyLat = double.tryParse(loc?.lag ?? "0") ?? 0.0;
+    final surveyLng = double.tryParse(loc?.lug ?? "0") ?? 0.0;
+    final surveyLoc = LatLng(surveyLat, surveyLng);
+
     return Scaffold(
       body: Stack(
         children: [
           /// MAP VIEW
-          FutureBuilder<LocationData>(
-            future: locationHelper.getCurrentPosition(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              final userLoc =
-                  LatLng(snapshot.data!.latitude!, snapshot.data!.longitude!);
-
-              final loc = survey.locationMap?['loc'];
-              final surveyLat = double.tryParse(loc?.lag ?? "0") ?? 0.0;
-              final surveyLng = double.tryParse(loc?.lug ?? "0") ?? 0.0;
-              final surveyLoc = LatLng(surveyLat, surveyLng);
-
-              return FlutterMap(
-                options: MapOptions(
-                  initialCenter: surveyLoc,
-                  initialZoom: 15,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate: _getMapUrl(),
-                    subdomains: const ['a', 'b', 'c'],
-                    userAgentPackageName: "com.dvgsurveyor.app",
-                  ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: userLoc,
-                        width: 50,
-                        height: 50,
-                        child: const Icon(Icons.my_location,
-                            color: Colors.blue, size: 38),
-                      ),
-                      Marker(
-                        point: surveyLoc,
-                        width: 50,
-                        height: 50,
-                        child: const Icon(Icons.location_on,
-                            color: Colors.red, size: 40),
-                      ),
-                    ],
-                  ),
-                  PolylineLayer(
-                    polylines: [
-                      Polyline(
-                        points: [userLoc, surveyLoc],
-                        strokeWidth: 4,
-                        color: Colors.teal.withOpacity(0.8),
-                      ),
-                    ],
+          FlutterMap(
+            options: MapOptions(
+              initialCenter: surveyLoc,
+              initialZoom: 16,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: _getMapUrl(),
+                subdomains: const ['a', 'b', 'c'],
+                userAgentPackageName: "com.dvgsurveyor.app",
+              ),
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: surveyLoc,
+                    width: 50,
+                    height: 50,
+                    child: const Icon(Icons.location_on,
+                        color: Colors.red, size: 40),
                   ),
                 ],
-              );
-            },
+              ),
+            ],
           ),
 
           /// BACK BUTTON
@@ -146,13 +115,13 @@ class _LocationViewWidgetState extends State<LocationViewWidget> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(24)),
+                    const BorderRadius.vertical(top: Radius.circular(20)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.12),
-                    blurRadius: 12,
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 15,
                     offset: const Offset(0, -4),
-                  )
+                  ),
                 ],
               ),
               child: Column(
@@ -163,15 +132,13 @@ class _LocationViewWidgetState extends State<LocationViewWidget> {
                     child: Container(
                       height: 5,
                       width: 50,
+                      margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-
-                  /// Owner Name
                   Text(
                     survey.ownerName,
                     style: const TextStyle(
@@ -179,15 +146,27 @@ class _LocationViewWidgetState extends State<LocationViewWidget> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 4),
-
-                  /// Address
+                  const SizedBox(height: 6),
                   Text(
                     survey.address,
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
-
-                  const Divider(height: 20),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.map, size: 18, color: Colors.teal),
+                      const SizedBox(width: 6),
+                      Text(
+                        "Lat: $surveyLat, Lng: $surveyLng",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.teal,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
