@@ -68,4 +68,5 @@ class AppConst {
       'Are you sure you want to archive this Surveys?';
   static const String archive = 'Archive';
   static const String excelUpload = 'Excel Upload';
+  static const String pendingSurvey = 'Pending Surveys';
 }

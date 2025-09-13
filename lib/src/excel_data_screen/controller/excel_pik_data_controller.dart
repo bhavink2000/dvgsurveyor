@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
+import 'package:dvgsurveyor/helper/firebase_const.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
@@ -210,7 +211,7 @@ class ExcelPikDataController extends GetxController {
       );
 
       await FirebaseFirestore.instance
-          .collection("pending_survey")
+          .collection(FirebaseConst.pendingCollection)
           .doc(docId)
           .set(survey.toJson(), SetOptions(merge: true));
     } catch (e) {
