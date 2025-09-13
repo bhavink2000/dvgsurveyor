@@ -207,17 +207,22 @@ class AuthRepo {
   Future<SurveyModel?> saveSurveyForm({
     required SurveyModel surveyData,
     bool? isEditData = false,
+    bool? isPendingData = false,
   }) async {
     try {
       final docRef = _surveyCollection.doc(surveyData.id);
 
-      if (isEditData == true) {
+      if (isEditData == true && isPendingData == false) {
         await docRef.update(surveyData.toJson()); // Convert model to Map
       } else {
         await docRef.set(surveyData);
       }
 
       final snapshot = await docRef.get();
+
+      if (isPendingData == true) {
+        await deletePendingSurvey(surveyId: surveyData.id);
+      }
       return snapshot.data();
     } catch (e) {
       log('Log: error to save survey form data -> $e');
@@ -322,5 +327,18 @@ class AuthRepo {
     } catch (e) {
       log('Error deleting user: $e');
     }
+  }
+
+  Future<SurveyModel?> deletePendingSurvey({String? surveyId}) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection(FirebaseConst.pendingCollection)
+          .doc(surveyId)
+          .delete();
+    } catch (e) {
+      log('Log error in delete survey ->$e');
+      return null;
+    }
+    return null;
   }
 }

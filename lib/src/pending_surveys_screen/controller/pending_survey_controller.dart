@@ -9,9 +9,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 
 class PendingSurveyController extends GetxController {
+  final AuthRepo authRepo = AuthRepo();
+
   Rx<UserCollectionModel?> userData = Rx<UserCollectionModel?>(null);
 
   var pendingSurveys = <SurveyModel>[].obs;
+  RxList<SurveyModel> filteredSurveys = <SurveyModel>[].obs;
+
   var isLoading = false.obs;
   var deletingIndex = (-1).obs; // 🔹 store index of item being deleted
 

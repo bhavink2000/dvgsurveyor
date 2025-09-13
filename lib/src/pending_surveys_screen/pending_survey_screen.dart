@@ -1,5 +1,7 @@
+import 'package:dvgsurveyor/app_routes/app_routes.dart';
 import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
+import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/src/pending_surveys_screen/controller/pending_survey_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -67,9 +69,28 @@ class PendingSurveyScreen extends GetWidget<PendingSurveyController> {
                     IconButton(
                       icon:
                           const Icon(Icons.edit, size: 18, color: Colors.blue),
-                      onPressed: () {
-                        //Get.snackbar("Edit", "Editing ${survey.ownerName}");
-                        // Get.to(() => SurveyFormScreen(survey: survey));
+                      onPressed: () async {
+                        if (controller.userData.value?.role == 'Govt') {
+                          AppSnackbar.showSnackbar(
+                            title: 'Access Denied',
+                            message:
+                                'You do not have permission to access this feature.',
+                          );
+                          return;
+                        }
+
+                        Get.toNamed(
+                          AppRoutes.surveyorFormScreen,
+                          arguments: {
+                            'isEdit': true,
+                            'surveyData': survey,
+                            'isPending': true,
+                          },
+                        )?.then((_) {
+                          // Refresh the survey list after coming back
+                          controller
+                              .fetchPendingSurveys(); // or whatever method reloads the list
+                        });
                       },
                     ),
                     Visibility(

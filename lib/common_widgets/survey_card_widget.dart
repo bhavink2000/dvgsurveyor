@@ -248,7 +248,6 @@ class SurveyCardWidget extends StatelessWidget {
                       surveyCon
                           ?.fetchSurveyData(); // or whatever method reloads the list
                     });
-                    ;
                   },
                   icon: Icon(
                     Icons.edit,
