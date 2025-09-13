@@ -104,6 +104,12 @@ class DrawerScreen extends GetWidget<DrawerScreenController> {
             onTap: () => Get.toNamed(AppRoutes.surveyScreen),
             context: context,
           ),
+          _buildDrawerItem(
+            icon: Icons.file_upload_rounded,
+            title: AppConst.excelUpload,
+            onTap: () => Get.toNamed(AppRoutes.excelDataPicScreen),
+            context: context,
+          ),
           controller.userData.value?.role == 'Admin'
               ? _buildDrawerItem(
                   icon: Icons.archive_rounded,
