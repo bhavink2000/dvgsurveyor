@@ -17,10 +17,14 @@ class PendingSurveyController extends GetxController {
   RxList<SurveyModel> filteredSurveys = <SurveyModel>[].obs;
 
   var isLoading = false.obs;
-  var deletingIndex = (-1).obs; // 🔹 store index of item being deleted
+  var deletingIndex = (-1).obs;
 
   RxString searchQuery = ''.obs;
   final searchTextController = TextEditingController();
+
+  // ✅ NEW: Selection mode
+  var isSelectionMode = false.obs;
+  var selectedSurveys = <String>[].obs; // store survey IDs
 
   @override
   void onInit() {
@@ -34,7 +38,6 @@ class PendingSurveyController extends GetxController {
         await AuthRepo.instance.getUser(userId: SessionManager.getUser()?.id);
   }
 
-  /// Fetch surveys
   Future<void> fetchPendingSurveys() async {
     try {
       isLoading.value = true;
@@ -51,7 +54,104 @@ class PendingSurveyController extends GetxController {
     }
   }
 
-  /// Delete a survey
+  /// ✅ Toggle selection
+  void toggleSelection(String surveyId) {
+    if (selectedSurveys.contains(surveyId)) {
+      selectedSurveys.remove(surveyId);
+    } else {
+      selectedSurveys.add(surveyId);
+    }
+  }
+
+  /// ✅ Delete selected surveys
+  Future<void> deleteSelectedSurveys() async {
+    if (selectedSurveys.isEmpty) return;
+
+    final confirm = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text("Delete Selected Surveys"),
+        content: Text("Are you sure you want to delete "
+            "${selectedSurveys.length} selected surveys?"),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        isLoading.value = true;
+        for (var id in selectedSurveys) {
+          await FirebaseFirestore.instance
+              .collection(FirebaseConst.pendingCollection)
+              .doc(id)
+              .delete();
+        }
+        pendingSurveys.removeWhere((s) => selectedSurveys.contains(s.id));
+        filteredSurveys.removeWhere((s) => selectedSurveys.contains(s.id));
+        selectedSurveys.clear();
+        AppSnackbar.showSnackbar(
+            title: 'Deleted', message: "Selected surveys deleted successfully");
+      } finally {
+        isLoading.value = false;
+      }
+    }
+  }
+
+  /// ✅ Delete all
+  Future<void> deleteAllSurveys() async {
+    if (pendingSurveys.isEmpty) return;
+
+    final confirm = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text("Delete All Surveys"),
+        content: const Text(
+            "⚠️ This will permanently delete all pending surveys. Continue?"),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child:
+                const Text("Delete All", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        isLoading.value = true;
+        final batch = FirebaseFirestore.instance.batch();
+
+        for (var survey in pendingSurveys) {
+          final docRef = FirebaseFirestore.instance
+              .collection(FirebaseConst.pendingCollection)
+              .doc(survey.id);
+          batch.delete(docRef);
+        }
+
+        await batch.commit();
+        pendingSurveys.clear();
+        filteredSurveys.clear();
+        selectedSurveys.clear();
+        AppSnackbar.showSnackbar(
+            title: 'Deleted', message: "All surveys deleted successfully");
+      } finally {
+        isLoading.value = false;
+      }
+    }
+  }
+
   Future<void> deleteSurvey(String surveyId, int index) async {
     final confirm = await Get.dialog<bool>(
       AlertDialog(
