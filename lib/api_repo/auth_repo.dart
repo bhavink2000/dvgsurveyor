@@ -341,4 +341,18 @@ class AuthRepo {
     }
     return null;
   }
+
+  // ✅ New method: listen to user document changes
+  Stream<UserCollectionModel?> listenUser(String userId) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .withConverter<UserCollectionModel>(
+          fromFirestore: (snap, _) =>
+              UserCollectionModel.fromJson(snap.data()!),
+          toFirestore: (user, _) => user.toJson(),
+        )
+        .doc(userId)
+        .snapshots()
+        .map((doc) => doc.data());
+  }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:dvgsurveyor/api_repo/app_repo.dart';
@@ -15,20 +16,18 @@ class LoginController extends GetxController {
 
   LoginController({required this.authRepo, required this.appRepo});
 
-  // Controllers
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-
-  // Form Key (should be declared in the widget ideally to avoid duplicate key issues)
   final loginFormKey = GlobalKey<FormState>();
 
-  // Reactive State
   final isLoading = false.obs;
   final isPasswordVisible = false.obs;
 
   RxBool isGamLoad = false.obs;
   RxList<GamModel> gamList = <GamModel>[].obs;
   String? selectedGam = '';
+
+  StreamSubscription? userListener;
 
   @override
   void onInit() {
@@ -39,9 +38,7 @@ class LoginController extends GetxController {
   Future<void> fetchGamName() async {
     isGamLoad.value = true;
     try {
-      final res = await appRepo.getGam();
-
-      gamList.value = res;
+      gamList.value = await appRepo.getGam();
     } catch (e) {
       log('Log: Error in fetch gam name $e');
     } finally {
@@ -49,12 +46,10 @@ class LoginController extends GetxController {
     }
   }
 
-  // Toggle password visibility
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
-  // ──────── Validators ──────── //
   String? validateUsername(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Please enter your username';
@@ -110,21 +105,19 @@ class LoginController extends GetxController {
         return;
       }
 
-      // Hide keyboard
-      FocusManager.instance.primaryFocus?.unfocus();
-
       // Save session
       await SessionManager.saveUser(user: user);
 
-      AppSnackbar.showSnackbar(
-        title: 'Welcome!',
-        message: 'Hello, ${user.username}',
-      );
+      // Start listening to user's active status
+      _startUserListener(user.id);
 
-      // Navigate to dashboard, clear fields after navigation
+      FocusManager.instance.primaryFocus?.unfocus();
+      AppSnackbar.showSnackbar(
+          title: 'Welcome!', message: 'Hello, ${user.username}');
+
       await Future.delayed(const Duration(milliseconds: 500));
       Get.offAllNamed(AppRoutes.dashScreen)?.then((_) {
-        _clearControllers();
+        // _clearControllers();
       });
     } catch (e) {
       AppSnackbar.showErrorSnackbar(message: 'Login failed: ${e.toString()}');
@@ -133,14 +126,39 @@ class LoginController extends GetxController {
     }
   }
 
-  // ──────── Helpers ──────── //
-  void _clearControllers() {
-    usernameController.clear();
-    passwordController.clear();
+  // ──────── Listener ──────── //
+  void _startUserListener(String userId) {
+    // Cancel old listener if exists
+    userListener?.cancel();
+
+    userListener = authRepo.listenUser(userId).listen((user) {
+      if (user == null) return;
+
+      if (user.isActive == false) {
+        forceLogout("Your account was deactivated by Admin.");
+      }
+    });
   }
+
+  Future<void> forceLogout(String message) async {
+    userListener?.cancel();
+    await SessionManager.clearSession();
+
+    Get.offAllNamed(AppRoutes.welcomeScreen);
+
+    if (message.isNotEmpty) {
+      AppSnackbar.showSnackbar(message: message, title: 'Access Denied');
+    }
+  }
+
+  // void _clearControllers() {
+  //   usernameController.clear();
+  //   passwordController.clear();
+  // }
 
   @override
   void onClose() {
+    //userListener?.cancel();
     usernameController.dispose();
     passwordController.dispose();
     super.onClose();
