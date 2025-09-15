@@ -91,6 +91,14 @@ class UserCollectionModel {
 
   // Create from JSON
   factory UserCollectionModel.fromJson(Map<String, dynamic> json) {
+    DateTime? _parseDate(dynamic value) {
+      if (value == null) return null;
+      if (value is Timestamp) return value.toDate();
+      if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+      if (value is String) return DateTime.tryParse(value);
+      return null;
+    }
+
     return UserCollectionModel(
       id: json['id'] ?? '',
       username: json['username'] ?? '',
@@ -106,12 +114,8 @@ class UserCollectionModel {
       isEditable: json['isEditable'] ?? false, // Default value for isEditable
       isDelete: json['isDelete'] ?? false, // Default value for isDelete
       isApproved: json['isApproved'] ?? false, // Default value for isApproved
-      createdAt: json['createdAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'])
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'])
-          : null,
+      createdAt: _parseDate(json['createdAt']),
+      updatedAt: _parseDate(json['updatedAt']),
       gamName: json['gamName'] ?? '',
     );
   }

@@ -4,6 +4,6 @@ import 'package:get/get.dart';
 class SplashScreenBinding extends Bindings{
   @override
   void dependencies() {
-    Get.lazyPut(() => SplashScreenController());
+    Get.lazyPut(() => SplashScreenController(authRepo: Get.find()));
   }
 }
