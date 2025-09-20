@@ -133,6 +133,13 @@ class SurveyCardWidget extends StatelessWidget {
                           fontSize: 12,
                         ),
                       ),
+                      Text(
+                        'Sr.No: ${data.srNo}',
+                        style: AppFonts.text14(context).copyWith(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ),

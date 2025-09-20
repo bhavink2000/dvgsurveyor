@@ -213,6 +213,7 @@ class SurveyModel {
   final bool isNonResidential;
   final List<RcNumberItem>? rcNumber;
   final String? ecNumber;
+  final String? srNo;
 
   SurveyModel({
     required this.userId,
@@ -246,6 +247,7 @@ class SurveyModel {
     this.isNonResidential = false,
     this.rcNumber,
     this.ecNumber,
+    this.srNo,
   });
 
   /// ✅ From Firestore
@@ -295,6 +297,7 @@ class SurveyModel {
           ?.map((e) => RcNumberItem.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
       ecNumber: asString(data['ecNumber']),
+      srNo: asString(data['srNo']),
     );
   }
 
@@ -332,6 +335,7 @@ class SurveyModel {
         'isNonResidential': isNonResidential,
         "rcNumber": rcNumber?.map((e) => e.toJson()).toList(),
         'ecNumber': ecNumber,
+        'srNo': srNo,
       };
 
   /// ✅ CopyWith
@@ -367,6 +371,7 @@ class SurveyModel {
     bool? isNonResidential,
     List<RcNumberItem>? rcNumber,
     String? ecNumber,
+    String? srNo,
   }) {
     return SurveyModel(
       userId: userId ?? this.userId,
@@ -400,6 +405,7 @@ class SurveyModel {
       isNonResidential: isNonResidential ?? this.isNonResidential,
       rcNumber: rcNumber ?? this.rcNumber,
       ecNumber: ecNumber ?? this.ecNumber,
+      srNo: srNo ?? this.srNo,
     );
   }
 }

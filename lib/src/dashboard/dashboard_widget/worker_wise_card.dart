@@ -76,7 +76,8 @@ class WorkerWiseCard extends GetWidget<DashboardController> {
                             borderSide: const BorderSide(color: Colors.teal),
                           ),
                         ),
-                        icon: Obx(() => controller.isWorkerLoad.value
+                        icon: Obx(() => controller.isWorkerLoad.value ||
+                                controller.workerCount.value
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
