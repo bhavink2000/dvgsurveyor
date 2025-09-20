@@ -359,9 +359,15 @@ class SurveyorFormScreenController extends GetxController {
 
       final surveyData = SurveyModel(
         id: id,
-        userId: user?.id ?? '',
-        userRole: user?.role ?? '',
-        userName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
+        userId: (user?.role == 'Admin' && isEditMode.value == true)
+            ? survey?.userId ?? ''
+            : user?.id ?? '',
+        userRole: (user?.role == 'Admin' && isEditMode.value == true)
+            ? survey?.userRole ?? ''
+            : user?.role ?? '',
+        userName: (user?.role == 'Admin' && isEditMode.value == true)
+            ? survey?.userName ?? ''
+            : '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
         ownerName: ownerName.text.trim(),
         oldHomeNumber: junagharNumber.text.trim(),
         newHomeNumber: isEdit && isPendingMode.value == false
@@ -450,9 +456,15 @@ class SurveyorFormScreenController extends GetxController {
 
       final surveyData = SurveyModel(
         id: id,
-        userId: user?.id ?? '',
-        userRole: user?.role ?? '',
-        userName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
+        userId: (user?.role == 'Admin' && isEditMode.value == true)
+            ? survey?.userId ?? ''
+            : user?.id ?? '',
+        userRole: (user?.role == 'Admin' && isEditMode.value == true)
+            ? survey?.userRole ?? ''
+            : user?.role ?? '',
+        userName: (user?.role == 'Admin' && isEditMode.value == true)
+            ? survey?.userName ?? ''
+            : '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
         surveyNumber: surveyNumber.text.trim(),
         ownerName: ownerName.text.trim(),
         oldHomeNumber: junagharNumber.text.trim(),

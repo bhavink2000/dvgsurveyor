@@ -116,8 +116,10 @@ class DashboardController extends GetxController {
           backgroundColor: Colors.orange.shade100, colorText: Colors.orange);
     }
   }
-
+  
+  RxBool cityCount = false.obs;
   Future<void> fetchCitySurveySummary({String? userId}) async {
+    cityCount.value = true;
     try {
       filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
@@ -144,9 +146,14 @@ class DashboardController extends GetxController {
       cityTotalAreaCount.value = 0;
       log('Error in fetchCitySurveySummary: $e');
     }
+    finally {
+      cityCount.value = false;
+    }
   }
-
+  
+  RxBool dateCount = false.obs;
   Future<void> fetchDateSurveySummary({String? userId}) async {
+    dateCount.value = true;
     try {
       filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
@@ -172,9 +179,14 @@ class DashboardController extends GetxController {
       dateTotalAreaCount.value = 0;
       log('Error in fetchDateSurveySummary: $e');
     }
+    finally {
+      dateCount.value = false;
+    }
   }
 
+  RxBool workerCount = false.obs;
   Future<void> fetchWorkerSurveySummary({String? workerId}) async {
+    workerCount.value = true;
     try {
       filteredSurveys.value = [];
       final surveys = await appRepo.getSurveyDataByCityDateWorker(
@@ -200,6 +212,9 @@ class DashboardController extends GetxController {
       workerTotalAreaCount.value = 0;
       workerTotalSurveyCount.value = 0;
       log('Error in fetchDateSurveySummary: $e');
+    }
+    finally {
+      workerCount.value = false;
     }
   }
 }

@@ -43,6 +43,7 @@ class ExcelService {
     // Row 1: Main headers
     appendCenteredRow([
       'ક્રમ નંબર',
+      'Sr.No', // <-- Added here
       'જૂના ઘર નંબર',
       'મુળ માલિકનું નામ',
       'કબજેદારનું નામ',
@@ -58,7 +59,7 @@ class ExcelService {
       'મોબાઇલ નંબર',
       'દબાણ',
       'નળ',
-      'Worker', // <-- Added here
+      'Worker',
       'EC Number',
       'RC Numbers',
       'Signature',
@@ -76,6 +77,7 @@ class ExcelService {
       'નળીયા તથા પતરા',
       'સ્લેબ તથા પાપડા',
       'નળીયા તથા પતરા',
+      '',
       '',
       '',
       '',
@@ -236,6 +238,7 @@ class ExcelService {
       // Append row (without signature first)
       appendCenteredRow([
         counter,
+        data['srNo'] ?? '', // <-- new Sr.No column
         data['oldHomeNumber'] ?? '',
         data['ownerName'] ?? '',
         data['rentPersonName'] ?? '',
@@ -251,10 +254,10 @@ class ExcelService {
         data['mobileNumber'] ?? '',
         data['isDabaan']?.toString() ?? '',
         waterPipelineTotal,
-        data['userName'] ?? '', // <-- Worker column
+        data['userName'] ?? '', // Worker
         ecNumber,
         rcCombined,
-        '', // signature
+        '', // Signature
       ]);
 
       // Add signature image if available
@@ -264,7 +267,7 @@ class ExcelService {
           Uint8List signatureBytes = base64Decode(signatureBase64);
           final Picture picture = sheet.pictures.addBase64(
             currentRow - 1,
-            20, // Signature column
+            21, // Signature column
             base64Encode(signatureBytes),
           );
           picture.height = 40;
@@ -285,27 +288,28 @@ class ExcelService {
     headerStyle.borders.all.lineStyle = LineStyle.thin;
     headerStyle.fontSize = 12;
     headerStyle.wrapText = true;
-    sheet.getRangeByName("A1:T2").cellStyle = headerStyle;
-    final usedRange = sheet.getRangeByIndex(1, 1, currentRow, 20);
+    sheet.getRangeByName("A1:U2").cellStyle = headerStyle;
+    final usedRange = sheet.getRangeByIndex(1, 1, currentRow, 21);
 
     // Auto fit columns
-    for (int i = 1; i <= 20; i++) {
+    for (int i = 1; i <= 21; i++) {
       sheet.autoFitColumn(i);
     }
 
     // Custom widths
-    sheet.setColumnWidthInPixels(1, 60); // Sr No
-    sheet.setColumnWidthInPixels(2, 80); // Old home no
-    sheet.setColumnWidthInPixels(3, 120); // Owner name
-    sheet.setColumnWidthInPixels(4, 120); // Tenant name
-    sheet.setColumnWidthInPixels(5, 90); // Area
-    sheet.setColumnWidthInPixels(12, 120); // Survey No
-    sheet.setColumnWidthInPixels(13, 150); // Address
-    sheet.setColumnWidthInPixels(14, 120); // Mobile
-    sheet.setColumnWidthInPixels(17, 120); // Worker
-    sheet.setColumnWidthInPixels(18, 120); // EC Number
-    sheet.setColumnWidthInPixels(19, 200); // RC Numbers
-    sheet.setColumnWidthInPixels(20, 100); // Signature
+    sheet.setColumnWidthInPixels(1, 60); // ક્રમ નંબર
+    sheet.setColumnWidthInPixels(2, 80); // Sr.No
+    sheet.setColumnWidthInPixels(3, 80); // Old home no
+    sheet.setColumnWidthInPixels(4, 120); // Owner name
+    sheet.setColumnWidthInPixels(5, 120); // Tenant name
+    sheet.setColumnWidthInPixels(6, 90); // Area
+    sheet.setColumnWidthInPixels(13, 120); // Survey No
+    sheet.setColumnWidthInPixels(14, 150); // Address
+    sheet.setColumnWidthInPixels(15, 120); // Mobile
+    sheet.setColumnWidthInPixels(18, 120); // Worker
+    sheet.setColumnWidthInPixels(19, 120); // EC Number
+    sheet.setColumnWidthInPixels(20, 200); // RC Numbers
+    sheet.setColumnWidthInPixels(21, 100); // Signature
 
     // Apply borders
 

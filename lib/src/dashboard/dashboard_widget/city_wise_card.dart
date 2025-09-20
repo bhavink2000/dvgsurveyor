@@ -81,7 +81,8 @@ class CityWiseCard extends GetWidget<DashboardController> {
                             borderSide: const BorderSide(color: Colors.teal),
                           ),
                         ),
-                        icon: controller.isGamLoad.value
+                        icon: controller.isGamLoad.value ||
+                                controller.cityCount.value
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
