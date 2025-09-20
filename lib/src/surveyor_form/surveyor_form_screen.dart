@@ -148,6 +148,9 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                                           FormLabels.ecNumber,
                                           controller.ecNumber,
                                           keyboardType: TextInputType.text,
+                                          validator: (value) {
+                                            return null;
+                                          },
                                         ),
                                         SizedBox(height: 8.h),
 
@@ -170,6 +173,9 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                                                         map["contractorName"]!,
                                                         keyboardType:
                                                             TextInputType.text,
+                                                        validator: (value) {
+                                                          return null;
+                                                        },
                                                       ),
                                                     ),
                                                     SizedBox(width: 8.w),
@@ -179,6 +185,9 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                                                         map["rcNumber"]!,
                                                         keyboardType:
                                                             TextInputType.text,
+                                                        validator: (value) {
+                                                          return null;
+                                                        },
                                                       ),
                                                     ),
                                                     SizedBox(width: 8.w),

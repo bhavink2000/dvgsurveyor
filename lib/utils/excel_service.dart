@@ -58,6 +58,7 @@ class ExcelService {
       'મોબાઇલ નંબર',
       'દબાણ',
       'નળ',
+      'Worker', // <-- Added here
       'EC Number',
       'RC Numbers',
       'Signature',
@@ -75,6 +76,7 @@ class ExcelService {
       'નળીયા તથા પતરા',
       'સ્લેબ તથા પાપડા',
       'નળીયા તથા પતરા',
+      '',
       '',
       '',
       '',
@@ -249,9 +251,10 @@ class ExcelService {
         data['mobileNumber'] ?? '',
         data['isDabaan']?.toString() ?? '',
         waterPipelineTotal,
+        data['userName'] ?? '', // <-- Worker column
         ecNumber,
         rcCombined,
-        '', // signature cell placeholder
+        '', // signature
       ]);
 
       // Add signature image if available
@@ -261,7 +264,7 @@ class ExcelService {
           Uint8List signatureBytes = base64Decode(signatureBase64);
           final Picture picture = sheet.pictures.addBase64(
             currentRow - 1,
-            19, // Signature column
+            20, // Signature column
             base64Encode(signatureBytes),
           );
           picture.height = 40;
@@ -282,10 +285,11 @@ class ExcelService {
     headerStyle.borders.all.lineStyle = LineStyle.thin;
     headerStyle.fontSize = 12;
     headerStyle.wrapText = true;
-    sheet.getRangeByName("A1:S2").cellStyle = headerStyle;
+    sheet.getRangeByName("A1:T2").cellStyle = headerStyle;
+    final usedRange = sheet.getRangeByIndex(1, 1, currentRow, 20);
 
     // Auto fit columns
-    for (int i = 1; i <= 19; i++) {
+    for (int i = 1; i <= 20; i++) {
       sheet.autoFitColumn(i);
     }
 
@@ -298,12 +302,13 @@ class ExcelService {
     sheet.setColumnWidthInPixels(12, 120); // Survey No
     sheet.setColumnWidthInPixels(13, 150); // Address
     sheet.setColumnWidthInPixels(14, 120); // Mobile
-    sheet.setColumnWidthInPixels(17, 120); // EC Number
-    sheet.setColumnWidthInPixels(18, 200); // RC Numbers
-    sheet.setColumnWidthInPixels(19, 100); // Signature
+    sheet.setColumnWidthInPixels(17, 120); // Worker
+    sheet.setColumnWidthInPixels(18, 120); // EC Number
+    sheet.setColumnWidthInPixels(19, 200); // RC Numbers
+    sheet.setColumnWidthInPixels(20, 100); // Signature
 
     // Apply borders
-    final usedRange = sheet.getRangeByIndex(1, 1, currentRow, 19);
+
     usedRange.cellStyle.borders.all.lineStyle = LineStyle.thin;
 
     // Wrap text for address & RC numbers
