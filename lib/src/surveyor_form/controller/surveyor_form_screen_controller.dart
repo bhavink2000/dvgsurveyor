@@ -41,6 +41,7 @@ class SurveyorFormScreenController extends GetxController {
   final surveyNumber = TextEditingController();
   final remarks = TextEditingController();
   final ecNumber = TextEditingController();
+  final srNo = TextEditingController();
 
   RxBool isNonResedential = false.obs;
 
@@ -208,6 +209,7 @@ class SurveyorFormScreenController extends GetxController {
         addRcNumberField(); // empty one
       }
     }
+    srNo.text = survey.srNo ?? '';
 
     // ✅ Load property descriptions (after type selected)
     await getPropertyDescription();
@@ -351,7 +353,7 @@ class SurveyorFormScreenController extends GetxController {
           isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
       final newIndex = isEdit && isPendingMode.value == false
           ? (survey?.index ?? '')
-          : (await authRepo.getSurveyData(userId: user?.id ?? '')).length + 1;
+          : (await authRepo.getSurveyData(userId: '')).length + 1;
 
       Uint8List? signatureBytes = await signatureController.toPngBytes();
 
@@ -408,6 +410,7 @@ class SurveyorFormScreenController extends GetxController {
         isNonResidential: isNonResedential.value,
         rcNumber: rcNumbers, // List<String>
         ecNumber: ecNumber.text.trim(),
+        srNo: srNo.text.trim(),
       );
 
       final result = await authRepo.saveSurveyForm(
@@ -443,7 +446,7 @@ class SurveyorFormScreenController extends GetxController {
           isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
       final newIndex = isEdit && isPendingMode.value == false
           ? (survey?.index ?? '')
-          : (await authRepo.getSurveyData(userId: user?.id ?? '')).length + 1;
+          : (await authRepo.getSurveyData(userId: '')).length + 1;
 
       final surveyData = SurveyModel(
         id: id,
@@ -482,6 +485,7 @@ class SurveyorFormScreenController extends GetxController {
         isOffProperty: true,
         isDabaan: 'ના',
         signature: null,
+        srNo: srNo.text.trim(),
       );
 
       final result = await authRepo.saveSurveyForm(

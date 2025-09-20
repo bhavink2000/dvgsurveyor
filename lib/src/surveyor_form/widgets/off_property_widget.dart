@@ -16,19 +16,38 @@ class OffPropertyWidget extends GetWidget<SurveyorFormScreenController> {
     return Column(
       children: [
         buildInput(
-          FormLabels.junagharNumber,
-          controller.junagharNumber,
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            return null;
-          },
-        ),
-        buildInput(
           FormLabels.ownerName,
           controller.ownerName,
           validator: (value) {
             return null;
           },
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: 175.w,
+              child: buildInput(
+                FormLabels.junagharNumber,
+                controller.junagharNumber,
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  return null;
+                },
+              ),
+            ),
+            SizedBox(
+              width: 125.w,
+              child: buildInput(
+                FormLabels.srNo,
+                controller.srNo,
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  return null;
+                },
+              ),
+            ),
+          ],
         ),
         buildInput(
           FormLabels.mobileNumber,

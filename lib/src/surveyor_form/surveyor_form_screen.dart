@@ -82,10 +82,26 @@ class SurveyorFormScreen extends GetWidget<SurveyorFormScreenController> {
                               FormLabels.ownerName,
                               controller.ownerName,
                             ),
-                            buildInput(
-                              FormLabels.junagharNumber,
-                              controller.junagharNumber,
-                              keyboardType: TextInputType.number,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 175.w,
+                                  child: buildInput(
+                                    FormLabels.junagharNumber,
+                                    controller.junagharNumber,
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 125.w,
+                                  child: buildInput(
+                                    FormLabels.srNo,
+                                    controller.srNo,
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
+                              ],
                             ),
                             buildInput(
                               FormLabels.kabjedarName,
