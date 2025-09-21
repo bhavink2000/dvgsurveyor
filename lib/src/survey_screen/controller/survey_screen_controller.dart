@@ -152,7 +152,7 @@ class SurveyScreenController extends GetxController {
     applySearch();
   }
 
-  Future<void> deleteSurvey({String? sId}) async {
+  Future<void> deleteSurvey({String? sId, String? wId, String? cNm}) async {
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -212,8 +212,8 @@ class SurveyScreenController extends GetxController {
                       onPressed: () async {
                         await authRepo.deleteSurveyInsideWorkerCityWise(
                             surveyId: sId ?? '',
-                            workerId: userData.value?.id ?? '',
-                            cityName: userData.value?.gamName ?? '');
+                            workerId:  wId ?? '',
+                            cityName: cNm ?? '');
                         Get.back();
                         await fetchSurveyData();
                       },

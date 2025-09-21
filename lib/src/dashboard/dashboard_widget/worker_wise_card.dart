@@ -2,6 +2,7 @@ import 'package:dvgsurveyor/helper/app_colors.dart';
 import 'package:dvgsurveyor/helper/app_fonts_helper.dart';
 import 'package:dvgsurveyor/helper/app_images_helper.dart';
 import 'package:dvgsurveyor/helper/app_snackbar.dart';
+import 'package:dvgsurveyor/model/gam_model.dart';
 import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
 import 'package:dvgsurveyor/utils/excel_service.dart';
 import 'package:flutter/material.dart';
@@ -54,10 +55,75 @@ class WorkerWiseCard extends GetWidget<DashboardController> {
                     ),
                     const Spacer(),
                     SizedBox(
-                      width: 110,
+                      width: 90,
+                      height: 34,
+                      child: DropdownButtonFormField<GamModel?>(
+                        value: controller.selectedGam.value,
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Colors.teal),
+                          ),
+                        ),
+                        icon: controller.isGamLoad.value ||
+                                controller.cityCount.value
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.arrow_drop_down),
+                        items: [
+                          const DropdownMenuItem<GamModel>(
+                            value: null,
+                            child: Text(
+                              'Select City',
+                              style:
+                                  TextStyle(fontSize: 13, color: Colors.grey),
+                            ),
+                          ),
+                          ...controller.gamList.map((gam) {
+                            return DropdownMenuItem<GamModel>(
+                              value: gam,
+                              child: Text(
+                                gam.name.capitalizeFirst ?? '',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            );
+                          }).toList(),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            controller.selectedGam.value = val;
+                            controller.selectedWorkerId.value = null;
+                            controller.workerTotalSurveyCount.value = 0;
+                            controller.workerTotalAreaCount.value = 0;
+                            controller.fetchCitySurveySummary();
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    SizedBox(
+                      width: 100,
                       height: 34,
                       child: DropdownButtonFormField<String?>(
-                        value: controller.selectedWorker.value,
+                        value: controller.selectedWorkerId.value,
                         isExpanded: true,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
@@ -94,32 +160,23 @@ class WorkerWiseCard extends GetWidget<DashboardController> {
                                   TextStyle(fontSize: 13, color: Colors.grey),
                             ),
                           ),
-                          ...controller.workerList.map((worker) {
+                          ...controller.workerMap.entries.map((entry) {
                             return DropdownMenuItem<String>(
-                              value: worker,
+                              value: entry.key, // workerId
                               child: Text(
-                                worker.capitalizeFirst ?? '',
+                                entry.value.capitalizeFirst ?? '', // workerName
                                 style: const TextStyle(fontSize: 13),
                               ),
                             );
                           }).toList(),
                         ],
-                        onChanged: (val) {
-                          controller.selectedWorker.value = val;
+                        onChanged: (workerId) {
+                          controller.selectedWorkerId.value = workerId;
 
-                          if (val != null) {
-                            // Get the selected user from the full list using username
-                            final selectedUser =
-                                controller.allWorkers.firstWhere(
-                              (user) => user.username == val,
-                              // fallback empty model
-                            );
-
-                            final userId = selectedUser.id;
-
+                          if (workerId != null) {
                             controller.fetchWorkerSurveySummary(
-                              workerId: userId,
-                            ); // pass it
+                              workerId: workerId, // directly pass ID
+                            );
                           }
                         },
                       ),
@@ -202,7 +259,8 @@ class WorkerWiseCard extends GetWidget<DashboardController> {
                       );
                       return;
                     }
-                    if (controller.selectedWorker.value != null) {
+                    if (controller.selectedWorkerId.value != null ||
+                        controller.selectedGam.value != null) {
                       if (controller.userData.value?.isExcelDownload == true) {
                         final service = ExcelService();
                         final List<Map<String, dynamic>> dataList = controller

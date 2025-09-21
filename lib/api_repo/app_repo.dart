@@ -19,13 +19,13 @@ class AppRepo {
         toFirestore: (model, _) => model.toFirestore(),
       );
 
-  CollectionReference<SurveyModel> get _surveyCollection =>
-      FirebaseFirestore.instance
-          .collection(FirebaseConst.surveyCollection)
-          .withConverter<SurveyModel>(
-            fromFirestore: (snapshot, _) => SurveyModel.fromFirebase(snapshot),
-            toFirestore: (model, _) => model.toJson(),
-          );
+  // CollectionReference<SurveyModel> get _surveyCollection =>
+  //     FirebaseFirestore.instance
+  //         .collection(FirebaseConst.surveyCollection)
+  //         .withConverter<SurveyModel>(
+  //           fromFirestore: (snapshot, _) => SurveyModel.fromFirebase(snapshot),
+  //           toFirestore: (model, _) => model.toJson(),
+  //         );
 
   Future<List<GamModel>> getGam() async {
     try {
@@ -69,75 +69,94 @@ class AppRepo {
     }
   }
 
-  Future<List<SurveyModel>> getSurveyDataByCityDateWorker({
-    required String userId,
-    String? cityName, // optional
-    DateTime? startDate, // optional
-    DateTime? endDate, // optional
-    String? workerId,
+  // Future<List<SurveyModel>> getSurveyDataByCityDateWorker({
+  //   required String userId,
+  //   String? cityName, // optional
+  //   DateTime? startDate, // optional
+  //   DateTime? endDate, // optional
+  //   String? workerId,
+  // }) async {
+  //   try {
+  //     Query query = _surveyCollection;
+
+  //     if (userId.isNotEmpty || userId != '') {
+  //       query = query.where('userId', isEqualTo: userId);
+  //     }
+
+  //     if (cityName != null && cityName.isNotEmpty) {
+  //       query = query.where('gamName', isEqualTo: cityName);
+  //     }
+
+  //     if (startDate != null) {
+  //       query = query.where('createdAt',
+  //           isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
+  //     }
+
+  //     if (endDate != null) {
+  //       // Add 1 day to include the full end date
+  //       final adjustedEnd = endDate.add(const Duration(days: 1));
+  //       query = query.where('createdAt',
+  //           isLessThan: Timestamp.fromDate(adjustedEnd));
+  //     }
+
+  //     if (workerId != null) {
+  //       query = query.where('userId', isEqualTo: workerId);
+  //     }
+
+  //     query = query.orderBy('createdAt', descending: true);
+
+  //     final querySnap = await query.get();
+
+  //     return querySnap.docs
+  //         .map((doc) => doc.data())
+  //         .whereType<SurveyModel>()
+  //         .toList();
+  //   } catch (e) {
+  //     log('Log: get error in getSurveyData $e');
+  //     return [];
+  //   }
+  // }
+
+  Future<List<SurveyModel>> getSurveyByCityWiseData({
+    required String cityName,
   }) async {
+    final stopwatch = Stopwatch()..start();
+    log('🔹 getCityWiseSurveys started: city="$cityName",');
+
     try {
-      Query query = _surveyCollection;
+      // Fetch all surveys from all subcollections named cityName
+      final querySnap =
+          await FirebaseFirestore.instance.collectionGroup(cityName).get();
 
-      if (userId.isNotEmpty || userId != '') {
-        query = query.where('userId', isEqualTo: userId);
-      }
+      log('🔹 Raw query returned ${querySnap.docs.length} documents');
 
-      if (cityName != null && cityName.isNotEmpty) {
-        query = query.where('gamName', isEqualTo: cityName);
-      }
-
-      if (startDate != null) {
-        query = query.where('createdAt',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
-      }
-
-      if (endDate != null) {
-        // Add 1 day to include the full end date
-        final adjustedEnd = endDate.add(const Duration(days: 1));
-        query = query.where('createdAt',
-            isLessThan: Timestamp.fromDate(adjustedEnd));
-      }
-
-      if (workerId != null) {
-        query = query.where('userId', isEqualTo: workerId);
-      }
-
-      query = query.orderBy('createdAt', descending: true);
-
-      final querySnap = await query.get();
-
-      return querySnap.docs
-          .map((doc) => doc.data())
-          .whereType<SurveyModel>()
+      // Convert to SurveyModel
+      final allSurveys = querySnap.docs
+          .map((doc) => SurveyModel.fromJson(doc.data()))
           .toList();
-    } catch (e) {
-      log('Log: get error in getSurveyData $e');
-      return [];
-    }
-  }
+      log('🔹 Converted to SurveyModel: ${allSurveys.length} items');
 
-  Future<List<SurveyModel>> getSurveyByCityWiseData(
-      {required String cityName}) async {
-    try {
-      final querySnap;
-      if (cityName != '' || cityName.isNotEmpty) {
-        querySnap = await _surveyCollection
-            .where('gamName', isEqualTo: cityName)
-            .orderBy('createdAt', descending: true)
-            .get();
-      } else {
-        querySnap = await _surveyCollection
-            .orderBy('createdAt', descending: true)
-            .get();
-      }
+      // Local filtering
+      final filtered = allSurveys.where((survey) {
+        final matchesCity =
+            cityName != null ? survey.gamName == cityName : true;
+        return matchesCity;
+      }).toList();
 
-      return querySnap.docs
-          .map((doc) => doc.data())
-          .whereType<SurveyModel>()
-          .toList();
-    } catch (e) {
-      log('Log: get error in get survey data $e');
+      log('🔹 After local filtering: ${filtered.length} surveys');
+
+      // Sort by createdAt descending
+      filtered.sort(
+          (a, b) => b.createdAt?.compareTo(a.createdAt ?? DateTime(0)) ?? 0);
+
+      stopwatch.stop();
+      log('🔹 getCityWiseSurveys finished in ${stopwatch.elapsedMilliseconds} ms');
+
+      log('🔹 Final filtered count: ${filtered.length}');
+
+      return filtered;
+    } catch (e, s) {
+      log('❌ Error in getCityWiseSurveys: $e\nStack: $s');
       return [];
     }
   }
@@ -206,6 +225,54 @@ class AppRepo {
     } catch (e, st) {
       log('Error archiving surveys for $cityName: $e\n$st');
       throw Exception('Failed to archive surveys. Please try again later.');
+    }
+  }
+
+  Future<List<SurveyModel>> getCityWiseSurveys({
+    String? cityName,
+    String? workerId,
+  }) async {
+    final stopwatch = Stopwatch()..start();
+    log('🔹 getCityWiseSurveys started: city="$cityName", worker="$workerId"');
+
+    try {
+      // Fetch all surveys from all subcollections named cityName
+      final querySnap = await FirebaseFirestore.instance
+          .collectionGroup(cityName ?? '')
+          .get();
+
+      log('🔹 Raw query returned ${querySnap.docs.length} documents');
+
+      // Convert to SurveyModel
+      final allSurveys = querySnap.docs
+          .map((doc) => SurveyModel.fromJson(doc.data()))
+          .toList();
+      log('🔹 Converted to SurveyModel: ${allSurveys.length} items');
+
+      // Local filtering
+      final filtered = allSurveys.where((survey) {
+        final matchesWorker =
+            workerId != null ? survey.userId == workerId : true;
+        final matchesCity =
+            cityName != null ? survey.gamName == cityName : true;
+        return matchesWorker && matchesCity;
+      }).toList();
+
+      log('🔹 After local filtering: ${filtered.length} surveys');
+
+      // Sort by createdAt descending
+      filtered.sort(
+          (a, b) => b.createdAt?.compareTo(a.createdAt ?? DateTime(0)) ?? 0);
+
+      stopwatch.stop();
+      log('🔹 getCityWiseSurveys finished in ${stopwatch.elapsedMilliseconds} ms');
+
+      log('🔹 Final filtered count: ${filtered.length}');
+
+      return filtered;
+    } catch (e, s) {
+      log('❌ Error in getCityWiseSurveys: $e\nStack: $s');
+      return [];
     }
   }
 }
