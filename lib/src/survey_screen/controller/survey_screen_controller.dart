@@ -45,36 +45,42 @@ class SurveyScreenController extends GetxController {
   Future<void> fetchSurveyData() async {
     isSurveyLoad.value = true;
     try {
-      final response = await authRepo.getSurveyInsideWorkerCityWise(
-        workerId: userData.value?.id ?? '',
-        cityName: userData.value?.gamName ?? '',
-      );
+      final List<SurveyModel> surveys;
+      if (userData.value?.role == 'Admin') {
+        surveys = await authRepo.getAllSurveysForAdmin(
+          cityName: userData.value?.gamName ?? '',
+        );
+      } else {
+        surveys = await authRepo.getSurveyInsideWorkerCityWise(
+          workerId: userData.value?.id ?? '',
+          cityName: userData.value?.gamName ?? '',
+        );
+      }
 
-      surveyData.value = response;
-      filteredSurveys.value = response;
+      // Save all surveys
+      surveyData.value = surveys;
+      filteredSurveys.value = surveys;
 
-      gamList.value = response
+      // 🔹 List of unique gamNames (cities)
+      gamList.value = surveys
           .map((e) => e.gamName ?? '')
+          .toSet()
+          .toList()
+          .cast<String>(); // ✅ cast to List<String>
+
+      propertyTypes.value = surveys
+          .map<String>((e) => (e.propertyType.isNotEmpty)
+              ? e.propertyType.values.first.propertyName ?? ''
+              : '')
           .where((e) => e.isNotEmpty)
           .toSet()
           .toList();
 
-      propertyTypes.value = response
-          .map((e) {
-            if (e.propertyType.isNotEmpty) {
-              return e.propertyType.values.first.propertyName ?? '';
-            }
-            return '';
-          })
-          .where((e) => e.isNotEmpty)
-          .toSet()
-          .toList();
-
-      workerList.value = response
+      workerList.value = surveys
           .map((e) => e.userName)
-          .where((e) => e.isNotEmpty)
           .toSet()
-          .toList();
+          .toList()
+          .cast<String>(); // ✅ cast to List<String>
 
       isSurveyLoad.value = false;
     } catch (e, s) {

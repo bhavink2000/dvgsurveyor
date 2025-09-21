@@ -88,7 +88,7 @@ class DashboardScreen extends GetWidget<DashboardController> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'Here is your dashboard',
+                    'Here is your dashboard (${SessionManager.getUser()?.gamName ?? ''})',
                     style: AppFonts.text14(context).copyWith(
                       color: AppColors.offWhite.withOpacity(0.8),
                       fontSize: 12.sp,

@@ -434,4 +434,24 @@ class AuthRepo {
 
     return querySnap.docs.length + 1; // next index
   }
+
+  Future<List<SurveyModel>> getAllSurveysForAdmin({
+    required String cityName,
+  }) async {
+    try {
+      // Fetch all surveys from all workers for a specific city
+      final querySnap = await FirebaseFirestore.instance
+          .collectionGroup(
+              cityName) // matches all subcollections with this name
+          //.orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnap.docs
+          .map((doc) => SurveyModel.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      log('Error in getAllSurveysForAdmin: $e');
+      return [];
+    }
+  }
 }
