@@ -204,55 +204,55 @@ class AuthRepo {
     }
   }
 
-  Future<SurveyModel?> saveSurveyForm({
-    required SurveyModel surveyData,
-    bool? isEditData = false,
-    bool? isPendingData = false,
-  }) async {
-    try {
-      final docRef = _surveyCollection.doc(surveyData.id);
+  // Future<SurveyModel?> saveSurveyForm({
+  //   required SurveyModel surveyData,
+  //   bool? isEditData = false,
+  //   bool? isPendingData = false,
+  // }) async {
+  //   try {
+  //     final docRef = _surveyCollection.doc(surveyData.id);
 
-      if (isEditData == true && isPendingData == false) {
-        await docRef.update(surveyData.toJson()); // Convert model to Map
-      } else {
-        await docRef.set(surveyData);
-      }
+  //     if (isEditData == true && isPendingData == false) {
+  //       await docRef.update(surveyData.toJson()); // Convert model to Map
+  //     } else {
+  //       await docRef.set(surveyData);
+  //     }
 
-      final snapshot = await docRef.get();
+  //     final snapshot = await docRef.get();
 
-      if (isPendingData == true) {
-        await deletePendingSurvey(surveyId: surveyData.id);
-      }
-      return snapshot.data();
-    } catch (e) {
-      log('Log: error to save survey form data -> $e');
-      return null;
-    }
-  }
+  //     if (isPendingData == true) {
+  //       await deletePendingSurvey(surveyId: surveyData.id);
+  //     }
+  //     return snapshot.data();
+  //   } catch (e) {
+  //     log('Log: error to save survey form data -> $e');
+  //     return null;
+  //   }
+  // }
 
-  Future<List<SurveyModel>> getSurveyData({required String userId}) async {
-    try {
-      final querySnap;
-      if (userId != '' || userId.isNotEmpty) {
-        querySnap = await _surveyCollection
-            .where('userId', isEqualTo: userId)
-            .orderBy('createdAt', descending: true)
-            .get();
-      } else {
-        querySnap = await _surveyCollection
-            .orderBy('createdAt', descending: true)
-            .get();
-      }
+  // Future<List<SurveyModel>> getSurveyData({required String userId}) async {
+  //   try {
+  //     final querySnap;
+  //     if (userId != '' || userId.isNotEmpty) {
+  //       querySnap = await _surveyCollection
+  //           .where('userId', isEqualTo: userId)
+  //           .orderBy('createdAt', descending: true)
+  //           .get();
+  //     } else {
+  //       querySnap = await _surveyCollection
+  //           .orderBy('createdAt', descending: true)
+  //           .get();
+  //     }
 
-      return querySnap.docs
-          .map((doc) => doc.data())
-          .whereType<SurveyModel>()
-          .toList();
-    } catch (e) {
-      log('Log: get error in get survey data $e');
-      return [];
-    }
-  }
+  //     return querySnap.docs
+  //         .map((doc) => doc.data())
+  //         .whereType<SurveyModel>()
+  //         .toList();
+  //   } catch (e) {
+  //     log('Log: get error in get survey data $e');
+  //     return [];
+  //   }
+  // }
 
   Future<PropertyTypeModel?> addUpdatePropertyType({
     required PropertyTypeModel proData,
@@ -308,16 +308,16 @@ class AuthRepo {
     }
   }
 
-  Future<SurveyModel?> deleteSurvey({String? surveyId}) async {
-    try {
-      final docRef = _surveyCollection.doc(surveyId);
-      await docRef.delete();
-      return null;
-    } catch (e) {
-      log('Log error in delete survey ->$e');
-      return null;
-    }
-  }
+  // Future<SurveyModel?> deleteSurvey({String? surveyId}) async {
+  //   try {
+  //     final docRef = _surveyCollection.doc(surveyId);
+  //     await docRef.delete();
+  //     return null;
+  //   } catch (e) {
+  //     log('Log error in delete survey ->$e');
+  //     return null;
+  //   }
+  // }
 
   Future<void> deleteUser({String? userId}) async {
     try {
@@ -354,5 +354,84 @@ class AuthRepo {
         .doc(userId)
         .snapshots()
         .map((doc) => doc.data());
+  }
+
+  Future<SurveyModel?> saveSurveyInsideWorkerCityWise({
+    required String workerId,
+    required String cityName,
+    required SurveyModel surveyData,
+    bool? isEditData = false,
+    bool? isPendingData = false,
+  }) async {
+    try {
+      // path: surveys/{workerId}/{cityName}/{surveyId}
+      final docRef = _surveyCollection
+          .doc(workerId)
+          .collection(cityName)
+          .doc(surveyData.id);
+
+      if (isEditData == true && isPendingData == false) {
+        await docRef.update(surveyData.toJson());
+      } else {
+        await docRef.set(surveyData.toJson()); // always use Map for Firestore
+      }
+
+      final snapshot = await docRef.get();
+
+      if (isPendingData == true) {
+        await deletePendingSurvey(surveyId: surveyData.id);
+      }
+
+      // Convert back to SurveyModel
+      return snapshot.exists ? SurveyModel.fromJson(snapshot.data()!) : null;
+    } catch (e) {
+      log('Log: error to save survey form data -> $e');
+      return null;
+    }
+  }
+
+  Future<List<SurveyModel>> getSurveyInsideWorkerCityWise({
+    required String workerId,
+    required String cityName,
+  }) async {
+    try {
+      //final querySnap;
+      final querySnap =
+          await _surveyCollection.doc(workerId).collection(cityName).get();
+
+      return querySnap.docs
+          .map((doc) => SurveyModel.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      log('Log: get error in get survey data $e');
+      return [];
+    }
+  }
+
+  Future<void> deleteSurveyInsideWorkerCityWise(
+      {required String workerId,
+      required String cityName,
+      required String surveyId}) async {
+    try {
+      if (workerId.isNotEmpty) {
+        await _surveyCollection
+            .doc(workerId)
+            .collection(cityName)
+            .doc(surveyId)
+            .delete();
+      }
+    } catch (e) {
+      log('Error deleting user: $e');
+    }
+  }
+
+  Future<int> getNextSurveyIndex({
+    required String workerId,
+    required String cityName,
+  }) async {
+    final querySnap =
+        await _surveyCollection.doc(workerId).collection(cityName).get();
+
+    return querySnap.docs.length + 1; // next index
   }
 }

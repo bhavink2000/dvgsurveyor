@@ -42,13 +42,12 @@ class SurveyScreenController extends GetxController {
         await AuthRepo.instance.getUser(userId: SessionManager.getUser()?.id);
   }
 
-  Future<void> fetchSurveyData({String? userId}) async {
+  Future<void> fetchSurveyData() async {
     isSurveyLoad.value = true;
     try {
-      final response = await authRepo.getSurveyData(
-        userId:
-            (userData.value?.role == 'Worker' ? userData.value?.id : userId) ??
-                '',
+      final response = await authRepo.getSurveyInsideWorkerCityWise(
+        workerId: userData.value?.id ?? '',
+        cityName: userData.value?.gamName ?? '',
       );
 
       surveyData.value = response;
@@ -205,7 +204,10 @@ class SurveyScreenController extends GetxController {
                         ),
                       ),
                       onPressed: () async {
-                        await authRepo.deleteSurvey(surveyId: sId);
+                        await authRepo.deleteSurveyInsideWorkerCityWise(
+                            surveyId: sId ?? '',
+                            workerId: userData.value?.id ?? '',
+                            cityName: userData.value?.gamName ?? '');
                         Get.back();
                         await fetchSurveyData();
                       },

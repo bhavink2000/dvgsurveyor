@@ -351,9 +351,15 @@ class SurveyorFormScreenController extends GetxController {
       final bool isEdit = isEditMode.value;
       final id =
           isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
+      // final newIndex = isEdit && isPendingMode.value == false
+      //     ? (survey?.index ?? '')
+      //     : (await authRepo.getSurveyData(userId: '')).length + 1;
+
       final newIndex = isEdit && isPendingMode.value == false
-          ? (survey?.index ?? '')
-          : (await authRepo.getSurveyData(userId: '')).length + 1;
+          ? (survey?.index ?? 0) // keep old index if editing
+          : await authRepo.getNextSurveyIndex(
+              workerId: user?.id ?? '',
+              cityName: user?.gamName ?? ''); // fetch next index
 
       Uint8List? signatureBytes = await signatureController.toPngBytes();
 
@@ -419,10 +425,12 @@ class SurveyorFormScreenController extends GetxController {
         srNo: srNo.text.trim(),
       );
 
-      final result = await authRepo.saveSurveyForm(
+      final result = await authRepo.saveSurveyInsideWorkerCityWise(
         surveyData: surveyData,
         isEditData: isEdit,
         isPendingData: isPendingMode.value,
+        workerId: user?.id ?? surveyData.userId,
+        cityName: '${user?.gamName ?? surveyData.gamName}',
       );
 
       if (result != null) {
@@ -451,8 +459,10 @@ class SurveyorFormScreenController extends GetxController {
       final id =
           isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
       final newIndex = isEdit && isPendingMode.value == false
-          ? (survey?.index ?? '')
-          : (await authRepo.getSurveyData(userId: '')).length + 1;
+          ? (survey?.index ?? 0) // keep old index if editing
+          : await authRepo.getNextSurveyIndex(
+              workerId: user?.id ?? '',
+              cityName: user?.gamName ?? ''); // fetch next index
 
       final surveyData = SurveyModel(
         id: id,
@@ -500,10 +510,12 @@ class SurveyorFormScreenController extends GetxController {
         srNo: srNo.text.trim(),
       );
 
-      final result = await authRepo.saveSurveyForm(
+      final result = await authRepo.saveSurveyInsideWorkerCityWise(
         surveyData: surveyData,
         isEditData: isEdit,
         isPendingData: isPendingMode.value,
+        workerId: user?.id ?? surveyData.userId,
+        cityName: '${user?.gamName ?? surveyData.gamName}',
       );
 
       if (result != null) {
