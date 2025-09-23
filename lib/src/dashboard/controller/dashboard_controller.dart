@@ -140,6 +140,17 @@ class DashboardController extends GetxController {
 
       print(' surveys length: ${surveys.length}');
 
+      // 🔹 Sort surveys by srNo (missing/null → last)
+      surveys.sort((a, b) {
+        final aNo = (a.srNo is int)
+            ? a.srNo as int
+            : int.tryParse(a.srNo?.toString() ?? '') ?? 0;
+        final bNo = (b.srNo is int)
+            ? b.srNo as int
+            : int.tryParse(b.srNo?.toString() ?? '') ?? 0;
+        return aNo.compareTo(bNo);
+      });
+
       cityTotalSurveyCount.value = surveys.length;
       filteredSurveys.value = surveys;
 
@@ -208,6 +219,17 @@ class DashboardController extends GetxController {
         workerId: workerId,
         cityName: selectedGam.value!.name,
       );
+
+      // 🔹 Sort surveys by srNo (missing/null → last)
+      surveys.sort((a, b) {
+        final aNo = (a.srNo is int)
+            ? a.srNo as int
+            : int.tryParse(a.srNo?.toString() ?? '') ?? 0;
+        final bNo = (b.srNo is int)
+            ? b.srNo as int
+            : int.tryParse(b.srNo?.toString() ?? '') ?? 0;
+        return aNo.compareTo(bNo);
+      });
 
       workerTotalSurveyCount.value = surveys.length;
       filteredSurveys.value = surveys;
