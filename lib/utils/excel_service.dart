@@ -156,7 +156,7 @@ class ExcelService {
 
     // === Main loop ===
     int counter = 1;
-    for (var data in dataList.reversed) {
+    for (var data in dataList) {
       final createdAtRaw = data['createdAt'];
       final updatedAtRaw = data['updatedAt'];
 
