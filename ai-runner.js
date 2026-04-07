@@ -95,7 +95,7 @@ ${diff}
             { stdio: "inherit" }
         );
 
-        console.log("\n✅ PR Created Successfully!\n");
+        console.log("\n✅ PR Created Successfully! \n");
 
     } catch (err) {
         console.log("\n❌ Error:", err.message);
