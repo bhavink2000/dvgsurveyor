@@ -43,7 +43,7 @@ async function run() {
 
         // 🔹 Call Ollama (FREE AI)
         const response = await axios.post("http://localhost:11434/api/generate", {
-            model: "llama3",
+            model: "phi3",
             prompt: `
 You are a senior software engineer.
 
