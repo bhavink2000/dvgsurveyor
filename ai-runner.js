@@ -30,7 +30,9 @@ async function run() {
 
         // 🔹 Get diff from base branch
         console.log("🔍 Getting diff...");
-        const diff = execSync("git diff new_develop").toString();
+        const diff = execSync("git diff new_develop", {
+            maxBuffer: 1024 * 1024 * 20 // 20MB buffer
+        }).toString();
 
         if (!diff || diff.trim().length === 0) {
             console.log("⚠️ No changes found vs base branch");
