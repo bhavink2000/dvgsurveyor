@@ -7,7 +7,7 @@ import 'package:dvgsurveyor/helper/location_helper.dart';
 import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:dvgsurveyor/src/dashboard/controller/dashboard_controller.dart';
 import 'package:dvgsurveyor/src/dashboard/dashboard_widget/city_wise_card.dart';
-import 'package:dvgsurveyor/src/dashboard/dashboard_widget/date_wise_card.dart';
+// import 'package:dvgsurveyor/src/dashboard/dashboard_widget/date_wise_card.dart';
 import 'package:dvgsurveyor/src/dashboard/dashboard_widget/worker_wise_card.dart';
 import 'package:dvgsurveyor/src/drawer_screen/drawer_screen.dart';
 import 'package:flutter/material.dart';
@@ -88,7 +88,7 @@ class DashboardScreen extends GetWidget<DashboardController> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'Here is your dashboard',
+                    'Here is your dashboard (${SessionManager.getUser()?.gamName ?? ''})',
                     style: AppFonts.text14(context).copyWith(
                       color: AppColors.offWhite.withOpacity(0.8),
                       fontSize: 12.sp,
@@ -118,8 +118,8 @@ class DashboardScreen extends GetWidget<DashboardController> {
                       children: [
                         SizedBox(height: 16.h),
                         CityWiseCard(),
-                        SizedBox(height: 12.h),
-                        DateWiseCard(),
+                        // SizedBox(height: 12.h),
+                        // DateWiseCard(),
                         SizedBox(height: 12.h),
                         Obx(() => controller.userData.value?.role == 'Admin'
                             ? WorkerWiseCard()

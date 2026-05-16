@@ -11,6 +11,7 @@ import 'package:dvgsurveyor/model/property_description_model.dart';
 import 'package:dvgsurveyor/model/property_type_model.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/usage_model.dart';
+import 'package:dvgsurveyor/model/user_collection_model.dart';
 import 'package:dvgsurveyor/session_manager/session_manger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -124,9 +125,12 @@ class SurveyorFormScreenController extends GetxController {
 
   RxBool isOffProperty = false.obs;
 
+  Rx<UserCollectionModel?> userData = Rx<UserCollectionModel?>(null);
+
   @override
   void onInit() {
     super.onInit();
+    getUserDataFromStorage();
     final args = Get.arguments;
     if (args != null && args['isEdit'] == true) {
       survey = args['surveyData'];
@@ -137,6 +141,14 @@ class SurveyorFormScreenController extends GetxController {
     }
     fetchData();
     addRcNumberField(); // add at least one by default
+  }
+
+  Future<void> getUserDataFromStorage() async {
+    userData.value =
+        await AuthRepo.instance.getUser(userId: SessionManager.getUser()?.id);
+    // if (userData.value?.role == 'Admin') {
+    //   await getAllWorker();
+    // }
   }
 
   // signature controller
@@ -351,23 +363,29 @@ class SurveyorFormScreenController extends GetxController {
       final bool isEdit = isEditMode.value;
       final id =
           isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
+      // final newIndex = isEdit && isPendingMode.value == false
+      //     ? (survey?.index ?? '')
+      //     : (await authRepo.getSurveyData(userId: '')).length + 1;
+
       final newIndex = isEdit && isPendingMode.value == false
-          ? (survey?.index ?? '')
-          : (await authRepo.getSurveyData(userId: '')).length + 1;
+          ? (survey?.index ?? 0) // keep old index if editing
+          : await authRepo.getNextSurveyIndex(
+              workerId: user?.id ?? '',
+              cityName: user?.gamName ?? ''); // fetch next index
 
       Uint8List? signatureBytes = await signatureController.toPngBytes();
 
       final surveyData = SurveyModel(
         id: id,
         userId: (user?.role == 'Admin' && isEditMode.value == true)
-            ? survey?.userId ?? ''
-            : user?.id ?? '',
+            ? survey?.userId ?? userData.value?.id ?? ''
+            : user?.id ?? userData.value?.id ?? '',
         userRole: (user?.role == 'Admin' && isEditMode.value == true)
-            ? survey?.userRole ?? ''
-            : user?.role ?? '',
+            ? survey?.userRole ?? userData.value?.role ?? ''
+            : user?.role ?? userData.value?.role ?? '',
         userName: (user?.role == 'Admin' && isEditMode.value == true)
-            ? survey?.userName ?? ''
-            : '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
+            ? survey?.userName ?? userData.value?.username ?? ''
+            : '${user?.firstName ?? userData.value?.firstName ?? ''} ${user?.lastName ?? userData.value?.lastName ?? ''}',
         ownerName: ownerName.text.trim(),
         oldHomeNumber: junagharNumber.text.trim(),
         newHomeNumber: isEdit && isPendingMode.value == false
@@ -419,10 +437,12 @@ class SurveyorFormScreenController extends GetxController {
         srNo: srNo.text.trim(),
       );
 
-      final result = await authRepo.saveSurveyForm(
+      final result = await authRepo.saveSurveyInsideWorkerCityWise(
         surveyData: surveyData,
         isEditData: isEdit,
         isPendingData: isPendingMode.value,
+        workerId: user?.id ?? surveyData.userId,
+        cityName: '${user?.gamName ?? surveyData.gamName}',
       );
 
       if (result != null) {
@@ -451,20 +471,22 @@ class SurveyorFormScreenController extends GetxController {
       final id =
           isEdit ? (survey?.id ?? '') : 'SUR${now.millisecondsSinceEpoch}';
       final newIndex = isEdit && isPendingMode.value == false
-          ? (survey?.index ?? '')
-          : (await authRepo.getSurveyData(userId: '')).length + 1;
+          ? (survey?.index ?? 0) // keep old index if editing
+          : await authRepo.getNextSurveyIndex(
+              workerId: user?.id ?? '',
+              cityName: user?.gamName ?? ''); // fetch next index
 
       final surveyData = SurveyModel(
         id: id,
         userId: (user?.role == 'Admin' && isEditMode.value == true)
-            ? survey?.userId ?? ''
-            : user?.id ?? '',
+            ? survey?.userId ?? userData.value?.id ?? ''
+            : user?.id ?? userData.value?.id ?? '',
         userRole: (user?.role == 'Admin' && isEditMode.value == true)
-            ? survey?.userRole ?? ''
-            : user?.role ?? '',
+            ? survey?.userRole ?? userData.value?.role ?? ''
+            : user?.role ?? userData.value?.role ?? '',
         userName: (user?.role == 'Admin' && isEditMode.value == true)
-            ? survey?.userName ?? ''
-            : '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
+            ? survey?.userName ?? userData.value?.username ?? ''
+            : '${user?.firstName ?? userData.value?.firstName ?? ''} ${user?.lastName ?? userData.value?.lastName ?? ''}',
         surveyNumber: surveyNumber.text.trim(),
         ownerName: ownerName.text.trim(),
         oldHomeNumber: junagharNumber.text.trim(),
@@ -500,10 +522,12 @@ class SurveyorFormScreenController extends GetxController {
         srNo: srNo.text.trim(),
       );
 
-      final result = await authRepo.saveSurveyForm(
+      final result = await authRepo.saveSurveyInsideWorkerCityWise(
         surveyData: surveyData,
         isEditData: isEdit,
         isPendingData: isPendingMode.value,
+        workerId: user?.id ?? surveyData.userId,
+        cityName: '${user?.gamName ?? surveyData.gamName}',
       );
 
       if (result != null) {

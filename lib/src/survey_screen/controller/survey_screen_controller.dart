@@ -42,40 +42,50 @@ class SurveyScreenController extends GetxController {
         await AuthRepo.instance.getUser(userId: SessionManager.getUser()?.id);
   }
 
-  Future<void> fetchSurveyData({String? userId}) async {
+  Future<void> fetchSurveyData() async {
     isSurveyLoad.value = true;
     try {
-      final response = await authRepo.getSurveyData(
-        userId:
-            (userData.value?.role == 'Worker' ? userData.value?.id : userId) ??
-                '',
-      );
+      final List<SurveyModel> surveys;
+      if (userData.value?.role == 'Admin') {
+        surveys = await authRepo.getAllSurveysForAdmin(
+          cityName: userData.value?.gamName ?? '',
+        );
+      } else {
+        surveys = await authRepo.getSurveyInsideWorkerCityWise(
+          workerId: userData.value?.id ?? '',
+          cityName: userData.value?.gamName ?? '',
+        );
+      }
 
-      surveyData.value = response;
-      filteredSurveys.value = response;
+      // 🔹 Sort surveys by srNo
+      surveys.sort((a, b) {
+        final aNo = (a.srNo is int)
+            ? a.srNo as int
+            : int.tryParse(a.srNo?.toString() ?? '') ?? 0;
+        final bNo = (b.srNo is int)
+            ? b.srNo as int
+            : int.tryParse(b.srNo?.toString() ?? '') ?? 0;
+        return aNo.compareTo(bNo);
+      });
 
-      gamList.value = response
-          .map((e) => e.gamName ?? '')
+      // Save all surveys (already ordered)
+      surveyData.value = surveys.reversed.toList();
+      filteredSurveys.value = surveys.reversed.toList();
+
+      // 🔹 Unique gamNames (cities)
+      gamList.value =
+          surveys.map((e) => e.gamName ?? '').toSet().toList().cast<String>();
+
+      propertyTypes.value = surveys
+          .map<String>((e) => (e.propertyType.isNotEmpty)
+              ? e.propertyType.values.first.propertyName ?? ''
+              : '')
           .where((e) => e.isNotEmpty)
           .toSet()
           .toList();
 
-      propertyTypes.value = response
-          .map((e) {
-            if (e.propertyType.isNotEmpty) {
-              return e.propertyType.values.first.propertyName ?? '';
-            }
-            return '';
-          })
-          .where((e) => e.isNotEmpty)
-          .toSet()
-          .toList();
-
-      workerList.value = response
-          .map((e) => e.userName)
-          .where((e) => e.isNotEmpty)
-          .toSet()
-          .toList();
+      workerList.value =
+          surveys.map((e) => e.userName).toSet().toList().cast<String>();
 
       isSurveyLoad.value = false;
     } catch (e, s) {
@@ -83,6 +93,53 @@ class SurveyScreenController extends GetxController {
       isSurveyLoad.value = false;
     }
   }
+
+  // Future<void> fetchSurveyData() async {
+  //   isSurveyLoad.value = true;
+  //   try {
+  //     final List<SurveyModel> surveys;
+  //     if (userData.value?.role == 'Admin') {
+  //       surveys = await authRepo.getAllSurveysForAdmin(
+  //         cityName: userData.value?.gamName ?? '',
+  //       );
+  //     } else {
+  //       surveys = await authRepo.getSurveyInsideWorkerCityWise(
+  //         workerId: userData.value?.id ?? '',
+  //         cityName: userData.value?.gamName ?? '',
+  //       );
+  //     }
+
+  //     // Save all surveys
+  //     surveyData.value = surveys;
+  //     filteredSurveys.value = surveys;
+
+  //     // 🔹 List of unique gamNames (cities)
+  //     gamList.value = surveys
+  //         .map((e) => e.gamName ?? '')
+  //         .toSet()
+  //         .toList()
+  //         .cast<String>(); // ✅ cast to List<String>
+
+  //     propertyTypes.value = surveys
+  //         .map<String>((e) => (e.propertyType.isNotEmpty)
+  //             ? e.propertyType.values.first.propertyName ?? ''
+  //             : '')
+  //         .where((e) => e.isNotEmpty)
+  //         .toSet()
+  //         .toList();
+
+  //     workerList.value = surveys
+  //         .map((e) => e.userName)
+  //         .toSet()
+  //         .toList()
+  //         .cast<String>(); // ✅ cast to List<String>
+
+  //     isSurveyLoad.value = false;
+  //   } catch (e, s) {
+  //     log('Log: get error in fetch survey data $e s-> $s');
+  //     isSurveyLoad.value = false;
+  //   }
+  // }
 
   void applySearch([String? inputQuery]) {
     if (inputQuery != null) searchQuery.value = inputQuery;
@@ -147,7 +204,7 @@ class SurveyScreenController extends GetxController {
     applySearch();
   }
 
-  Future<void> deleteSurvey({String? sId}) async {
+  Future<void> deleteSurvey({String? sId, String? wId, String? cNm}) async {
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -205,7 +262,10 @@ class SurveyScreenController extends GetxController {
                         ),
                       ),
                       onPressed: () async {
-                        await authRepo.deleteSurvey(surveyId: sId);
+                        await authRepo.deleteSurveyInsideWorkerCityWise(
+                            surveyId: sId ?? '',
+                            workerId: wId ?? '',
+                            cityName: cNm ?? '');
                         Get.back();
                         await fetchSurveyData();
                       },

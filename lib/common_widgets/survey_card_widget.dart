@@ -283,7 +283,8 @@ class SurveyCardWidget extends StatelessWidget {
                       return;
                     }
 
-                    surveyCon?.deleteSurvey(sId: data.id);
+                    surveyCon?.deleteSurvey(
+                        sId: data.id, wId: data.userId, cNm: data.gamName);
                   },
                   icon: Icon(
                     Icons.delete,

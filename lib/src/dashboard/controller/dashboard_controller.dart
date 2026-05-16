@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:dvgsurveyor/api_repo/app_repo.dart';
 import 'package:dvgsurveyor/api_repo/auth_repo.dart';
+import 'package:dvgsurveyor/helper/app_snackbar.dart';
 import 'package:dvgsurveyor/model/gam_model.dart';
 import 'package:dvgsurveyor/model/surveyor_form_model.dart';
 import 'package:dvgsurveyor/model/user_collection_model.dart';
@@ -33,7 +34,8 @@ class DashboardController extends GetxController {
 
   final RxList<UserCollectionModel> allWorkers = <UserCollectionModel>[].obs;
   final RxList<String> workerList = <String>[].obs; // Just for dropdown
-  final Rx<String?> selectedWorker = Rx<String?>(null);
+  RxMap<String, String> workerMap = <String, String>{}.obs;
+  final Rx<String?> selectedWorkerId = Rx<String?>(null);
   RxBool isWorkerLoad = false.obs;
   final RxInt workerTotalSurveyCount = 0.obs;
   final RxInt workerTotalAreaCount = 0.obs;
@@ -72,6 +74,13 @@ class DashboardController extends GetxController {
     try {
       final workerRes = await authRepo.getAllUser(); // List<UserModel>
       allWorkers.value = workerRes;
+
+      // Map ID -> name
+      workerMap.value = {
+        for (var w in workerRes) w.id: w.username,
+      };
+
+      // Dropdown items will use map values
       workerList.value = workerRes.map((e) => e.username).toList();
     } catch (e) {
       log('Error fetching workers: $e');
@@ -116,19 +125,31 @@ class DashboardController extends GetxController {
           backgroundColor: Colors.orange.shade100, colorText: Colors.orange);
     }
   }
-  
+
   RxBool cityCount = false.obs;
-  Future<void> fetchCitySurveySummary({String? userId}) async {
+  Future<void> fetchCitySurveySummary() async {
     cityCount.value = true;
     try {
       filteredSurveys.value = [];
-      final surveys = await appRepo.getSurveyDataByCityDateWorker(
-        userId: userData.value?.role == 'Admin' ? '' : userData.value!.id,
-        cityName:
-            selectedGam.value!.name.isNotEmpty ? selectedGam.value?.name : null,
-        startDate: null,
-        endDate: null,
+      final surveys = await appRepo.getCityWiseSurveys(
+        workerId: userData.value?.role == 'Admin' ? null : userData.value!.id,
+        cityName: selectedGam.value?.name.isNotEmpty == true
+            ? selectedGam.value?.name
+            : null,
       );
+
+      print(' surveys length: ${surveys.length}');
+
+      // 🔹 Sort surveys by srNo (missing/null → last)
+      surveys.sort((a, b) {
+        final aNo = (a.srNo is int)
+            ? a.srNo as int
+            : int.tryParse(a.srNo?.toString() ?? '') ?? 0;
+        final bNo = (b.srNo is int)
+            ? b.srNo as int
+            : int.tryParse(b.srNo?.toString() ?? '') ?? 0;
+        return aNo.compareTo(bNo);
+      });
 
       cityTotalSurveyCount.value = surveys.length;
       filteredSurveys.value = surveys;
@@ -141,61 +162,74 @@ class DashboardController extends GetxController {
       }
 
       cityTotalAreaCount.value = areaSum;
+      print(' areaSum = cityTotalAreaCount: $areaSum');
     } catch (e) {
       cityTotalSurveyCount.value = 0;
       cityTotalAreaCount.value = 0;
       log('Error in fetchCitySurveySummary: $e');
-    }
-    finally {
+    } finally {
       cityCount.value = false;
     }
   }
-  
+
   RxBool dateCount = false.obs;
   Future<void> fetchDateSurveySummary({String? userId}) async {
     dateCount.value = true;
-    try {
-      filteredSurveys.value = [];
-      final surveys = await appRepo.getSurveyDataByCityDateWorker(
-        userId: userData.value?.role == 'Admin' ? '' : userData.value!.id,
-        cityName: null,
-        startDate: selectedStartDate.value,
-        endDate: selectedEndDate.value,
-      );
+    // try {
+    //   filteredSurveys.value = [];
+    //   final surveys = await appRepo.getSurveyDataByCityDateWorker(
+    //     userId: userData.value?.role == 'Admin' ? '' : userData.value!.id,
+    //     cityName: null,
+    //     startDate: selectedStartDate.value,
+    //     endDate: selectedEndDate.value,
+    //   );
 
-      dateTotalSurveyCount.value = surveys.length;
-      filteredSurveys.value = surveys;
+    //   dateTotalSurveyCount.value = surveys.length;
+    //   filteredSurveys.value = surveys;
 
-      int areaSum = 0;
-      for (final survey in surveys) {
-        for (final area in survey.area.values) {
-          areaSum += (area.totalArea).toInt();
-        }
-      }
+    //   int areaSum = 0;
+    //   for (final survey in surveys) {
+    //     for (final area in survey.area.values) {
+    //       areaSum += (area.totalArea).toInt();
+    //     }
+    //   }
 
-      dateTotalAreaCount.value = areaSum;
-    } catch (e) {
-      dateTotalSurveyCount.value = 0;
-      dateTotalAreaCount.value = 0;
-      log('Error in fetchDateSurveySummary: $e');
-    }
-    finally {
-      dateCount.value = false;
-    }
+    //   dateTotalAreaCount.value = areaSum;
+    // } catch (e) {
+    //   dateTotalSurveyCount.value = 0;
+    //   dateTotalAreaCount.value = 0;
+    //   log('Error in fetchDateSurveySummary: $e');
+    // } finally {
+    //   dateCount.value = false;
+    // }
   }
 
   RxBool workerCount = false.obs;
-  Future<void> fetchWorkerSurveySummary({String? workerId}) async {
+  Future<void> fetchWorkerSurveySummary({required String workerId}) async {
+    if (selectedGam.value == null || selectedGam.value!.name.isEmpty) {
+      AppSnackbar.showSnackbar(message: 'Please select a city first');
+      return;
+    }
+
     workerCount.value = true;
     try {
       filteredSurveys.value = [];
-      final surveys = await appRepo.getSurveyDataByCityDateWorker(
-        userId: '',
-        cityName: userData.value?.gamName,
-        startDate: null,
-        endDate: null,
-        workerId: workerId ?? '',
+
+      final surveys = await appRepo.getCityWiseSurveys(
+        workerId: workerId,
+        cityName: selectedGam.value!.name,
       );
+
+      // 🔹 Sort surveys by srNo (missing/null → last)
+      surveys.sort((a, b) {
+        final aNo = (a.srNo is int)
+            ? a.srNo as int
+            : int.tryParse(a.srNo?.toString() ?? '') ?? 0;
+        final bNo = (b.srNo is int)
+            ? b.srNo as int
+            : int.tryParse(b.srNo?.toString() ?? '') ?? 0;
+        return aNo.compareTo(bNo);
+      });
 
       workerTotalSurveyCount.value = surveys.length;
       filteredSurveys.value = surveys;
@@ -206,14 +240,12 @@ class DashboardController extends GetxController {
           areaSum += (area.totalArea).toInt();
         }
       }
-
       workerTotalAreaCount.value = areaSum;
     } catch (e) {
-      workerTotalAreaCount.value = 0;
       workerTotalSurveyCount.value = 0;
-      log('Error in fetchDateSurveySummary: $e');
-    }
-    finally {
+      workerTotalAreaCount.value = 0;
+      log('❌ Error in fetchWorkerSurveySummary: $e');
+    } finally {
       workerCount.value = false;
     }
   }

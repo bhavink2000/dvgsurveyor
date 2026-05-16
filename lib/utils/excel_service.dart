@@ -43,7 +43,7 @@ class ExcelService {
     // Row 1: Main headers
     appendCenteredRow([
       'ક્રમ નંબર',
-      'Sr.No', // <-- Added here
+      'Sr.No',
       'જૂના ઘર નંબર',
       'મુળ માલિકનું નામ',
       'કબજેદારનું નામ',
@@ -62,6 +62,8 @@ class ExcelService {
       'Worker',
       'EC Number',
       'RC Numbers',
+      'Created Date', // ✅ New
+      'Updated Date', // ✅ New
       'Signature',
     ]);
 
@@ -77,6 +79,7 @@ class ExcelService {
       'નળીયા તથા પતરા',
       'સ્લેબ તથા પાપડા',
       'નળીયા તથા પતરા',
+      '',
       '',
       '',
       '',
@@ -153,7 +156,10 @@ class ExcelService {
 
     // === Main loop ===
     int counter = 1;
-    for (var data in dataList.reversed) {
+    for (var data in dataList) {
+      final createdAtRaw = data['createdAt'];
+      final updatedAtRaw = data['updatedAt'];
+
       final areaMap = (data['area'] is Map)
           ? Map<String, dynamic>.from(data['area'])
           : <String, dynamic>{};
@@ -235,10 +241,30 @@ class ExcelService {
             .join(', ');
       }
 
+      String formatDate(dynamic ts) {
+        if (ts == null) return '';
+        try {
+          if (ts is int) {
+            return DateTime.fromMillisecondsSinceEpoch(ts)
+                .toString()
+                .split('.')
+                .first;
+          } else if (ts is String) {
+            return DateTime.tryParse(ts)?.toString().split('.').first ?? ts;
+          } else if (ts is DateTime) {
+            return ts.toString().split('.').first;
+          }
+        } catch (_) {}
+        return ts.toString();
+      }
+
+      final createdDate = formatDate(createdAtRaw);
+      final updatedDate = formatDate(updatedAtRaw);
+
       // Append row (without signature first)
       appendCenteredRow([
         counter,
-        data['srNo'] ?? '', // <-- new Sr.No column
+        data['srNo'] ?? '',
         data['oldHomeNumber'] ?? '',
         data['ownerName'] ?? '',
         data['rentPersonName'] ?? '',
@@ -254,9 +280,11 @@ class ExcelService {
         data['mobileNumber'] ?? '',
         data['isDabaan']?.toString() ?? '',
         waterPipelineTotal,
-        data['userName'] ?? '', // Worker
+        data['userName'] ?? '',
         ecNumber,
         rcCombined,
+        createdDate, // ✅ new field
+        updatedDate, // ✅ new field
         '', // Signature
       ]);
 
@@ -267,7 +295,7 @@ class ExcelService {
           Uint8List signatureBytes = base64Decode(signatureBase64);
           final Picture picture = sheet.pictures.addBase64(
             currentRow - 1,
-            21, // Signature column
+            23, // Signature column
             base64Encode(signatureBytes),
           );
           picture.height = 40;
@@ -289,10 +317,12 @@ class ExcelService {
     headerStyle.fontSize = 12;
     headerStyle.wrapText = true;
     sheet.getRangeByName("A1:U2").cellStyle = headerStyle;
-    final usedRange = sheet.getRangeByIndex(1, 1, currentRow, 21);
+    final usedRange =
+        sheet.getRangeByIndex(1, 1, currentRow, 23); // ✅ now 23 cols
+    usedRange.cellStyle.borders.all.lineStyle = LineStyle.thin;
 
     // Auto fit columns
-    for (int i = 1; i <= 21; i++) {
+    for (int i = 1; i <= 23; i++) {
       sheet.autoFitColumn(i);
     }
 
@@ -309,7 +339,9 @@ class ExcelService {
     sheet.setColumnWidthInPixels(18, 120); // Worker
     sheet.setColumnWidthInPixels(19, 120); // EC Number
     sheet.setColumnWidthInPixels(20, 200); // RC Numbers
-    sheet.setColumnWidthInPixels(21, 100); // Signature
+    sheet.setColumnWidthInPixels(21, 120); // Created Date
+    sheet.setColumnWidthInPixels(22, 120); // Updated Date
+    sheet.setColumnWidthInPixels(23, 100); // Signature
 
     // Apply borders
 
